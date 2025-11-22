@@ -40,7 +40,7 @@ const { Title, Text } = Typography;
 const { confirm } = Modal;
 
 // Mapping service keys to Vietnamese names and descriptions
-const serviceMapping: Record<string, { name: string; description: string }> = {
+const SERVICE_MAPPING: Record<string, { name: string; description: string }> = {
   // Homecare services
   "homecare-organizing": {
     name: "Dọn dẹp nhà cửa",
@@ -244,8 +244,8 @@ const getServiceName = (nameKey?: string, slug?: string): string => {
   if (!nameKey && !slug) return "Dịch vụ không xác định";
 
   // Try to get from mapping first
-  if (slug && serviceMapping[slug]) {
-    return serviceMapping[slug].name;
+  if (slug && SERVICE_MAPPING[slug]) {
+    return SERVICE_MAPPING[slug].name;
   }
 
   // Try with name_key (convert to slug format)
@@ -254,8 +254,8 @@ const getServiceName = (nameKey?: string, slug?: string): string => {
       .replace(/^SERVICE_/, "")
       .toLowerCase()
       .replace(/_/g, "-");
-    if (serviceMapping[slugFromKey]) {
-      return serviceMapping[slugFromKey].name;
+    if (SERVICE_MAPPING[slugFromKey]) {
+      return SERVICE_MAPPING[slugFromKey].name;
     }
   }
 
@@ -275,8 +275,8 @@ const getServiceDescription = (
   fallbackDescription?: string
 ): string => {
   // Try to get from mapping first
-  if (slug && serviceMapping[slug]) {
-    return serviceMapping[slug].description;
+  if (slug && SERVICE_MAPPING[slug]) {
+    return SERVICE_MAPPING[slug].description;
   }
 
   // Try with name_key (convert to slug format)
@@ -285,8 +285,8 @@ const getServiceDescription = (
       .replace(/^SERVICE_/, "")
       .toLowerCase()
       .replace(/_/g, "-");
-    if (serviceMapping[slugFromKey]) {
-      return serviceMapping[slugFromKey].description;
+    if (SERVICE_MAPPING[slugFromKey]) {
+      return SERVICE_MAPPING[slugFromKey].description;
     }
   }
 

@@ -5,7 +5,7 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import {
   Card,
   Form,
@@ -54,12 +54,16 @@ export default function WorkerFilter({
   const [selectedService, setSelectedService] = useState<string | undefined>();
 
   // Filter services by selected category
-  const filteredServices = selectedCategory
-    ? services.filter((s) => s.category_id === selectedCategory)
-    : services;
+  const filteredServices = useMemo(
+    () =>
+      selectedCategory
+        ? services.filter((s) => s.category_id === selectedCategory)
+        : services,
+    [selectedCategory, services]
+  );
 
   // Handle filter submission
-  const handleApplyFilters = () => {
+  const handleApplyFilters = useCallback(() => {
     const filters: WorkerFilters = {
       age_min: ageRange[0],
       age_max: ageRange[1],
@@ -70,24 +74,27 @@ export default function WorkerFilter({
     };
 
     onFilterChange(filters);
-  };
+  }, [ageRange, priceRange, selectedCategory, selectedService, onFilterChange]);
 
   // Handle reset
-  const handleReset = () => {
+  const handleReset = useCallback(() => {
     setAgeRange([18, 60]);
     setPriceRange([0, 200]);
     setSelectedCategory(undefined);
     setSelectedService(undefined);
     form.resetFields();
     onFilterChange({});
-  };
+  }, [form, onFilterChange]);
 
   // Handle category change
-  const handleCategoryChange = (value: string) => {
-    setSelectedCategory(value);
-    setSelectedService(undefined);
-    form.setFieldValue("service_id", undefined);
-  };
+  const handleCategoryChange = useCallback(
+    (value: string) => {
+      setSelectedCategory(value);
+      setSelectedService(undefined);
+      form.setFieldValue("service_id", undefined);
+    },
+    [form]
+  );
 
   return (
     <Card
