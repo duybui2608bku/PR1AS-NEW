@@ -166,20 +166,45 @@ export class WorkerProfileService {
   // ===========================================================================
 
   /**
+   * Helper: Reset profile status to pending if approved/published
+   * This is called when worker makes changes that require re-review
+   */
+  private async resetProfileStatusIfNeeded(profileId: string): Promise<void> {
+    const { data: profile } = await this.supabase
+      .from("worker_profiles")
+      .select("profile_status")
+      .eq("id", profileId)
+      .single();
+
+    if (profile) {
+      const currentStatus = profile.profile_status;
+      if (
+        currentStatus === WorkerProfileStatus.APPROVED ||
+        currentStatus === WorkerProfileStatus.PUBLISHED
+      ) {
+        await this.supabase
+          .from("worker_profiles")
+          .update({ profile_status: WorkerProfileStatus.PENDING })
+          .eq("id", profileId);
+      }
+    }
+  }
+
+  /**
    * Create or update worker profile (Step 1)
    */
   async saveWorkerProfile(
     userId: string,
     data: WorkerProfileStep1Request
   ): Promise<WorkerProfile> {
-    // Check if profile exists
+    // Check if profile exists and get current status
     const { data: existingProfile } = await this.supabase
       .from("worker_profiles")
-      .select("id")
+      .select("id, profile_status")
       .eq("user_id", userId)
       .single();
 
-    const profileData = {
+    const profileData: Record<string, unknown> = {
       user_id: userId,
       full_name: data.full_name,
       nickname: data.nickname,
@@ -192,6 +217,17 @@ export class WorkerProfileService {
       bio: data.bio,
       profile_completed_steps: 1, // Step 1 completed
     };
+
+    // If profile was approved or published, set status to pending for re-review
+    if (existingProfile) {
+      const currentStatus = existingProfile.profile_status;
+      if (
+        currentStatus === WorkerProfileStatus.APPROVED ||
+        currentStatus === WorkerProfileStatus.PUBLISHED
+      ) {
+        profileData.profile_status = WorkerProfileStatus.PENDING;
+      }
+    }
 
     if (existingProfile) {
       // Update existing profile
@@ -307,8 +343,8 @@ export class WorkerProfileService {
         *,
         tags:worker_tags(*),
         availabilities:worker_availabilities(*),
-        images:worker_images!inner(*)
-        services:worker_services!inner(
+        images:worker_images(*),
+        services:worker_services(
           *,
           service:services(*),
           service_option:service_options(*),
@@ -318,8 +354,6 @@ export class WorkerProfileService {
       )
       .eq("id", profileId)
       .eq("profile_status", WorkerProfileStatus.PUBLISHED)
-      .eq("images.is_approved", true)
-      .eq("services.is_active", true)
       .single();
 
     if (error) {
@@ -334,10 +368,16 @@ export class WorkerProfileService {
     }
 
     const profile = data as unknown as WorkerProfileComplete;
+
+    // Filter approved images only
+    profile.images = profile.images?.filter((img) => img.is_approved) || [];
     profile.avatar = profile.images?.find((img) => img.image_type === "avatar");
     profile.gallery_images = profile.images?.filter(
       (img) => img.image_type === "gallery"
     );
+
+    // Filter active services only
+    profile.services = profile.services?.filter((svc) => svc.is_active) || [];
 
     return profile;
   }
@@ -527,13 +567,16 @@ export class WorkerProfileService {
       throw new WorkerServiceError("Failed to add image", "CREATE_ERROR", 500);
     }
 
+    // Reset profile status to pending if approved/published
+    await this.resetProfileStatusIfNeeded(profileId);
+
     return data as WorkerImage;
   }
 
   /**
    * Delete worker image
    */
-  async deleteWorkerImage(imageId: string): Promise<void> {
+  async deleteWorkerImage(imageId: string, profileId: string): Promise<void> {
     const { error } = await this.supabase
       .from("worker_images")
       .delete()
@@ -546,6 +589,9 @@ export class WorkerProfileService {
         500
       );
     }
+
+    // Reset profile status to pending if approved/published
+    await this.resetProfileStatusIfNeeded(profileId);
   }
 
   // ===========================================================================
@@ -628,6 +674,9 @@ export class WorkerProfileService {
       .update({ profile_completed_steps: 3 })
       .eq("id", profileId);
 
+    // Reset profile status to pending if approved/published
+    await this.resetProfileStatusIfNeeded(profileId);
+
     return {
       service: service as WorkerService,
       pricing: pricing as WorkerServicePrice,
@@ -639,6 +688,7 @@ export class WorkerProfileService {
    */
   async updateWorkerServicePrice(
     workerServiceId: string,
+    profileId: string,
     priceUpdate: UpdateServicePriceRequest
   ): Promise<WorkerServicePrice> {
     const priceData = this.buildPriceData(
@@ -665,13 +715,16 @@ export class WorkerProfileService {
       );
     }
 
+    // Reset profile status to pending if approved/published
+    await this.resetProfileStatusIfNeeded(profileId);
+
     return data as WorkerServicePrice;
   }
 
   /**
    * Remove service from worker profile
    */
-  async removeWorkerService(workerServiceId: string): Promise<void> {
+  async removeWorkerService(workerServiceId: string, profileId: string): Promise<void> {
     const { error } = await this.supabase
       .from("worker_services")
       .delete()
@@ -684,6 +737,9 @@ export class WorkerProfileService {
         500
       );
     }
+
+    // Reset profile status to pending if approved/published
+    await this.resetProfileStatusIfNeeded(profileId);
   }
 
   /**

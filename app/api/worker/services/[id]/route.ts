@@ -28,7 +28,17 @@ export async function DELETE(
     }
 
     const service = new WorkerProfileService(supabase);
-    await service.removeWorkerService(params.id);
+
+    // Get worker profile to pass profileId
+    const profile = await service.getWorkerProfile(user.id);
+    if (!profile) {
+      return NextResponse.json(
+        { success: false, error: 'Worker profile not found' },
+        { status: 404 }
+      );
+    }
+
+    await service.removeWorkerService(params.id, profile.id);
 
     return NextResponse.json({
       success: true,
