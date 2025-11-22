@@ -33,7 +33,7 @@ export async function DELETE(request: NextRequest) {
     const { error } = await supabase.auth.admin.deleteUser(userId);
 
     if (error) {
-      console.error("Delete user error:", error);
+
       return NextResponse.json(
         { error: "Failed to delete user" },
         { status: 500 }
@@ -48,14 +48,14 @@ export async function DELETE(request: NextRequest) {
     });
 
     if (logError) {
-      console.error("Failed to log admin action:", logError);
+
     }
 
     return NextResponse.json({
       message: "User deleted successfully",
     });
   } catch (error) {
-    console.error("API error:", error);
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

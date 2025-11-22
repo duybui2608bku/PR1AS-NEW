@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error: any) {
-    console.error('[Wallet Transactions] Error:', error);
+
     return NextResponse.json(
       {
         success: false,

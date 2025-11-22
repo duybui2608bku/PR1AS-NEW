@@ -35,7 +35,7 @@ export async function DELETE(
       message: 'Service removed successfully',
     });
   } catch (error: unknown) {
-    console.error('Error removing worker service:', error);
+
     return NextResponse.json(
       {
         success: false,

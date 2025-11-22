@@ -76,7 +76,6 @@ export default function Step2ServicesAndPricing({
       setServices(servicesData);
       setWorkerServices(workerServicesData);
     } catch (error) {
-      console.error("Failed to load data:", error);
       showMessage.error(getErrorMessage(error));
     } finally {
       setLoading(false);
@@ -199,7 +198,7 @@ export default function Step2ServicesAndPricing({
             <Space direction="horizontal" style={{ width: "100%" }}>
               {galleryUrls.map((url, index) => (
                 <img
-                  key={index}
+                  key={url}
                   src={url}
                   alt={`Gallery ${index + 1}`}
                   style={{

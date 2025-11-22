@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
       message: 'Image added successfully',
     });
   } catch (error: unknown) {
-    console.error('Error adding image:', error);
+
     return NextResponse.json(
       {
         success: false,

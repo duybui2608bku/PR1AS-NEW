@@ -56,7 +56,7 @@ export async function GET(request: NextRequest) {
       settings,
     });
   } catch (error: any) {
-    console.error('[Admin Settings GET] Error:', error);
+
     return NextResponse.json(
       {
         success: false,
@@ -131,7 +131,7 @@ export async function PUT(request: NextRequest) {
       settings,
     });
   } catch (error: any) {
-    console.error('[Admin Settings PUT] Error:', error);
+
     return NextResponse.json(
       {
         success: false,

@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (authError) {
-      console.error("Auth error:", authError);
+
       return NextResponse.json(
         { error: authError.message },
         { status: 400 }
@@ -105,7 +105,7 @@ export async function POST(request: NextRequest) {
       });
 
     if (profileError) {
-      console.error("Profile error:", profileError);
+
       // Cleanup: delete auth user if profile creation fails
       await supabase.auth.admin.deleteUser(authData.user.id);
       
@@ -123,7 +123,7 @@ export async function POST(request: NextRequest) {
       });
 
     if (sessionError || !sessionData.session) {
-      console.error("Auto-login error:", sessionError);
+
       // User created but auto-login failed - they can login manually
       return NextResponse.json({
         success: true,
@@ -169,7 +169,7 @@ export async function POST(request: NextRequest) {
 
     return response;
   } catch (error) {
-    console.error("Signup error:", error);
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

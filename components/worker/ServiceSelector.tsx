@@ -79,7 +79,7 @@ export default function ServiceSelector({
       const service = await servicesAPI.getServiceById(serviceId);
       setServiceOptions(service.options || []);
     } catch (error) {
-      console.error("Failed to load service options:", error);
+      // Silent error handling
     }
   };
 

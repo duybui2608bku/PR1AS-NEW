@@ -72,7 +72,7 @@ export default function MarketPage() {
         setCategories(categoriesData);
         setServices(servicesData);
       } catch (error) {
-        console.error("Failed to load categories and services:", error);
+        // Silent error handling
       }
     };
 
@@ -87,7 +87,6 @@ export default function MarketPage() {
       setWorkers(response.workers);
       setPagination(response.pagination);
     } catch (error) {
-      console.error("Failed to load workers:", error);
       setWorkers([]);
     } finally {
       setSearchLoading(false);

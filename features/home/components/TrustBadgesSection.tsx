@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { Typography, Row, Col } from "antd";
 import {
   TrophyOutlined,
@@ -10,23 +11,26 @@ import { useTranslation } from "react-i18next";
 
 const { Title, Text } = Typography;
 
-export default function TrustBadgesSection() {
+const TrustBadgesSection = memo(function TrustBadgesSection() {
   const { t } = useTranslation();
 
   const badges = [
     {
+      id: "award",
       icon: TrophyOutlined,
       titleKey: "home.trustBadges.award.title",
       descriptionKey: "home.trustBadges.award.description",
       color: "text-yellow-500",
     },
     {
+      id: "security",
       icon: SafetyOutlined,
       titleKey: "home.trustBadges.security.title",
       descriptionKey: "home.trustBadges.security.description",
       color: "text-green-500",
     },
     {
+      id: "community",
       icon: TeamOutlined,
       titleKey: "home.trustBadges.community.title",
       descriptionKey: "home.trustBadges.community.description",
@@ -38,10 +42,10 @@ export default function TrustBadgesSection() {
     <section className="py-10 sm:py-12 md:py-16 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <Row gutter={[16, 24]} align="middle">
-          {badges.map((badge, index) => {
+          {badges.map((badge) => {
             const IconComponent = badge.icon;
             return (
-              <Col xs={24} sm={8} md={8} className="text-center" key={index}>
+              <Col xs={24} sm={8} md={8} className="text-center" key={badge.id}>
                 <IconComponent
                   className={`text-4xl sm:text-5xl md:text-6xl mb-3 sm:mb-4 ${badge.color}`}
                 />
@@ -61,4 +65,6 @@ export default function TrustBadgesSection() {
       </div>
     </section>
   );
-}
+});
+
+export default TrustBadgesSection;

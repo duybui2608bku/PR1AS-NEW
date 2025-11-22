@@ -89,7 +89,7 @@ export async function POST(request: NextRequest) {
       transaction: result.transaction,
     });
   } catch (error: any) {
-    console.error("[Wallet Payment] Error:", error);
+
     return NextResponse.json(
       {
         success: false,

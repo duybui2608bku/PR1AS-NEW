@@ -30,7 +30,7 @@ export async function DELETE(
       message: 'Image deleted successfully',
     });
   } catch (error: unknown) {
-    console.error('Error deleting image:', error);
+
     return NextResponse.json(
       {
         success: false,

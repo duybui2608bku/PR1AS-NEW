@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
       data: profile,
     });
   } catch (error: unknown) {
-    console.error('Error fetching worker profile:', error);
+
     return NextResponse.json(
       {
         success: false,
@@ -94,7 +94,7 @@ export async function POST(request: NextRequest) {
       message: 'Profile saved successfully',
     });
   } catch (error: unknown) {
-    console.error('Error saving worker profile:', error);
+
     return NextResponse.json(
       {
         success: false,

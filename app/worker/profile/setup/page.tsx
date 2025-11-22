@@ -53,7 +53,6 @@ export default function WorkerProfileSetupPage() {
         }
       }
     } catch (error) {
-      console.error("Failed to load profile:", error);
       // Profile doesn't exist yet, start from step 0
       setCurrentStep(0);
     } finally {

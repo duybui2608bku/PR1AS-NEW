@@ -45,20 +45,13 @@ export async function POST(request: NextRequest) {
     // Parse webhook payload
     const webhookData: BankWebhookData = await request.json();
 
-    console.log("[Bank Webhook] Received:", {
-      content: webhookData.content,
-      amount: webhookData.transferAmount,
-      reference: webhookData.referenceCode,
-      id: webhookData.id,
-    });
-
     // Validate webhook data
     if (
       !webhookData.content ||
       !webhookData.transferAmount ||
       !webhookData.accountNumber
     ) {
-      console.error("[Bank Webhook] Invalid payload:", webhookData);
+
       return NextResponse.json(
         { error: "Invalid webhook payload" },
         { status: 400 }
@@ -80,9 +73,6 @@ export async function POST(request: NextRequest) {
     const deposit = await bankService.processWebhook(supabase, webhookData);
 
     if (!deposit) {
-      console.log(
-        "[Bank Webhook] No matching deposit found or webhook ignored"
-      );
       return NextResponse.json({
         success: true,
         message: "Webhook received but no action taken",
@@ -135,13 +125,6 @@ export async function POST(request: NextRequest) {
         })
         .eq("id", deposit.id);
 
-      console.log("[Bank Webhook] Deposit completed:", {
-        depositId: deposit.id,
-        userId: deposit.user_id,
-        amount: deposit.amount_usd,
-        transactionId: transaction.id,
-      });
-
       return NextResponse.json({
         success: true,
         message: "Deposit processed successfully",
@@ -152,7 +135,6 @@ export async function POST(request: NextRequest) {
         },
       });
     } catch (error) {
-      console.error("[Bank Webhook] Failed to process deposit:", error);
 
       // Mark deposit as failed
       await supabase
@@ -165,7 +147,6 @@ export async function POST(request: NextRequest) {
       throw error;
     }
   } catch (error: any) {
-    console.error("[Bank Webhook] Error:", error);
 
     return NextResponse.json(
       {

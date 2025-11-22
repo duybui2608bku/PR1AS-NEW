@@ -1,9 +1,10 @@
 "use client";
 
+import { memo } from "react";
 import { Row, Col, Statistic } from "antd";
 import { useTranslation } from "react-i18next";
 
-export default function StatisticsSection() {
+const StatisticsSection = memo(function StatisticsSection() {
   const { t } = useTranslation();
 
   const STATISTICS = [
@@ -17,8 +18,8 @@ export default function StatisticsSection() {
     <section className="py-8 sm:py-12 bg-gray-50 border-b">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <Row gutter={[16, 24]} justify="center">
-          {STATISTICS.map((stat, index) => (
-            <Col xs={12} sm={6} md={6} key={index}>
+          {STATISTICS.map((stat) => (
+            <Col xs={12} sm={6} md={6} key={stat.titleKey}>
               <div className="text-center">
                 <Statistic
                   title={t(stat.titleKey)}
@@ -38,4 +39,6 @@ export default function StatisticsSection() {
       </div>
     </section>
   );
-}
+});
+
+export default StatisticsSection;

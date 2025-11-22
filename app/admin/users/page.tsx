@@ -329,14 +329,11 @@ export default function UserManagementPage() {
     try {
       const response = await adminUserAPI.getPendingWorkers();
       if (response.error) {
-        console.error("Pending workers error:", response.error);
         message.error(`Failed to load pending workers: ${response.error}`);
       } else if (response.data) {
-        console.log("Pending workers loaded:", response.data.workers);
         setPendingWorkers(response.data.workers);
       }
     } catch (error) {
-      console.error("Pending workers fetch error:", error);
       message.error("Failed to load pending workers");
     } finally {
       setPendingLoading(false);

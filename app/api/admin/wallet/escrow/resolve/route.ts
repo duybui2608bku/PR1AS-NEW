@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
       escrow,
     });
   } catch (error: any) {
-    console.error('[Admin Escrow Resolve] Error:', error);
+
     return NextResponse.json(
       {
         success: false,

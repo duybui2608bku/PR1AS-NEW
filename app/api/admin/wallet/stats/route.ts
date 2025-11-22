@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
       stats,
     });
   } catch (error: any) {
-    console.error('[Admin Wallet Stats] Error:', error);
+
     return NextResponse.json(
       {
         success: false,

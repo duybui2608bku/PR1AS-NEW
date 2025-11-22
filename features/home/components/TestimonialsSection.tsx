@@ -1,15 +1,17 @@
 "use client";
 
+import { memo } from "react";
 import { Typography, Card, Carousel, Avatar, Rate } from "antd";
 import { useTranslation } from "react-i18next";
 
 const { Title, Paragraph, Text } = Typography;
 
-export default function TestimonialsSection() {
+const TestimonialsSection = memo(function TestimonialsSection() {
   const { t } = useTranslation();
 
   const TESTIMONIALS = [
     {
+      id: "testimonial1",
       nameKey: "home.testimonials.items.testimonial1.name",
       roleKey: "home.testimonials.items.testimonial1.role",
       commentKey: "home.testimonials.items.testimonial1.comment",
@@ -17,6 +19,7 @@ export default function TestimonialsSection() {
       rating: 5,
     },
     {
+      id: "testimonial2",
       nameKey: "home.testimonials.items.testimonial2.name",
       roleKey: "home.testimonials.items.testimonial2.role",
       commentKey: "home.testimonials.items.testimonial2.comment",
@@ -24,6 +27,7 @@ export default function TestimonialsSection() {
       rating: 5,
     },
     {
+      id: "testimonial3",
       nameKey: "home.testimonials.items.testimonial3.name",
       roleKey: "home.testimonials.items.testimonial3.role",
       commentKey: "home.testimonials.items.testimonial3.comment",
@@ -31,6 +35,7 @@ export default function TestimonialsSection() {
       rating: 5,
     },
     {
+      id: "testimonial4",
       nameKey: "home.testimonials.items.testimonial4.name",
       roleKey: "home.testimonials.items.testimonial4.role",
       commentKey: "home.testimonials.items.testimonial4.comment",
@@ -74,8 +79,8 @@ export default function TestimonialsSection() {
           ]}
           className="testimonial-carousel"
         >
-          {TESTIMONIALS.map((testimonial, index) => (
-            <div key={index} className="px-2 sm:px-3">
+          {TESTIMONIALS.map((testimonial) => (
+            <div key={testimonial.id} className="px-2 sm:px-3">
               <Card className="!bg-white/10 !backdrop-blur-lg !border-white/20 !text-white !h-full mx-2">
                 <div className="text-center mb-3 sm:mb-4">
                   <Avatar
@@ -110,4 +115,6 @@ export default function TestimonialsSection() {
       </div>
     </section>
   );
-}
+});
+
+export default TestimonialsSection;
