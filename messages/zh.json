@@ -1,0 +1,630 @@
+{
+  "common": {
+    "loading": "加载中...",
+    "error": "发生错误",
+    "success": "成功",
+    "cancel": "取消",
+    "confirm": "确认",
+    "save": "保存",
+    "delete": "删除",
+    "edit": "编辑",
+    "search": "搜索",
+    "filter": "筛选",
+    "back": "返回",
+    "continue": "继续",
+    "next": "下一页",
+    "previous": "上一页",
+    "submit": "提交",
+    "saveAndContinue": "保存并继续",
+    "add": "添加",
+    "remove": "移除",
+    "yes": "是",
+    "no": "否",
+    "close": "关闭",
+    "homeButton": "返回首页",
+    "backToDashboard": "返回仪表板"
+  },
+  "nav": {
+    "home": "首页",
+    "about": "关于我们",
+    "contact": "联系我们",
+    "login": "登录",
+    "signup": "注册",
+    "logout": "退出",
+    "profile": "个人资料",
+    "settings": "设置",
+    "becomeWorker": "成为工作者"
+  },
+  "header": {
+    "brandName": "PR1AS",
+    "becomeWorker": "成为工作者",
+    "userMenu": {
+      "profile": "我的个人资料",
+      "bookings": "预订",
+      "logout": "退出",
+      "dashboard": "仪表板",
+      "adminDashboard": "管理员仪表板",
+      "workerDashboard": "工作者仪表板",
+      "myJobs": "我的工作",
+      "myWork": "我的工作",
+      "settings": "设置",
+      "user": "用户",
+      "roles": {
+        "client": "客户",
+        "worker": "工作者",
+        "admin": "管理员"
+      },
+      "logoutSuccess": "退出成功",
+      "logoutError": "退出时发生错误"
+    },
+    "menu": "菜单",
+    "login": "登录",
+    "signup": "注册"
+  },
+  "footer": {
+    "about": {
+      "title": "关于",
+      "aboutUs": "关于我们",
+      "careers": "招聘",
+      "press": "新闻",
+      "blog": "博客"
+    },
+    "community": {
+      "title": "社区",
+      "diversity": "多样性与包容性",
+      "accessibility": "无障碍访问",
+      "partners": "合作伙伴",
+      "safety": "安全"
+    },
+    "worker": {
+      "title": "工作者",
+      "become": "成为工作者",
+      "help": "帮助中心",
+      "resources": "资源",
+      "forum": "论坛"
+    },
+    "support": {
+      "title": "支持",
+      "helpCenter": "帮助中心",
+      "cancellation": "取消政策",
+      "contact": "联系我们",
+      "faq": "常见问题"
+    },
+    "copyright": "© 2025 PR1AS",
+    "terms": "条款",
+    "privacy": "隐私",
+    "sitemap": "网站地图"
+  },
+  "home": {
+    "hero": {
+      "slide1": {
+        "title": "寻找专业工作者",
+        "description": "连接您所在地区数千名经过验证且评价很高的可靠工作者",
+        "primaryCTA": "立即寻找工作者",
+        "secondaryCTA": "注册成为工作者"
+      },
+      "slide2": {
+        "title": "安全可靠",
+        "description": "所有工作者均经过身份验证，并拥有来自客户的真实评价",
+        "primaryCTA": "立即探索"
+      },
+      "slide3": {
+        "title": "快速便捷",
+        "description": "在线预订，轻松付款，随时随地跟踪进度",
+        "primaryCTA": "立即开始"
+      }
+    },
+    "statistics": {
+      "workers": "活跃工作者",
+      "jobs": "已完成工作",
+      "clients": "满意客户",
+      "rating": "平均评分"
+    },
+    "features": {
+      "title": "为什么选择PR1AS？",
+      "subtitle": "具有卓越功能的领先平台",
+      "safety": {
+        "title": "绝对安全",
+        "description": "所有工作者均经过身份验证、背景调查和严格评级。具有安全托管机制的安全支付系统。"
+      },
+      "speed": {
+        "title": "快速便捷",
+        "description": "几秒钟内即可预订，工作者快速响应。在应用程序上实时跟踪工作进度。"
+      },
+      "quality": {
+        "title": "质量保证",
+        "description": "来自数千名真实客户的透明评价。如果不满意，保证100%退款。"
+      }
+    },
+    "categories": {
+      "title": "服务类别",
+      "subtitle": "从维修到护理的50多种多样化服务",
+      "viewAll": "查看所有类别",
+      "items": {
+        "homeRepair": {
+          "name": "房屋维修",
+          "count": "2,500+ 工作者"
+        },
+        "electricity": {
+          "name": "电气和水管",
+          "count": "1,800+ 工作者"
+        },
+        "transport": {
+          "name": "运输",
+          "count": "3,200+ 工作者"
+        },
+        "housekeeping": {
+          "name": "家政服务",
+          "count": "4,100+ 工作者"
+        },
+        "care": {
+          "name": "护理服务",
+          "count": "1,600+ 工作者"
+        },
+        "events": {
+          "name": "活动",
+          "count": "900+ 工作者"
+        }
+      }
+    },
+    "howItWorks": {
+      "title": "工作原理",
+      "subtitle": "只需4个简单步骤即可获得完美服务",
+      "finalText": "简单、快速、高效！",
+      "steps": {
+        "step1": {
+          "title": "创建账户",
+          "description": "只需30秒即可创建免费账户"
+        },
+        "step2": {
+          "title": "找到合适的工作者",
+          "description": "浏览数千名拥有真实评价的工作者"
+        },
+        "step3": {
+          "title": "预订并付款",
+          "description": "选择合适的时间并安全付款"
+        },
+        "step4": {
+          "title": "工作完成",
+          "description": "工作者准时到达并出色完成"
+        }
+      }
+    },
+    "testimonials": {
+      "title": "客户对PR1AS的评价",
+      "subtitle": "来自满意客户的25,000多条5星评价",
+      "items": {
+        "testimonial1": {
+          "name": "张伟",
+          "role": "房主",
+          "comment": "我通过PR1AS找到了一位非常专业的电工。服务快速可靠！"
+        },
+        "testimonial2": {
+          "name": "李娜",
+          "role": "客户",
+          "comment": "优秀的平台！我在我的地区轻松找到了可靠的家政服务人员。"
+        },
+        "testimonial3": {
+          "name": "王强",
+          "role": "工作者 - 电工",
+          "comment": "PR1AS帮助我获得稳定的收入。预订系统非常方便和专业。"
+        },
+        "testimonial4": {
+          "name": "刘芳",
+          "role": "客户",
+          "comment": "通过PR1AS雇佣工作者让我很放心。评价透明，价格公道！"
+        }
+      }
+    },
+    "trustBadges": {
+      "award": {
+        "title": "奖项",
+        "description": "2024年十大创业公司"
+      },
+      "security": {
+        "title": "安全",
+        "description": "ISO 27001认证"
+      },
+      "community": {
+        "title": "社区",
+        "description": "25,000多名会员"
+      }
+    },
+    "cta": {
+      "title": "准备好开始了吗？",
+      "subtitle": "加入信任PR1AS的数千名用户。立即免费注册！",
+      "primaryButton": "免费注册",
+      "secondaryButton": "登录",
+      "benefits": {
+        "free": "免费注册",
+        "noCard": "无需信用卡",
+        "cancel": "随时取消"
+      }
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "欢迎回来",
+      "subtitle": "登录以继续使用PR1AS",
+      "continueWithGoogle": "使用Google继续",
+      "orLoginWithEmail": "或使用电子邮箱登录",
+      "emailPlaceholder": "输入您的电子邮箱",
+      "passwordPlaceholder": "输入密码",
+      "emailRequired": "请输入电子邮箱",
+      "emailInvalid": "电子邮箱无效",
+      "passwordRequired": "请输入密码",
+      "forgotPassword": "忘记密码？",
+      "loginButton": "登录",
+      "noAccount": "还没有账户？",
+      "signupLink": "立即注册",
+      "loginSuccess": "登录成功！",
+      "googleLoginComingSoon": "Google登录功能即将推出！"
+    },
+    "signup": {
+      "title": "创建账户",
+      "subtitle": "立即加入PR1AS社区",
+      "selectRole": "我想：",
+      "clientRole": "客户 - 寻找服务",
+      "clientDescription": "为您的项目寻找并雇佣工作者",
+      "workerRole": "工作者 - 提供服务",
+      "workerDescription": "提供服务并赚取收入",
+      "continueWithGoogle": "使用Google注册",
+      "orSignupWithEmail": "或使用电子邮箱注册",
+      "namePlaceholder": "输入您的全名",
+      "emailPlaceholder": "输入您的电子邮箱",
+      "passwordPlaceholder": "创建密码（最少6个字符）",
+      "nameRequired": "请输入您的全名",
+      "emailRequired": "请输入电子邮箱",
+      "emailInvalid": "电子邮箱无效",
+      "passwordRequired": "请输入密码",
+      "passwordMinLength": "密码必须至少6个字符",
+      "signupButton": "创建账户",
+      "haveAccount": "已有账户？",
+      "loginLink": "登录",
+      "signupSuccess": "账户创建成功！",
+      "googleSignupComingSoon": "Google注册功能即将推出！"
+    }
+  },
+  "banned": {
+    "title": "账户已被暂停",
+    "description": "您的账户因违反我们的",
+    "termsLink": "服务条款",
+    "or": "或",
+    "guidelinesLink": "社区准则",
+    "ofUs": "而被暂停。",
+    "whyTitle": "为什么我的账户被暂停？",
+    "whyDescription": "账户可能因以下原因被暂停：",
+    "reasons": {
+      "payment": "违反支付政策",
+      "fraud": "欺诈或欺骗行为",
+      "complaints": "收到其他用户的多次投诉",
+      "terms": "违反服务条款"
+    },
+    "contactText": "如果您认为这是一个错误或需要更多信息，请联系我们的支持团队。",
+    "contactButton": "联系支持",
+    "homeButton": "返回首页",
+    "supportEmail": "支持邮箱："
+  },
+  "worker": {
+    "dashboard": {
+      "title": "工作者仪表板",
+      "availableJobs": "可用工作",
+      "inProgress": "进行中",
+      "completed": "已完成",
+      "totalEarnings": "总收入"
+    },
+    "profile": {
+      "setupTitle": "设置您的工作者档案",
+      "step1Title": "基础信息",
+      "step1Desc": "介绍一下自己",
+      "step2Title": "服务与定价",
+      "step2Desc": "添加服务并设定价格",
+      "submitTitle": "提交审核",
+      "submitDesc": "检查并提交",
+      "basicInfoTitle": "基础信息",
+      "basicInfoDesc": "请填写您的个人信息",
+      "personalInfo": "个人信息",
+      "aboutYou": "关于你",
+      "fullName": "姓名",
+      "fullNameRequired": "请输入姓名",
+      "fullNamePlaceholder": "输入您的姓名",
+      "nickname": "昵称",
+      "nicknamePlaceholder": "输入昵称（可选）",
+      "age": "年龄",
+      "ageRequired": "请输入年龄",
+      "ageRange": "年龄必须在18到100之间",
+      "height": "身高",
+      "weight": "体重",
+      "zodiacSign": "星座",
+      "zodiacSignPlaceholder": "选择您的星座",
+      "lifestyle": "生活方式",
+      "lifestylePlaceholder": "选择生活方式",
+      "personalQuote": "座右铭",
+      "personalQuotePlaceholder": "一句代表你的话",
+      "bio": "自我介绍",
+      "bioPlaceholder": "向我们介绍自己...",
+      "interestsAndHobbies": "兴趣与爱好",
+      "addTagPlaceholder": "添加标签",
+      "basicInfoSubmit": "保存基础信息",
+      "servicesAndPricingTitle": "服务与定价",
+      "servicesAndPricingDesc": "添加您提供的服务并设置价格",
+      "imagesSection": "档案图片",
+      "avatar": "头像",
+      "avatarHint": "上传一张专业的个人照片",
+      "avatarRequired": "请上传头像",
+      "avatarUploaded": "头像上传成功",
+      "gallery": "图片集",
+      "galleryHint": "添加更多照片展示自己",
+      "imageAdded": "图片添加成功",
+      "servicesSection": "服务",
+      "addService": "添加服务",
+      "addFirstService": "添加第一项服务",
+      "noServicesYet": "尚未添加任何服务",
+      "atLeastOneService": "请至少添加一项服务",
+      "selectService": "选择服务",
+      "selectServiceHint": "选择服务并设置价格",
+      "service": "服务",
+      "serviceRequired": "请选择服务",
+      "selectServicePlaceholder": "搜索并选择服务",
+      "serviceOption": "服务选项",
+      "serviceOptionRequired": "请选择服务选项",
+      "selectOptionPlaceholder": "选择一个选项",
+      "pricing": "价格",
+      "hourlyRate": "时薪",
+      "hourlyRateRequired": "请输入时薪",
+      "hourlyRateMin": "时薪至少为1",
+      "currency": "货币",
+      "optionalDiscounts": "可选折扣（长期预订）",
+      "dailyDiscount": "按日折扣",
+      "weeklyDiscount": "按周折扣",
+      "monthlyDiscount": "按月折扣",
+      "pricePreview": "价格预览",
+      "hourly": "小时",
+      "daily": "每日",
+      "weekly": "每周",
+      "monthly": "每月",
+      "serviceAddedSuccess": "服务添加成功",
+      "serviceRemoved": "服务删除成功",
+      "confirmRemoveService": "确定要删除该服务吗？",
+      "readyToSubmit": "准备提交！",
+      "readyToSubmitDesc": "您的档案已完成。提交给管理员审核即可开始。",
+      "submitForReview": "提交审核",
+      "submitSuccess": "档案提交成功！我们会尽快审核。",
+      "underReview": "档案审核中",
+      "underReviewDesc": "您的档案正在审核，我们会在批准后通知您。",
+      "approved": "档案已批准",
+      "approvedDesc": "您的档案已获批准！现在可以发布。",
+      "published": "档案已发布",
+      "publishedDesc": "您的档案已向客户展示！",
+      "rejected": "档案被拒绝",
+      "rejectedDesc": "档案被拒绝。请查看反馈并进行修改。",
+      "editProfile": "编辑档案",
+      "step1SaveSuccess": "基础信息保存成功"
+    },
+    "lifestyle": {
+      "LIFESTYLE_ACTIVE": "积极型",
+      "LIFESTYLE_RELAXED": "轻松型",
+      "LIFESTYLE_ADVENTUROUS": "爱冒险",
+      "LIFESTYLE_HOMEBODY": "喜居家",
+      "LIFESTYLE_SOCIAL": "社交型",
+      "LIFESTYLE_INDEPENDENT": "独立型"
+    }
+  },
+  "services": {
+    "CATEGORY_HOMECARE": "家务护理",
+    "CATEGORY_GROOMING": "美容护理",
+    "CATEGORY_ASSISTANCE": "助理服务",
+    "CATEGORY_COMPANIONSHIP": "陪伴服务",
+    "SERVICE_HOMECARE_ORGANIZING": "家庭整理",
+    "SERVICE_HOMECARE_COOKING": "烹饪",
+    "SERVICE_GROOMING_NAIL": "美甲护理",
+    "SERVICE_GROOMING_FACIAL": "面部护理",
+    "SERVICE_GROOMING_BODY": "身体护理",
+    "SERVICE_GROOMING_HAIRCARE": "美发护理",
+    "SERVICE_ASSISTANCE_PERSONAL": "私人助理",
+    "SERVICE_ASSISTANCE_ONSITE": "现场助理",
+    "SERVICE_ASSISTANCE_VIRTUAL": "虚拟助理",
+    "SERVICE_ASSISTANCE_TOUR_GUIDE": "导游",
+    "SERVICE_ASSISTANCE_INTERPRETER": "口译员",
+    "SERVICE_COMPANIONSHIP_LEVEL_1": "陪伴服务 - 一级",
+    "SERVICE_COMPANIONSHIP_LEVEL_2": "陪伴服务 - 二级",
+    "SERVICE_COMPANIONSHIP_LEVEL_3": "陪伴服务 - 三级",
+    "options": {
+      "COOKING_VIETNAMESE": "越南料理",
+      "COOKING_KOREAN": "韩国料理",
+      "COOKING_JAPANESE": "日本料理",
+      "COOKING_CHINESE": "中国菜",
+      "COOKING_WESTERN": "西式料理",
+      "HAIRCARE_NON_CHEMICAL": "无化学美发",
+      "HAIRCARE_CHEMICAL": "化学美发",
+      "INTERPRETER_VI_TO_EN": "越南语 → 英语",
+      "INTERPRETER_EN_TO_VI": "英语 → 越南语"
+    }
+  },
+  "client": {
+    "dashboard": {
+      "title": "客户仪表板",
+      "activeJobs": "活跃工作",
+      "inProgress": "进行中",
+      "completed": "已完成",
+      "totalSpent": "总支出"
+    }
+  },
+  "wallet": {
+    "title": "我的钱包",
+    "myWallet": "我的钱包",
+    "balance": {
+      "title": "钱包余额",
+      "available": "可用余额",
+      "pending": "待处理",
+      "totalEarned": "总收入",
+      "totalSpent": "总支出",
+      "activeEscrows": "活跃托管",
+      "refresh": "刷新",
+      "deposit": "充值",
+      "withdraw": "提现",
+      "status": "状态",
+      "active": "活跃",
+      "loading": "加载中...",
+      "failed": "无法加载钱包",
+      "loginRequired": "请登录以查看您的钱包"
+    },
+    "transaction": {
+      "title": "交易历史",
+      "refresh": "刷新",
+      "filterByType": "按类型筛选",
+      "filterByStatus": "按状态筛选",
+      "date": "日期",
+      "type": "类型",
+      "amount": "金额",
+      "status": "状态",
+      "paymentMethod": "支付方式",
+      "description": "描述",
+      "balanceAfter": "之后余额",
+      "total": "总计 {count} 笔交易",
+      "failed": "无法加载交易",
+      "types": {
+        "deposit": "充值",
+        "withdrawal": "提现",
+        "payment": "支付",
+        "earning": "收入",
+        "platformFee": "平台费用",
+        "refund": "退款",
+        "escrowCreate": "创建托管",
+        "escrowRelease": "释放托管",
+        "withdrawalFee": "提现费用"
+      },
+      "statuses": {
+        "pending": "待处理",
+        "processing": "处理中",
+        "completed": "已完成",
+        "failed": "失败",
+        "cancelled": "已取消"
+      }
+    },
+    "deposit": {
+      "title": "充值",
+      "bankTransfer": "银行转账",
+      "paypal": "PayPal",
+      "amount": "金额 (USD)",
+      "amountPlaceholder": "输入金额",
+      "amountRequired": "请输入金额",
+      "minimumDeposit": "最低充值金额为 $10",
+      "generateQR": "生成二维码",
+      "payWithPayPal": "使用 PayPal 支付",
+      "bankInfo": "通过二维码银行转账",
+      "bankInfoDesc": "您将收到一个二维码，可使用银行应用扫描。支付将在几分钟内自动确认。",
+      "paypalInfo": "PayPal 支付",
+      "paypalInfoDesc": "您将被重定向到 PayPal 以安全完成支付。",
+      "scanQR": "扫描二维码支付",
+      "scanQRDesc": "请转账 {amount} 以完成充值。",
+      "bank": "银行",
+      "account": "账户",
+      "transferContent": "转账备注",
+      "importantNote": "⚠️ 重要提示：请准确包含上述转账备注。",
+      "autoConfirm": "自动确认",
+      "autoConfirmDesc": "我们收到您的转账后，您的充值将在 1-5 分钟内自动确认。页面将自动刷新。",
+      "close": "关闭",
+      "completed": "我已完成转账",
+      "qrSuccess": "二维码已生成！请扫描以完成支付。",
+      "failed": "无法创建充值"
+    },
+    "withdraw": {
+      "title": "提现",
+      "bankTransfer": "银行转账",
+      "paypal": "PayPal",
+      "amount": "金额 (USD)",
+      "amountPlaceholder": "输入金额",
+      "amountRequired": "请输入金额",
+      "minimumWithdraw": "最低提现金额为 $50",
+      "bankName": "银行名称",
+      "bankNamePlaceholder": "例如：Vietcombank、BIDV、Techcombank",
+      "bankNameRequired": "请输入银行名称",
+      "accountNumber": "银行账号",
+      "accountNumberPlaceholder": "输入您的账号",
+      "accountNumberRequired": "请输入账号",
+      "accountNumberInvalid": "账号只能包含数字",
+      "accountHolder": "账户持有人姓名",
+      "accountHolderPlaceholder": "输入银行账户上显示的全名",
+      "accountHolderRequired": "请输入账户持有人姓名",
+      "paypalEmail": "PayPal 电子邮件",
+      "paypalEmailPlaceholder": "your.email@example.com",
+      "paypalEmailRequired": "请输入 PayPal 电子邮件",
+      "paypalEmailInvalid": "请输入有效的电子邮件",
+      "bankInfo": "银行转账提现",
+      "bankInfoDesc": "您的提现将在 1-3 个工作日内处理。请确保您的银行信息正确。",
+      "paypalInfo": "PayPal 提现",
+      "paypalInfoDesc": "您的提现将在 1-2 个工作日内发送到您的 PayPal 账户。请确保您的 PayPal 电子邮件正确。",
+      "cancel": "取消",
+      "submit": "提交提现请求",
+      "success": "提现请求已成功提交！",
+      "failed": "无法处理提现"
+    },
+    "worker": {
+      "earnings": "💰 您的收入",
+      "earningsInfo": {
+        "withdraw": "💸 提现：将您的收入转入您的银行账户",
+        "protected": "🔒 受保护：所有付款都保存在托管中以确保您的安全",
+        "fast": "⚡ 快速：提现在 1-3 个工作日内处理",
+        "track": "📊 跟踪：查看您的所有收入和交易历史"
+      }
+    }
+  },
+  "admin": {
+    "sidebar": {
+      "dashboard": "仪表板",
+      "seo": "SEO设置",
+      "content": "内容管理",
+      "pages": "页面",
+      "categories": "分类",
+      "users": "用户管理",
+      "settings": "设置"
+    },
+    "dashboard": {
+      "title": "仪表板",
+      "totalUsers": "总用户数",
+      "activeWorkers": "活跃工作者",
+      "totalJobs": "总工作数",
+      "revenue": "收入"
+    }
+  },
+  "errors": {
+    "404": {
+      "title": "404",
+      "subtitle": "抱歉，您要查找的页面不存在。",
+      "button": "返回首页"
+    },
+    "500": {
+      "title": "出现错误",
+      "subtitle": "抱歉，发生了错误。请重试。",
+      "button": "重试"
+    }
+  },
+  "market": {
+    "title": "工作者市场",
+    "subtitle": "发现并联系数千名专业工作者",
+    "searchPlaceholder": "按姓名搜索工作者...",
+    "search": "搜索",
+    "filters": "筛选",
+    "applyFilters": "应用筛选",
+    "resetFilters": "重置筛选",
+    "resultsCount": "找到 {count} 名工作者",
+    "noWorkers": "未找到符合条件的工作者",
+    "ageRange": "年龄范围",
+    "years": "岁",
+    "yearsOld": "岁",
+    "min": "最小",
+    "max": "最大",
+    "category": "服务类别",
+    "selectCategory": "选择类别",
+    "service": "服务",
+    "selectService": "选择具体服务",
+    "priceRange": "价格范围 (美元/小时)",
+    "priceNotSet": "未设置价格",
+    "available": "可用",
+    "services": "服务",
+    "more": "更多",
+    "viewProfile": "查看资料",
+    "pagination": "显示 {start} - {end}，共 {total} 名工作者"
+  }
+}

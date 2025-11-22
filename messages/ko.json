@@ -1,0 +1,630 @@
+{
+  "common": {
+    "loading": "로딩 중...",
+    "error": "오류가 발생했습니다",
+    "success": "성공",
+    "cancel": "취소",
+    "confirm": "확인",
+    "save": "저장",
+    "delete": "삭제",
+    "edit": "편집",
+    "search": "검색",
+    "filter": "필터",
+    "back": "뒤로",
+    "continue": "계속",
+    "next": "다음",
+    "previous": "이전",
+    "submit": "제출",
+    "saveAndContinue": "저장 후 계속",
+    "add": "추가",
+    "remove": "삭제",
+    "yes": "예",
+    "no": "아니오",
+    "close": "닫기",
+    "homeButton": "홈으로",
+    "backToDashboard": "대시보드로"
+  },
+  "nav": {
+    "home": "홈",
+    "about": "소개",
+    "contact": "문의",
+    "login": "로그인",
+    "signup": "회원가입",
+    "logout": "로그아웃",
+    "profile": "프로필",
+    "settings": "설정",
+    "becomeWorker": "워커 되기"
+  },
+  "header": {
+    "brandName": "PR1AS",
+    "becomeWorker": "워커 되기",
+    "userMenu": {
+      "profile": "내 프로필",
+      "bookings": "예약",
+      "logout": "로그아웃",
+      "dashboard": "대시보드",
+      "adminDashboard": "관리자 대시보드",
+      "workerDashboard": "워커 대시보드",
+      "myJobs": "내 작업",
+      "myWork": "내 작업",
+      "settings": "설정",
+      "user": "사용자",
+      "roles": {
+        "client": "클라이언트",
+        "worker": "워커",
+        "admin": "관리자"
+      },
+      "logoutSuccess": "로그아웃 성공",
+      "logoutError": "로그아웃 중 오류 발생"
+    },
+    "menu": "메뉴",
+    "login": "로그인",
+    "signup": "회원가입"
+  },
+  "footer": {
+    "about": {
+      "title": "소개",
+      "aboutUs": "회사 소개",
+      "careers": "채용",
+      "press": "언론",
+      "blog": "블로그"
+    },
+    "community": {
+      "title": "커뮤니티",
+      "diversity": "다양성 및 포용성",
+      "accessibility": "접근성",
+      "partners": "파트너",
+      "safety": "안전"
+    },
+    "worker": {
+      "title": "워커",
+      "become": "워커 되기",
+      "help": "고객센터",
+      "resources": "리소스",
+      "forum": "포럼"
+    },
+    "support": {
+      "title": "지원",
+      "helpCenter": "고객센터",
+      "cancellation": "취소 정책",
+      "contact": "문의하기",
+      "faq": "자주 묻는 질문"
+    },
+    "copyright": "© 2025 PR1AS",
+    "terms": "약관",
+    "privacy": "개인정보",
+    "sitemap": "사이트맵"
+  },
+  "home": {
+    "hero": {
+      "slide1": {
+        "title": "전문 워커 찾기",
+        "description": "귀하의 지역에서 검증되고 높은 평가를 받은 수천 명의 신뢰할 수 있는 워커와 연결하세요",
+        "primaryCTA": "지금 워커 찾기",
+        "secondaryCTA": "워커 등록"
+      },
+      "slide2": {
+        "title": "안전하고 신뢰할 수 있음",
+        "description": "모든 워커는 신원이 확인되었으며 고객의 실제 리뷰를 가지고 있습니다",
+        "primaryCTA": "지금 탐색하기"
+      },
+      "slide3": {
+        "title": "빠르고 편리함",
+        "description": "온라인으로 예약하고, 쉽게 결제하고, 언제 어디서나 진행 상황을 추적하세요",
+        "primaryCTA": "지금 시작하기"
+      }
+    },
+    "statistics": {
+      "workers": "활성 워커",
+      "jobs": "완료된 작업",
+      "clients": "만족한 고객",
+      "rating": "평균 평점"
+    },
+    "features": {
+      "title": "왜 PR1AS를 선택해야 할까요?",
+      "subtitle": "우수한 기능을 갖춘 선도적인 플랫폼",
+      "safety": {
+        "title": "절대 안전",
+        "description": "모든 워커는 신원 확인, 배경 조사 및 엄격한 평가를 받았습니다. 안전한 에스크로 메커니즘을 갖춘 보안 결제 시스템."
+      },
+      "speed": {
+        "title": "빠르고 편리함",
+        "description": "몇 초 만에 예약하고, 워커가 빠르게 응답합니다. 앱에서 실시간으로 작업 진행 상황을 추적하세요."
+      },
+      "quality": {
+        "title": "품질 보증",
+        "description": "수천 명의 실제 고객으로부터의 투명한 리뷰. 만족하지 않으면 100% 환불 보장."
+      }
+    },
+    "categories": {
+      "title": "서비스 카테고리",
+      "subtitle": "수리부터 케어까지 50개 이상의 다양한 서비스",
+      "viewAll": "모든 카테고리 보기",
+      "items": {
+        "homeRepair": {
+          "name": "주택 수리",
+          "count": "2,500+ 워커"
+        },
+        "electricity": {
+          "name": "전기 및 배관",
+          "count": "1,800+ 워커"
+        },
+        "transport": {
+          "name": "운송",
+          "count": "3,200+ 워커"
+        },
+        "housekeeping": {
+          "name": "가사 도우미",
+          "count": "4,100+ 워커"
+        },
+        "care": {
+          "name": "돌봄 서비스",
+          "count": "1,600+ 워커"
+        },
+        "events": {
+          "name": "이벤트",
+          "count": "900+ 워커"
+        }
+      }
+    },
+    "howItWorks": {
+      "title": "작동 방식",
+      "subtitle": "완벽한 서비스를 받기 위한 4단계만",
+      "finalText": "간단하고 빠르며 효율적입니다!",
+      "steps": {
+        "step1": {
+          "title": "계정 만들기",
+          "description": "단 30초 만에 무료 계정 만들기"
+        },
+        "step2": {
+          "title": "적합한 워커 찾기",
+          "description": "실제 리뷰가 있는 수천 명의 워커를 둘러보세요"
+        },
+        "step3": {
+          "title": "예약 및 결제",
+          "description": "적합한 시간을 선택하고 안전하게 결제하세요"
+        },
+        "step4": {
+          "title": "작업 완료",
+          "description": "워커가 정시에 도착하여 훌륭하게 완료합니다"
+        }
+      }
+    },
+    "testimonials": {
+      "title": "고객이 PR1AS에 대해 말하는 것",
+      "subtitle": "만족한 고객의 25,000개 이상의 5성급 리뷰",
+      "items": {
+        "testimonial1": {
+          "name": "김민수",
+          "role": "주택 소유자",
+          "comment": "PR1AS를 통해 매우 전문적인 전기 기사를 찾았습니다. 빠르고 신뢰할 수 있는 서비스입니다!"
+        },
+        "testimonial2": {
+          "name": "이수진",
+          "role": "클라이언트",
+          "comment": "훌륭한 플랫폼입니다! 내 지역에서 신뢰할 수 있는 가사 도우미를 쉽게 찾았습니다."
+        },
+        "testimonial3": {
+          "name": "박준호",
+          "role": "워커 - 전기 기사",
+          "comment": "PR1AS는 제가 안정적인 수입을 얻는 데 도움이 됩니다. 예약 시스템이 매우 편리하고 전문적입니다."
+        },
+        "testimonial4": {
+          "name": "최은영",
+          "role": "클라이언트",
+          "comment": "PR1AS를 통해 워커를 고용할 때 마음의 평화를 얻습니다. 투명한 리뷰와 공정한 가격!"
+        }
+      }
+    },
+    "trustBadges": {
+      "award": {
+        "title": "수상",
+        "description": "2024년 상위 10개 스타트업"
+      },
+      "security": {
+        "title": "보안",
+        "description": "ISO 27001 인증"
+      },
+      "community": {
+        "title": "커뮤니티",
+        "description": "25,000명 이상의 회원"
+      }
+    },
+    "cta": {
+      "title": "시작할 준비가 되셨나요?",
+      "subtitle": "PR1AS를 신뢰하는 수천 명의 사용자와 함께하세요. 오늘 무료로 가입하세요!",
+      "primaryButton": "무료 가입",
+      "secondaryButton": "로그인",
+      "benefits": {
+        "free": "무료 등록",
+        "noCard": "신용카드 필요 없음",
+        "cancel": "언제든지 취소 가능"
+      }
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "환영합니다",
+      "subtitle": "PR1AS를 계속 사용하려면 로그인하세요",
+      "continueWithGoogle": "Google로 계속하기",
+      "orLoginWithEmail": "또는 이메일로 로그인",
+      "emailPlaceholder": "이메일을 입력하세요",
+      "passwordPlaceholder": "비밀번호를 입력하세요",
+      "emailRequired": "이메일을 입력해주세요",
+      "emailInvalid": "유효하지 않은 이메일",
+      "passwordRequired": "비밀번호를 입력해주세요",
+      "forgotPassword": "비밀번호를 잊으셨나요?",
+      "loginButton": "로그인",
+      "noAccount": "계정이 없으신가요?",
+      "signupLink": "지금 가입하기",
+      "loginSuccess": "로그인 성공!",
+      "googleLoginComingSoon": "Google 로그인 기능이 곧 출시됩니다!"
+    },
+    "signup": {
+      "title": "계정 만들기",
+      "subtitle": "오늘 PR1AS 커뮤니티에 가입하세요",
+      "selectRole": "다음을 원합니다:",
+      "clientRole": "클라이언트 - 서비스 찾기",
+      "clientDescription": "프로젝트를 위한 워커 찾기 및 고용",
+      "workerRole": "워커 - 서비스 제공",
+      "workerDescription": "서비스를 제공하고 수입을 얻으세요",
+      "continueWithGoogle": "Google로 가입하기",
+      "orSignupWithEmail": "또는 이메일로 가입",
+      "namePlaceholder": "이름을 입력하세요",
+      "emailPlaceholder": "이메일을 입력하세요",
+      "passwordPlaceholder": "비밀번호 생성 (최소 6자)",
+      "nameRequired": "이름을 입력해주세요",
+      "emailRequired": "이메일을 입력해주세요",
+      "emailInvalid": "유효하지 않은 이메일",
+      "passwordRequired": "비밀번호를 입력해주세요",
+      "passwordMinLength": "비밀번호는 최소 6자 이상이어야 합니다",
+      "signupButton": "계정 만들기",
+      "haveAccount": "이미 계정이 있으신가요?",
+      "loginLink": "로그인",
+      "signupSuccess": "계정이 성공적으로 생성되었습니다!",
+      "googleSignupComingSoon": "Google 가입 기능이 곧 출시됩니다!"
+    }
+  },
+  "banned": {
+    "title": "계정이 정지되었습니다",
+    "description": "귀하의 계정은",
+    "termsLink": "서비스 약관",
+    "or": "또는",
+    "guidelinesLink": "커뮤니티 가이드라인",
+    "ofUs": "위반으로 인해 정지되었습니다.",
+    "whyTitle": "왜 제 계정이 정지되었나요?",
+    "whyDescription": "계정은 다음과 같은 이유로 정지될 수 있습니다:",
+    "reasons": {
+      "payment": "결제 정책 위반",
+      "fraud": "사기 또는 기만적인 행동",
+      "complaints": "다른 사용자의 여러 불만 사항",
+      "terms": "서비스 약관 위반"
+    },
+    "contactText": "이것이 실수라고 생각되거나 더 많은 정보가 필요한 경우 지원팀에 문의하세요.",
+    "contactButton": "지원 문의",
+    "homeButton": "홈으로",
+    "supportEmail": "지원 이메일:"
+  },
+  "worker": {
+    "dashboard": {
+      "title": "워커 대시보드",
+      "availableJobs": "이용 가능한 작업",
+      "inProgress": "진행 중",
+      "completed": "완료됨",
+      "totalEarnings": "총 수입"
+    },
+    "profile": {
+      "setupTitle": "워커 프로필 설정하기",
+      "step1Title": "기본 정보",
+      "step1Desc": "나에 대해 알려주세요",
+      "step2Title": "서비스 및 요금",
+      "step2Desc": "제공 서비스와 요금을 추가하세요",
+      "submitTitle": "검토 요청",
+      "submitDesc": "확인 후 제출",
+      "basicInfoTitle": "기본 정보",
+      "basicInfoDesc": "개인 정보를 입력해 주세요",
+      "personalInfo": "개인 정보",
+      "aboutYou": "나에 대해",
+      "fullName": "이름",
+      "fullNameRequired": "이름을 입력해 주세요",
+      "fullNamePlaceholder": "이름을 입력하세요",
+      "nickname": "별명",
+      "nicknamePlaceholder": "별명을 입력하세요 (선택)",
+      "age": "나이",
+      "ageRequired": "나이를 입력해 주세요",
+      "ageRange": "나이는 18~100세여야 합니다",
+      "height": "키",
+      "weight": "몸무게",
+      "zodiacSign": "별자리",
+      "zodiacSignPlaceholder": "별자리를 선택하세요",
+      "lifestyle": "라이프스타일",
+      "lifestylePlaceholder": "라이프스타일을 선택하세요",
+      "personalQuote": "좌우명",
+      "personalQuotePlaceholder": "당신을 표현하는 한 문장",
+      "bio": "소개글",
+      "bioPlaceholder": "자기소개를 작성해 주세요...",
+      "interestsAndHobbies": "관심사 & 취미",
+      "addTagPlaceholder": "태그를 추가하세요",
+      "basicInfoSubmit": "기본 정보 저장",
+      "servicesAndPricingTitle": "서비스 및 요금",
+      "servicesAndPricingDesc": "제공하는 서비스와 요금을 설정하세요",
+      "imagesSection": "프로필 이미지",
+      "avatar": "프로필 사진",
+      "avatarHint": "전문적인 사진을 업로드해 주세요",
+      "avatarRequired": "프로필 사진을 업로드해 주세요",
+      "avatarUploaded": "프로필 사진이 업로드되었습니다",
+      "gallery": "갤러리",
+      "galleryHint": "자신을 보여줄 더 많은 사진을 추가하세요",
+      "imageAdded": "이미지가 추가되었습니다",
+      "servicesSection": "서비스",
+      "addService": "서비스 추가",
+      "addFirstService": "첫 번째 서비스를 추가하세요",
+      "noServicesYet": "등록된 서비스가 없습니다",
+      "atLeastOneService": "최소 한 개의 서비스를 추가해 주세요",
+      "selectService": "서비스 선택",
+      "selectServiceHint": "서비스를 선택하고 요금을 설정하세요",
+      "service": "서비스",
+      "serviceRequired": "서비스를 선택해 주세요",
+      "selectServicePlaceholder": "서비스를 검색하고 선택하세요",
+      "serviceOption": "서비스 옵션",
+      "serviceOptionRequired": "옵션을 선택해 주세요",
+      "selectOptionPlaceholder": "옵션을 선택하세요",
+      "pricing": "가격",
+      "hourlyRate": "시간당 요금",
+      "hourlyRateRequired": "시간당 요금을 입력해 주세요",
+      "hourlyRateMin": "시간당 요금은 최소 1 이상이어야 합니다",
+      "currency": "통화",
+      "optionalDiscounts": "선택 할인 (장기 예약용)",
+      "dailyDiscount": "일간 할인",
+      "weeklyDiscount": "주간 할인",
+      "monthlyDiscount": "월간 할인",
+      "pricePreview": "가격 미리보기",
+      "hourly": "시간당",
+      "daily": "일간",
+      "weekly": "주간",
+      "monthly": "월간",
+      "serviceAddedSuccess": "서비스가 추가되었습니다",
+      "serviceRemoved": "서비스가 삭제되었습니다",
+      "confirmRemoveService": "이 서비스를 삭제하시겠습니까?",
+      "readyToSubmit": "제출 준비 완료!",
+      "readyToSubmitDesc": "프로필이 완료되었습니다. 검토를 요청하여 시작하세요.",
+      "submitForReview": "검토 요청",
+      "submitSuccess": "프로필이 성공적으로 제출되었습니다! 곧 검토해 드릴게요.",
+      "underReview": "프로필 검토 중",
+      "underReviewDesc": "프로필이 검토 중입니다. 승인되면 알려 드립니다.",
+      "approved": "프로필 승인됨",
+      "approvedDesc": "프로필이 승인되었습니다! 이제 게시할 수 있습니다.",
+      "published": "프로필 게시됨",
+      "publishedDesc": "프로필이 고객에게 공개되었습니다!",
+      "rejected": "프로필 반려됨",
+      "rejectedDesc": "프로필이 반려되었습니다. 피드백을 확인하고 수정해 주세요.",
+      "editProfile": "프로필 수정",
+      "step1SaveSuccess": "기본 정보가 저장되었습니다"
+    },
+    "lifestyle": {
+      "LIFESTYLE_ACTIVE": "활동적",
+      "LIFESTYLE_RELAXED": "여유로운",
+      "LIFESTYLE_ADVENTUROUS": "모험적",
+      "LIFESTYLE_HOMEBODY": "집에 있는 것을 선호",
+      "LIFESTYLE_SOCIAL": "사교적",
+      "LIFESTYLE_INDEPENDENT": "독립적"
+    }
+  },
+  "services": {
+    "CATEGORY_HOMECARE": "가사 케어",
+    "CATEGORY_GROOMING": "그루밍",
+    "CATEGORY_ASSISTANCE": "어시스턴트",
+    "CATEGORY_COMPANIONSHIP": "동행 서비스",
+    "SERVICE_HOMECARE_ORGANIZING": "홈 오거나이징",
+    "SERVICE_HOMECARE_COOKING": "홈 쿠킹",
+    "SERVICE_GROOMING_NAIL": "네일 케어",
+    "SERVICE_GROOMING_FACIAL": "페이셜 케어",
+    "SERVICE_GROOMING_BODY": "바디 케어",
+    "SERVICE_GROOMING_HAIRCARE": "헤어 케어",
+    "SERVICE_ASSISTANCE_PERSONAL": "퍼스널 어시스턴트",
+    "SERVICE_ASSISTANCE_ONSITE": "온사이트 어시스턴트",
+    "SERVICE_ASSISTANCE_VIRTUAL": "버추얼 어시스턴트",
+    "SERVICE_ASSISTANCE_TOUR_GUIDE": "투어 가이드",
+    "SERVICE_ASSISTANCE_INTERPRETER": "통역사",
+    "SERVICE_COMPANIONSHIP_LEVEL_1": "동행 서비스 - 레벨 1",
+    "SERVICE_COMPANIONSHIP_LEVEL_2": "동행 서비스 - 레벨 2",
+    "SERVICE_COMPANIONSHIP_LEVEL_3": "동행 서비스 - 레벨 3",
+    "options": {
+      "COOKING_VIETNAMESE": "베트남 요리",
+      "COOKING_KOREAN": "한식",
+      "COOKING_JAPANESE": "일식",
+      "COOKING_CHINESE": "중식",
+      "COOKING_WESTERN": "양식",
+      "HAIRCARE_NON_CHEMICAL": "무화학 헤어 케어",
+      "HAIRCARE_CHEMICAL": "화학 시술 헤어 케어",
+      "INTERPRETER_VI_TO_EN": "베트남어 → 영어",
+      "INTERPRETER_EN_TO_VI": "영어 → 베트남어"
+    }
+  },
+  "client": {
+    "dashboard": {
+      "title": "클라이언트 대시보드",
+      "activeJobs": "활성 작업",
+      "inProgress": "진행 중",
+      "completed": "완료됨",
+      "totalSpent": "총 지출"
+    }
+  },
+  "wallet": {
+    "title": "내 지갑",
+    "myWallet": "내 지갑",
+    "balance": {
+      "title": "지갑 잔액",
+      "available": "사용 가능한 잔액",
+      "pending": "대기 중",
+      "totalEarned": "총 수입",
+      "totalSpent": "총 지출",
+      "activeEscrows": "활성 에스크로",
+      "refresh": "새로고침",
+      "deposit": "입금",
+      "withdraw": "출금",
+      "status": "상태",
+      "active": "활성",
+      "loading": "로딩 중...",
+      "failed": "지갑을 불러올 수 없습니다",
+      "loginRequired": "지갑을 보려면 로그인하세요"
+    },
+    "transaction": {
+      "title": "거래 내역",
+      "refresh": "새로고침",
+      "filterByType": "유형별 필터",
+      "filterByStatus": "상태별 필터",
+      "date": "날짜",
+      "type": "유형",
+      "amount": "금액",
+      "status": "상태",
+      "paymentMethod": "결제 방법",
+      "description": "설명",
+      "balanceAfter": "이후 잔액",
+      "total": "총 {count}개 거래",
+      "failed": "거래를 불러올 수 없습니다",
+      "types": {
+        "deposit": "입금",
+        "withdrawal": "출금",
+        "payment": "결제",
+        "earning": "수입",
+        "platformFee": "플랫폼 수수료",
+        "refund": "환불",
+        "escrowCreate": "에스크로 생성",
+        "escrowRelease": "에스크로 해제",
+        "withdrawalFee": "출금 수수료"
+      },
+      "statuses": {
+        "pending": "대기 중",
+        "processing": "처리 중",
+        "completed": "완료됨",
+        "failed": "실패",
+        "cancelled": "취소됨"
+      }
+    },
+    "deposit": {
+      "title": "입금하기",
+      "bankTransfer": "은행 송금",
+      "paypal": "PayPal",
+      "amount": "금액 (USD)",
+      "amountPlaceholder": "금액을 입력하세요",
+      "amountRequired": "금액을 입력해주세요",
+      "minimumDeposit": "최소 입금액은 $10입니다",
+      "generateQR": "QR 코드 생성",
+      "payWithPayPal": "PayPal로 결제",
+      "bankInfo": "QR 코드를 통한 은행 송금",
+      "bankInfoDesc": "은행 앱으로 스캔할 QR 코드를 받게 됩니다. 결제는 몇 분 내에 자동으로 확인됩니다.",
+      "paypalInfo": "PayPal 결제",
+      "paypalInfoDesc": "안전한 결제를 위해 PayPal로 리디렉션됩니다.",
+      "scanQR": "QR 코드를 스캔하여 결제",
+      "scanQRDesc": "입금을 완료하려면 {amount}을(를) 송금하세요.",
+      "bank": "은행",
+      "account": "계좌",
+      "transferContent": "송금 내용",
+      "importantNote": "⚠️ 중요: 위와 정확히 동일한 송금 내용을 포함해주세요.",
+      "autoConfirm": "자동 확인",
+      "autoConfirmDesc": "송금을 받은 후 1-5분 이내에 입금이 자동으로 확인됩니다. 페이지가 자동으로 새로고침됩니다.",
+      "close": "닫기",
+      "completed": "송금을 완료했습니다",
+      "qrSuccess": "QR 코드가 생성되었습니다! 결제를 완료하려면 스캔하세요.",
+      "failed": "입금을 생성할 수 없습니다"
+    },
+    "withdraw": {
+      "title": "출금하기",
+      "bankTransfer": "은행 송금",
+      "paypal": "PayPal",
+      "amount": "금액 (USD)",
+      "amountPlaceholder": "금액을 입력하세요",
+      "amountRequired": "금액을 입력해주세요",
+      "minimumWithdraw": "최소 출금액은 $50입니다",
+      "bankName": "은행명",
+      "bankNamePlaceholder": "예: Vietcombank, BIDV, Techcombank",
+      "bankNameRequired": "은행명을 입력해주세요",
+      "accountNumber": "은행 계좌 번호",
+      "accountNumberPlaceholder": "계좌 번호를 입력하세요",
+      "accountNumberRequired": "계좌 번호를 입력해주세요",
+      "accountNumberInvalid": "계좌 번호는 숫자만 포함해야 합니다",
+      "accountHolder": "예금주명",
+      "accountHolderPlaceholder": "은행 계좌에 표시된 전체 이름을 입력하세요",
+      "accountHolderRequired": "예금주명을 입력해주세요",
+      "paypalEmail": "PayPal 이메일",
+      "paypalEmailPlaceholder": "your.email@example.com",
+      "paypalEmailRequired": "PayPal 이메일을 입력해주세요",
+      "paypalEmailInvalid": "유효한 이메일을 입력해주세요",
+      "bankInfo": "은행 송금 출금",
+      "bankInfoDesc": "출금은 1-3 영업일 이내에 처리됩니다. 은행 정보가 정확한지 확인하세요.",
+      "paypalInfo": "PayPal 출금",
+      "paypalInfoDesc": "출금은 1-2 영업일 이내에 PayPal 계정으로 전송됩니다. PayPal 이메일이 정확한지 확인하세요.",
+      "cancel": "취소",
+      "submit": "출금 요청 제출",
+      "success": "출금 요청이 성공적으로 제출되었습니다!",
+      "failed": "출금을 처리할 수 없습니다"
+    },
+    "worker": {
+      "earnings": "💰 수입",
+      "earningsInfo": {
+        "withdraw": "💸 출금: 수입을 은행 계좌로 이체",
+        "protected": "🔒 보호됨: 모든 결제는 안전을 위해 에스크로에 보관됩니다",
+        "fast": "⚡ 빠름: 출금은 1-3 영업일 이내에 처리됩니다",
+        "track": "📊 추적: 모든 수입과 거래 내역 보기"
+      }
+    }
+  },
+  "admin": {
+    "sidebar": {
+      "dashboard": "대시보드",
+      "seo": "SEO 설정",
+      "content": "콘텐츠 관리",
+      "pages": "페이지",
+      "categories": "카테고리",
+      "users": "사용자 관리",
+      "settings": "설정"
+    },
+    "dashboard": {
+      "title": "대시보드",
+      "totalUsers": "총 사용자",
+      "activeWorkers": "활성 워커",
+      "totalJobs": "총 작업",
+      "revenue": "수익"
+    }
+  },
+  "errors": {
+    "404": {
+      "title": "404",
+      "subtitle": "죄송합니다. 찾으시는 페이지가 존재하지 않습니다.",
+      "button": "홈으로"
+    },
+    "500": {
+      "title": "문제가 발생했습니다",
+      "subtitle": "죄송합니다. 오류가 발생했습니다. 다시 시도해주세요.",
+      "button": "다시 시도"
+    }
+  },
+  "market": {
+    "title": "워커 마켓",
+    "subtitle": "수천 명의 전문 워커를 발견하고 연결하세요",
+    "searchPlaceholder": "이름으로 워커 검색...",
+    "search": "검색",
+    "filters": "필터",
+    "applyFilters": "필터 적용",
+    "resetFilters": "필터 재설정",
+    "resultsCount": "{count}명의 워커를 찾았습니다",
+    "noWorkers": "조건과 일치하는 워커가 없습니다",
+    "ageRange": "연령대",
+    "years": "세",
+    "yearsOld": "세",
+    "min": "최소",
+    "max": "최대",
+    "category": "서비스 카테고리",
+    "selectCategory": "카테고리 선택",
+    "service": "서비스",
+    "selectService": "특정 서비스 선택",
+    "priceRange": "가격 범위 (USD/시간)",
+    "priceNotSet": "가격 미설정",
+    "available": "이용 가능",
+    "services": "서비스",
+    "more": "더보기",
+    "viewProfile": "프로필 보기",
+    "pagination": "{total}명 중 {start} - {end} 표시"
+  }
+}

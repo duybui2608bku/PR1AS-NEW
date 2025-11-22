@@ -1,0 +1,13 @@
+.ant-layout-sider {
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+}
+
+.ant-menu-dark.ant-menu-inline .ant-menu-item {
+  margin: 4px 8px;
+  border-radius: 4px;
+}
+
+.ant-menu-dark.ant-menu-inline .ant-menu-submenu-title {
+  margin: 4px 8px;
+  border-radius: 4px;
+}

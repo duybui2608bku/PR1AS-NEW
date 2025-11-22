@@ -1,0 +1,756 @@
+{
+  "common": {
+    "loading": "Đang tải...",
+    "error": "Có lỗi xảy ra",
+    "success": "Thành công",
+    "cancel": "Hủy",
+    "confirm": "Xác nhận",
+    "save": "Lưu",
+    "delete": "Xóa",
+    "edit": "Chỉnh sửa",
+    "search": "Tìm kiếm",
+    "filter": "Lọc",
+    "back": "Quay lại",
+    "continue": "Tiếp tục",
+    "next": "Tiếp theo",
+    "previous": "Trước",
+    "submit": "Gửi",
+    "saveAndContinue": "Lưu & tiếp tục",
+    "add": "Thêm",
+    "remove": "Xóa",
+    "yes": "Có",
+    "no": "Không",
+    "close": "Đóng",
+    "refresh": "Làm mới",
+    "homeButton": "Về trang chủ",
+    "backToDashboard": "Về trang tổng quan"
+  },
+  "nav": {
+    "home": "Trang chủ",
+    "about": "Giới thiệu",
+    "contact": "Liên hệ",
+    "login": "Đăng nhập",
+    "signup": "Đăng ký",
+    "logout": "Đăng xuất",
+    "profile": "Hồ sơ",
+    "settings": "Cài đặt",
+    "becomeWorker": "Trở thành Worker"
+  },
+  "header": {
+    "brandName": "PR1AS",
+    "becomeWorker": "Trở thành Worker",
+    "userMenu": {
+      "profile": "Hồ sơ của tôi",
+      "bookings": "Đặt chỗ",
+      "logout": "Đăng xuất",
+      "dashboard": "Dashboard",
+      "adminDashboard": "Bảng điều khiển Admin",
+      "workerDashboard": "Bảng điều khiển Worker",
+      "myJobs": "Công việc của tôi",
+      "myWork": "Công việc của tôi",
+      "settings": "Cài đặt",
+      "user": "Người dùng",
+      "roles": {
+        "client": "Khách hàng",
+        "worker": "Thợ",
+        "admin": "Quản trị viên"
+      },
+      "logoutSuccess": "Đăng xuất thành công",
+      "logoutError": "Có lỗi xảy ra khi đăng xuất"
+    },
+    "menu": "Menu",
+    "login": "Đăng nhập",
+    "signup": "Đăng ký"
+  },
+  "footer": {
+    "about": {
+      "title": "Giới thiệu",
+      "aboutUs": "Về chúng tôi",
+      "careers": "Tuyển dụng",
+      "press": "Báo chí",
+      "blog": "Blog"
+    },
+    "community": {
+      "title": "Cộng đồng",
+      "diversity": "Đa dạng & Hòa nhập",
+      "accessibility": "Khả năng tiếp cận",
+      "partners": "Đối tác",
+      "safety": "An toàn"
+    },
+    "worker": {
+      "title": "Worker",
+      "become": "Trở thành Worker",
+      "help": "Trung tâm trợ giúp",
+      "resources": "Tài nguyên",
+      "forum": "Diễn đàn"
+    },
+    "support": {
+      "title": "Hỗ trợ",
+      "helpCenter": "Trung tâm trợ giúp",
+      "cancellation": "Chính sách hủy",
+      "contact": "Liên hệ",
+      "faq": "Câu hỏi thường gặp"
+    },
+    "copyright": "© 2025 PR1AS",
+    "terms": "Điều khoản",
+    "privacy": "Quyền riêng tư",
+    "sitemap": "Sơ đồ trang"
+  },
+  "auth": {
+    "login": {
+      "title": "Chào mừng trở lại",
+      "subtitle": "Đăng nhập để tiếp tục sử dụng PR1AS",
+      "continueWithGoogle": "Tiếp tục với Google",
+      "orLoginWithEmail": "hoặc đăng nhập bằng email",
+      "emailPlaceholder": "Nhập email của bạn",
+      "passwordPlaceholder": "Nhập mật khẩu",
+      "emailRequired": "Vui lòng nhập email",
+      "emailInvalid": "Email không hợp lệ",
+      "passwordRequired": "Vui lòng nhập mật khẩu",
+      "forgotPassword": "Quên mật khẩu?",
+      "loginButton": "Đăng nhập",
+      "noAccount": "Chưa có tài khoản?",
+      "signupLink": "Đăng ký ngay",
+      "loginSuccess": "Đăng nhập thành công!",
+      "googleLoginComingSoon": "Tính năng đăng nhập Google sắp ra mắt!"
+    },
+    "signup": {
+      "title": "Tạo tài khoản",
+      "subtitle": "Tham gia cộng đồng PR1AS ngay hôm nay",
+      "selectRole": "Tôi muốn:",
+      "clientRole": "Client - Tìm dịch vụ",
+      "clientDescription": "Tìm kiếm và thuê Worker cho công việc của bạn",
+      "workerRole": "Worker - Cung cấp dịch vụ",
+      "workerDescription": "Cung cấp dịch vụ và kiếm thu nhập",
+      "continueWithGoogle": "Đăng ký với Google",
+      "orSignupWithEmail": "hoặc đăng ký bằng email",
+      "namePlaceholder": "Nhập họ và tên",
+      "emailPlaceholder": "Nhập email của bạn",
+      "passwordPlaceholder": "Tạo mật khẩu (tối thiểu 6 ký tự)",
+      "nameRequired": "Vui lòng nhập họ tên",
+      "emailRequired": "Vui lòng nhập email",
+      "emailInvalid": "Email không hợp lệ",
+      "passwordRequired": "Vui lòng nhập mật khẩu",
+      "passwordMinLength": "Mật khẩu phải có ít nhất 6 ký tự",
+      "signupButton": "Tạo tài khoản",
+      "haveAccount": "Đã có tài khoản?",
+      "loginLink": "Đăng nhập",
+      "signupSuccess": "Tạo tài khoản thành công!",
+      "googleSignupComingSoon": "Tính năng đăng ký Google sắp ra mắt!"
+    }
+  },
+  "banned": {
+    "title": "Tài khoản đã bị khóa",
+    "description": "Tài khoản của bạn đã bị tạm khóa do vi phạm",
+    "termsLink": "Điều khoản sử dụng",
+    "or": "hoặc",
+    "guidelinesLink": "Nguyên tắc cộng đồng",
+    "ofUs": "của chúng tôi.",
+    "whyTitle": "Tại sao tài khoản của tôi bị khóa?",
+    "whyDescription": "Tài khoản có thể bị khóa do các lý do sau:",
+    "reasons": {
+      "payment": "Vi phạm chính sách thanh toán",
+      "fraud": "Hành vi gian lận hoặc lừa đảo",
+      "complaints": "Nhiều khiếu nại từ người dùng khác",
+      "terms": "Vi phạm điều khoản sử dụng dịch vụ"
+    },
+    "contactText": "Nếu bạn cho rằng đây là nhầm lẫn hoặc cần thêm thông tin, vui lòng liên hệ với đội ngũ hỗ trợ của chúng tôi.",
+    "contactButton": "Liên hệ hỗ trợ",
+    "homeButton": "Về trang chủ",
+    "supportEmail": "Email hỗ trợ:"
+  },
+  "home": {
+    "hero": {
+      "slide1": {
+        "title": "Tìm Worker Chuyên Nghiệp",
+        "description": "Kết nối với hàng ngàn worker uy tín, được xác thực và đánh giá cao trong khu vực của bạn",
+        "primaryCTA": "Tìm Worker Ngay",
+        "secondaryCTA": "Đăng Ký Worker"
+      },
+      "slide2": {
+        "title": "An Toàn & Đáng Tin Cậy",
+        "description": "Tất cả worker đều được xác thực danh tính và có đánh giá thực từ khách hàng",
+        "primaryCTA": "Khám Phá Ngay"
+      },
+      "slide3": {
+        "title": "Nhanh Chóng & Tiện Lợi",
+        "description": "Đặt lịch online, thanh toán dễ dàng, theo dõi tiến độ mọi lúc mọi nơi",
+        "primaryCTA": "Bắt Đầu Ngay"
+      }
+    },
+    "statistics": {
+      "workers": "Active Workers",
+      "jobs": "Completed Jobs",
+      "clients": "Happy Clients",
+      "rating": "Average Rating"
+    },
+    "features": {
+      "title": "Tại Sao Chọn PR1AS?",
+      "subtitle": "Nền tảng kết nối hàng đầu với những tính năng vượt trội",
+      "safety": {
+        "title": "An Toàn Tuyệt Đối",
+        "description": "Tất cả worker đều được xác minh danh tính, kiểm tra lý lịch và đánh giá nghiêm ngặt. Hệ thống thanh toán bảo mật với cơ chế giữ tiền an toàn."
+      },
+      "speed": {
+        "title": "Nhanh Chóng & Tiện Lợi",
+        "description": "Đặt lịch chỉ trong vài giây, worker phản hồi nhanh chóng. Theo dõi tiến độ công việc realtime ngay trên ứng dụng."
+      },
+      "quality": {
+        "title": "Chất Lượng Đảm Bảo",
+        "description": "Đánh giá minh bạch từ hàng ngàn khách hàng thực. Cam kết hoàn tiền 100% nếu không hài lòng về dịch vụ."
+      }
+    },
+    "categories": {
+      "title": "Danh Mục Dịch Vụ",
+      "subtitle": "Hơn 50+ loại dịch vụ đa dạng từ sửa chữa đến chăm sóc",
+      "viewAll": "Xem Tất Cả Danh Mục",
+      "items": {
+        "homeRepair": {
+          "name": "Sửa chữa nhà",
+          "count": "2,500+ Workers"
+        },
+        "electricity": {
+          "name": "Điện - Nước",
+          "count": "1,800+ Workers"
+        },
+        "transport": {
+          "name": "Vận chuyển",
+          "count": "3,200+ Workers"
+        },
+        "housekeeping": {
+          "name": "Giúp việc",
+          "count": "4,100+ Workers"
+        },
+        "care": {
+          "name": "Chăm sóc",
+          "count": "1,600+ Workers"
+        },
+        "events": {
+          "name": "Sự kiện",
+          "count": "900+ Workers"
+        }
+      }
+    },
+    "howItWorks": {
+      "title": "Cách Thức Hoạt Động",
+      "subtitle": "Chỉ 4 bước đơn giản để có được dịch vụ hoàn hảo",
+      "finalText": "Đơn giản, nhanh chóng và hiệu quả!",
+      "steps": {
+        "step1": {
+          "title": "Đăng ký tài khoản",
+          "description": "Tạo tài khoản miễn phí chỉ trong 30 giây"
+        },
+        "step2": {
+          "title": "Tìm Worker phù hợp",
+          "description": "Duyệt qua hàng ngàn Worker với đánh giá thật"
+        },
+        "step3": {
+          "title": "Đặt lịch & Thanh toán",
+          "description": "Chọn thời gian phù hợp và thanh toán an toàn"
+        },
+        "step4": {
+          "title": "Hoàn thành công việc",
+          "description": "Worker đến đúng hẹn và hoàn thành xuất sắc"
+        }
+      }
+    },
+    "testimonials": {
+      "title": "Khách Hàng Nói Gì Về PR1AS",
+      "subtitle": "Hơn 25,000+ đánh giá 5 sao từ khách hàng hài lòng",
+      "items": {
+        "testimonial1": {
+          "name": "Nguyễn Văn A",
+          "role": "Chủ nhà",
+          "comment": "Tôi đã tìm được thợ sửa điện rất chuyên nghiệp qua PR1AS. Dịch vụ nhanh chóng và đáng tin cậy!"
+        },
+        "testimonial2": {
+          "name": "Trần Thị B",
+          "role": "Client",
+          "comment": "Nền tảng tuyệt vời! Tôi dễ dàng tìm được người giúp việc uy tín trong khu vực của mình."
+        },
+        "testimonial3": {
+          "name": "Lê Văn C",
+          "role": "Worker - Thợ điện",
+          "comment": "PR1AS giúp tôi có thêm thu nhập ổn định. Hệ thống đặt lịch rất tiện lợi và chuyên nghiệp."
+        },
+        "testimonial4": {
+          "name": "Phạm Thị D",
+          "role": "Client",
+          "comment": "An tâm khi thuê worker qua PR1AS. Đánh giá minh bạch, giá cả hợp lý!"
+        }
+      }
+    },
+    "trustBadges": {
+      "award": {
+        "title": "Giải Thưởng",
+        "description": "Top 10 Startup 2024"
+      },
+      "security": {
+        "title": "Bảo Mật",
+        "description": "Chứng nhận ISO 27001"
+      },
+      "community": {
+        "title": "Cộng Đồng",
+        "description": "25,000+ Thành Viên"
+      }
+    },
+    "cta": {
+      "title": "Sẵn Sàng Bắt Đầu?",
+      "subtitle": "Tham gia cùng hàng ngàn người dùng đã tin tưởng PR1AS. Đăng ký miễn phí ngay hôm nay!",
+      "primaryButton": "Đăng Ký Miễn Phí",
+      "secondaryButton": "Đăng Nhập",
+      "benefits": {
+        "free": "Miễn phí đăng ký",
+        "noCard": "Không cần thẻ tín dụng",
+        "cancel": "Hủy bất cứ lúc nào"
+      }
+    }
+  },
+  "worker": {
+    "dashboard": {
+      "title": "Worker",
+      "availableJobs": "Công việc có sẵn",
+      "inProgress": "Đang thực hiện",
+      "completed": "Hoàn thành",
+      "totalEarnings": "Tổng thu nhập"
+    },
+    "profile": {
+      "setupTitle": "Thiết lập hồ sơ Worker của bạn",
+      "step1Title": "Thông tin cơ bản",
+      "step1Desc": "Giới thiệu về bản thân",
+      "step2Title": "Dịch vụ & giá",
+      "step2Desc": "Thêm dịch vụ và đặt giá",
+      "submitTitle": "Gửi xét duyệt",
+      "submitDesc": "Kiểm tra và gửi",
+      "basicInfoTitle": "Thông tin cơ bản",
+      "basicInfoDesc": "Vui lòng điền thông tin cá nhân",
+      "personalInfo": "Thông tin cá nhân",
+      "aboutYou": "Về bạn",
+      "fullName": "Họ và tên",
+      "fullNameRequired": "Vui lòng nhập họ tên",
+      "fullNamePlaceholder": "Nhập họ và tên",
+      "nickname": "Biệt danh",
+      "nicknamePlaceholder": "Nhập biệt danh (không bắt buộc)",
+      "age": "Tuổi",
+      "ageRequired": "Vui lòng nhập tuổi",
+      "ageRange": "Tuổi phải từ 18 đến 100",
+      "height": "Chiều cao",
+      "weight": "Cân nặng",
+      "zodiacSign": "Cung hoàng đạo",
+      "zodiacSignPlaceholder": "Chọn cung hoàng đạo",
+      "lifestyle": "Phong cách sống",
+      "lifestylePlaceholder": "Chọn phong cách sống",
+      "personalQuote": "Câu nói yêu thích",
+      "personalQuotePlaceholder": "Một câu nói thể hiện bạn",
+      "bio": "Giới thiệu",
+      "bioPlaceholder": "Chia sẻ đôi nét về bạn...",
+      "interestsAndHobbies": "Sở thích & đam mê",
+      "addTagPlaceholder": "Thêm thẻ",
+      "basicInfoSubmit": "Lưu thông tin cơ bản",
+      "servicesAndPricingTitle": "Dịch vụ & giá",
+      "servicesAndPricingDesc": "Thêm dịch vụ bạn cung cấp và đặt giá",
+      "imagesSection": "Hình ảnh hồ sơ",
+      "avatar": "Ảnh đại diện",
+      "avatarHint": "Tải lên ảnh chuyên nghiệp của bạn",
+      "avatarRequired": "Vui lòng tải ảnh đại diện",
+      "avatarUploaded": "Tải ảnh đại diện thành công",
+      "gallery": "Thư viện ảnh",
+      "galleryHint": "Thêm nhiều ảnh để giới thiệu bản thân",
+      "imageAdded": "Thêm ảnh thành công",
+      "servicesSection": "Dịch vụ",
+      "addService": "Thêm dịch vụ",
+      "addFirstService": "Thêm dịch vụ đầu tiên",
+      "noServicesYet": "Chưa có dịch vụ nào",
+      "atLeastOneService": "Vui lòng thêm ít nhất một dịch vụ",
+      "selectService": "Chọn dịch vụ",
+      "selectServiceHint": "Chọn dịch vụ và đặt giá",
+      "service": "Dịch vụ",
+      "serviceRequired": "Vui lòng chọn dịch vụ",
+      "selectServicePlaceholder": "Tìm và chọn dịch vụ",
+      "serviceOption": "Tùy chọn dịch vụ",
+      "serviceOptionRequired": "Vui lòng chọn tùy chọn",
+      "selectOptionPlaceholder": "Chọn một tùy chọn",
+      "pricing": "Bảng giá",
+      "hourlyRate": "Giá theo giờ",
+      "hourlyRateRequired": "Vui lòng nhập giá theo giờ",
+      "hourlyRateMin": "Giá theo giờ phải từ 1 trở lên",
+      "currency": "Loại tiền",
+      "optionalDiscounts": "Giảm giá tùy chọn (cho hợp đồng dài hạn)",
+      "dailyDiscount": "Giảm giá theo ngày",
+      "weeklyDiscount": "Giảm giá theo tuần",
+      "monthlyDiscount": "Giảm giá theo tháng",
+      "pricePreview": "Xem trước giá",
+      "hourly": "Theo giờ",
+      "daily": "Theo ngày",
+      "weekly": "Theo tuần",
+      "monthly": "Theo tháng",
+      "serviceAddedSuccess": "Thêm dịch vụ thành công",
+      "serviceRemoved": "Xóa dịch vụ thành công",
+      "confirmRemoveService": "Bạn có chắc muốn xóa dịch vụ này?",
+      "readyToSubmit": "Sẵn sàng gửi!",
+      "readyToSubmitDesc": "Hồ sơ đã hoàn tất. Gửi cho admin duyệt để bắt đầu.",
+      "submitForReview": "Gửi xét duyệt",
+      "submitSuccess": "Gửi hồ sơ thành công! Chúng tôi sẽ sớm kiểm tra.",
+      "underReview": "Hồ sơ đang xét duyệt",
+      "underReviewDesc": "Hồ sơ của bạn đang được đội ngũ kiểm tra. Chúng tôi sẽ thông báo khi hoàn tất.",
+      "approved": "Hồ sơ đã duyệt",
+      "approvedDesc": "Hồ sơ đã được duyệt! Bạn có thể xuất bản ngay.",
+      "published": "Hồ sơ đã xuất bản",
+      "publishedDesc": "Hồ sơ đã hiển thị với khách hàng!",
+      "rejected": "Hồ sơ bị từ chối",
+      "rejectedDesc": "Hồ sơ bị từ chối. Vui lòng xem phản hồi và chỉnh sửa.",
+      "editProfile": "Chỉnh sửa hồ sơ",
+      "step1SaveSuccess": "Đã lưu thông tin cơ bản"
+    },
+    "lifestyle": {
+      "LIFESTYLE_ACTIVE": "Năng động",
+      "LIFESTYLE_RELAXED": "Thư thái",
+      "LIFESTYLE_ADVENTUROUS": "Ưa phiêu lưu",
+      "LIFESTYLE_HOMEBODY": "Ưa ở nhà",
+      "LIFESTYLE_SOCIAL": "Hướng ngoại",
+      "LIFESTYLE_INDEPENDENT": "Độc lập"
+    }
+  },
+  "services": {
+    "CATEGORY_HOMECARE": "Chăm sóc nhà cửa",
+    "CATEGORY_GROOMING": "Làm đẹp",
+    "CATEGORY_ASSISTANCE": "Hỗ trợ",
+    "CATEGORY_COMPANIONSHIP": "Đồng hành",
+    "SERVICE_HOMECARE_ORGANIZING": "Sắp xếp nhà cửa",
+    "SERVICE_HOMECARE_COOKING": "Nấu ăn",
+    "SERVICE_GROOMING_NAIL": "Chăm sóc móng",
+    "SERVICE_GROOMING_FACIAL": "Chăm sóc da mặt",
+    "SERVICE_GROOMING_BODY": "Chăm sóc cơ thể",
+    "SERVICE_GROOMING_HAIRCARE": "Chăm sóc tóc",
+    "SERVICE_ASSISTANCE_PERSONAL": "Trợ lý cá nhân",
+    "SERVICE_ASSISTANCE_ONSITE": "Trợ lý tại chỗ",
+    "SERVICE_ASSISTANCE_VIRTUAL": "Trợ lý online",
+    "SERVICE_ASSISTANCE_TOUR_GUIDE": "Hướng dẫn viên",
+    "SERVICE_ASSISTANCE_INTERPRETER": "Phiên dịch",
+    "SERVICE_COMPANIONSHIP_LEVEL_1": "Đồng hành - Cấp 1",
+    "SERVICE_COMPANIONSHIP_LEVEL_2": "Đồng hành - Cấp 2",
+    "SERVICE_COMPANIONSHIP_LEVEL_3": "Đồng hành - Cấp 3",
+    "options": {
+      "COOKING_VIETNAMESE": "Ẩm thực Việt",
+      "COOKING_KOREAN": "Ẩm thực Hàn",
+      "COOKING_JAPANESE": "Ẩm thực Nhật",
+      "COOKING_CHINESE": "Ẩm thực Trung",
+      "COOKING_WESTERN": "Ẩm thực Âu",
+      "HAIRCARE_NON_CHEMICAL": "Chăm tóc không hóa chất",
+      "HAIRCARE_CHEMICAL": "Chăm tóc hóa chất",
+      "INTERPRETER_VI_TO_EN": "Việt → Anh",
+      "INTERPRETER_EN_TO_VI": "Anh → Việt"
+    }
+  },
+  "client": {
+    "dashboard": {
+      "title": "Client",
+      "activeJobs": "Công việc đang hoạt động",
+      "inProgress": "Đang thực hiện",
+      "completed": "Hoàn thành",
+      "totalSpent": "Tổng chi tiêu"
+    }
+  },
+  "wallet": {
+    "title": "Ví của tôi",
+    "myWallet": "Ví của tôi",
+    "balance": {
+      "title": "Số dư ví",
+      "available": "Số dư khả dụng",
+      "pending": "Đang chờ",
+      "totalEarned": "Tổng thu nhập",
+      "totalSpent": "Tổng chi tiêu",
+      "activeEscrows": "Escrow đang hoạt động",
+      "refresh": "Làm mới",
+      "deposit": "Nạp tiền",
+      "withdraw": "Rút tiền",
+      "status": "Trạng thái",
+      "active": "Hoạt động",
+      "loading": "Đang tải...",
+      "failed": "Không thể tải ví",
+      "loginRequired": "Vui lòng đăng nhập để xem ví"
+    },
+    "transaction": {
+      "title": "Lịch sử giao dịch",
+      "refresh": "Làm mới",
+      "filterByType": "Lọc theo loại",
+      "filterByStatus": "Lọc theo trạng thái",
+      "date": "Ngày",
+      "type": "Loại",
+      "amount": "Số tiền",
+      "status": "Trạng thái",
+      "paymentMethod": "Phương thức thanh toán",
+      "description": "Mô tả",
+      "balanceAfter": "Số dư sau",
+      "total": "Tổng {count} giao dịch",
+      "failed": "Không thể tải giao dịch",
+      "types": {
+        "deposit": "Nạp tiền",
+        "withdrawal": "Rút tiền",
+        "payment": "Thanh toán",
+        "earning": "Thu nhập",
+        "platformFee": "Phí nền tảng",
+        "refund": "Hoàn tiền",
+        "escrowCreate": "Tạo Escrow",
+        "escrowRelease": "Giải phóng Escrow",
+        "withdrawalFee": "Phí rút tiền"
+      },
+      "statuses": {
+        "pending": "Đang chờ",
+        "processing": "Đang xử lý",
+        "completed": "Hoàn thành",
+        "failed": "Thất bại",
+        "cancelled": "Đã hủy"
+      }
+    },
+    "deposit": {
+      "title": "Nạp tiền",
+      "bankTransfer": "Chuyển khoản ngân hàng",
+      "paypal": "PayPal",
+      "amount": "Số tiền (USD)",
+      "amountPlaceholder": "Nhập số tiền",
+      "amountRequired": "Vui lòng nhập số tiền",
+      "minimumDeposit": "Số tiền nạp tối thiểu là $10",
+      "generateQR": "Tạo mã QR",
+      "payWithPayPal": "Thanh toán với PayPal",
+      "bankInfo": "Thông tin chuyển khoản ngân hàng",
+      "bankInfoDesc": "Bạn sẽ nhận được mã QR để quét bằng ứng dụng ngân hàng. Thanh toán được xác nhận tự động trong vài phút.",
+      "paypalInfo": "Thanh toán PayPal",
+      "paypalInfoDesc": "Bạn sẽ được chuyển hướng đến PayPal để hoàn tất thanh toán an toàn.",
+      "scanQR": "Quét mã QR để thanh toán",
+      "scanQRDesc": "Vui lòng chuyển {amount} để hoàn tất nạp tiền.",
+      "bank": "Ngân hàng",
+      "account": "Số tài khoản",
+      "transferContent": "Nội dung chuyển khoản",
+      "importantNote": "⚠️ Quan trọng: Vui lòng bao gồm chính xác nội dung chuyển khoản.",
+      "autoConfirm": "Tự động xác nhận",
+      "autoConfirmDesc": "Khoản nạp của bạn sẽ được tự động xác nhận trong vòng 1-5 phút sau khi chúng tôi nhận được chuyển khoản. Trang sẽ tự động làm mới.",
+      "close": "Đóng",
+      "completed": "Tôi đã hoàn tất chuyển khoản",
+      "qrSuccess": "Đã tạo mã QR! Vui lòng quét để hoàn tất thanh toán.",
+      "failed": "Không thể tạo yêu cầu nạp tiền"
+    },
+    "withdraw": {
+      "title": "Rút tiền",
+      "bankTransfer": "Chuyển khoản ngân hàng",
+      "paypal": "PayPal",
+      "amount": "Số tiền (USD)",
+      "amountPlaceholder": "Nhập số tiền",
+      "amountRequired": "Vui lòng nhập số tiền",
+      "minimumWithdraw": "Số tiền rút tối thiểu là $50",
+      "bankName": "Tên ngân hàng",
+      "bankNamePlaceholder": "vd: Vietcombank, BIDV, Techcombank",
+      "bankNameRequired": "Vui lòng nhập tên ngân hàng",
+      "accountNumber": "Số tài khoản ngân hàng",
+      "accountNumberPlaceholder": "Nhập số tài khoản của bạn",
+      "accountNumberRequired": "Vui lòng nhập số tài khoản",
+      "accountNumberInvalid": "Số tài khoản chỉ được chứa chữ số",
+      "accountHolder": "Tên chủ tài khoản",
+      "accountHolderPlaceholder": "Nhập họ tên đầy đủ như trên tài khoản ngân hàng",
+      "accountHolderRequired": "Vui lòng nhập tên chủ tài khoản",
+      "paypalEmail": "Email PayPal",
+      "paypalEmailPlaceholder": "your.email@example.com",
+      "paypalEmailRequired": "Vui lòng nhập email PayPal",
+      "paypalEmailInvalid": "Vui lòng nhập email hợp lệ",
+      "bankInfo": "Rút tiền qua chuyển khoản ngân hàng",
+      "bankInfoDesc": "Yêu cầu rút tiền sẽ được xử lý trong vòng 1-3 ngày làm việc. Đảm bảo thông tin ngân hàng của bạn chính xác.",
+      "paypalInfo": "Rút tiền qua PayPal",
+      "paypalInfoDesc": "Khoản rút sẽ được gửi đến tài khoản PayPal của bạn trong vòng 1-2 ngày làm việc. Đảm bảo email PayPal chính xác.",
+      "cancel": "Hủy",
+      "submit": "Gửi yêu cầu rút tiền",
+      "success": "Yêu cầu rút tiền đã được gửi thành công!",
+      "failed": "Không thể xử lý yêu cầu rút tiền"
+    },
+    "worker": {
+      "earnings": "💰 Thu nhập của bạn",
+      "earningsInfo": {
+        "withdraw": "💸 Rút tiền: Chuyển thu nhập của bạn vào tài khoản ngân hàng",
+        "protected": "🔒 Được bảo vệ: Tất cả thanh toán được giữ trong escrow để đảm bảo an toàn",
+        "fast": "⚡ Nhanh chóng: Rút tiền được xử lý trong vòng 1-3 ngày làm việc",
+        "track": "📊 Theo dõi: Xem tất cả thu nhập và lịch sử giao dịch của bạn"
+      }
+    }
+  },
+  "admin": {
+    "sidebar": {
+      "dashboard": "Bảng điều khiển",
+      "seo": "Cài đặt SEO",
+      "content": "Quản lý nội dung",
+      "pages": "Trang",
+      "categories": "Danh mục",
+      "users": "Quản lý người dùng",
+      "settings": "Cài đặt"
+    },
+    "dashboard": {
+      "title": "Bảng điều khiển",
+      "totalUsers": "Tổng người dùng",
+      "activeWorkers": "Worker hoạt động",
+      "totalJobs": "Tổng công việc",
+      "revenue": "Doanh thu"
+    },
+    "seo": {
+      "title": "Cài đặt SEO & Website",
+      "subtitle": "Cấu hình SEO metadata, header và footer cho website của bạn",
+      "saveButton": "Lưu tất cả cài đặt",
+      "saveSuccess": "Lưu cài đặt SEO thành công!",
+      "saveFailed": "Không thể lưu cài đặt",
+      "tabs": {
+        "general": "SEO Chung",
+        "header": "Cài đặt Header",
+        "footer": "Cài đặt Footer"
+      },
+      "fields": {
+        "siteName": "Tên website",
+        "siteTitle": "Tiêu đề website",
+        "siteDescription": "Mô tả website",
+        "siteKeywords": "Từ khóa (phân cách bằng dấu phẩy)",
+        "ogImage": "URL hình ảnh Open Graph",
+        "headerLogo": "URL Logo",
+        "headerTagline": "Tagline",
+        "headerContactPhone": "Số điện thoại liên hệ",
+        "headerContactEmail": "Email liên hệ",
+        "footerCompanyName": "Tên công ty",
+        "footerAddress": "Địa chỉ",
+        "footerPhone": "Số điện thoại",
+        "footerEmail": "Email",
+        "footerAbout": "Giới thiệu",
+        "footerCopyright": "Bản quyền",
+        "socialMedia": "Liên kết mạng xã hội",
+        "facebookUrl": "URL Facebook",
+        "twitterUrl": "URL Twitter",
+        "instagramUrl": "URL Instagram",
+        "linkedinUrl": "URL LinkedIn"
+      },
+      "placeholders": {
+        "siteName": "PR1AS",
+        "siteTitle": "PR1AS - Nền tảng kết nối Client & Worker",
+        "siteDescription": "Tìm kiếm và thuê Worker chuyên nghiệp...",
+        "siteKeywords": "worker, client, dịch vụ, tìm việc, thuê người",
+        "headerTagline": "Kết nối. Làm việc. Thành công.",
+        "footerAddress": "123 Đường ABC, Thành phố XYZ",
+        "footerAbout": "Mô tả ngắn về công ty của bạn...",
+        "footerCopyright": "© 2024 PR1AS. Bảo lưu mọi quyền."
+      }
+    },
+    "users": {
+      "title": "Quản lý người dùng",
+      "searchUsers": "Tìm kiếm người dùng...",
+      "allUsers": "Tất cả người dùng",
+      "pendingWorkers": "Worker chờ duyệt",
+      "allRoles": "Tất cả vai trò",
+      "total": "Tổng",
+      "users": "người dùng",
+      "pendingApplications": "đơn chờ duyệt",
+      "user": "Người dùng",
+      "worker": "Worker",
+      "role": "Vai trò",
+      "status": "Trạng thái",
+      "createdAt": "Ngày tạo",
+      "actions": "Thao tác",
+      "active": "Hoạt động",
+      "banned": "Đã khóa",
+      "ban": "Khóa",
+      "unban": "Mở khóa",
+      "delete": "Xóa",
+      "approve": "Duyệt",
+      "reject": "Từ chối",
+      "bio": "Giới thiệu",
+      "info": "Thông tin",
+      "basicInfo": "Thông tin cơ bản",
+      "skills": "Kỹ năng",
+      "hourlyRate": "Giá theo giờ",
+      "appliedAt": "Ngày nộp đơn",
+      "viewDetails": "Xem chi tiết",
+      "workerDetails": "Chi tiết hồ sơ Worker",
+      "fullName": "Họ và tên",
+      "email": "Email",
+      "nickname": "Biệt danh",
+      "age": "Tuổi",
+      "height": "Chiều cao",
+      "weight": "Cân nặng",
+      "zodiacSign": "Cung hoàng đạo",
+      "lifestyle": "Lối sống",
+      "personalQuote": "Câu nói cá nhân",
+      "userProfile": "Hồ sơ người dùng",
+      "images": "Hình ảnh",
+      "notApproved": "Chưa duyệt",
+      "servicesAndPricing": "Dịch vụ & Giá cả",
+      "pricing": "Giá",
+      "primaryCurrency": "Tiền tệ chính",
+      "banUser": "Khóa người dùng",
+      "banUserConfirm": "Bạn có chắc muốn khóa",
+      "yesBan": "Có, khóa",
+      "deleteUser": "Xóa người dùng",
+      "deleteUserConfirm": "Bạn có chắc muốn xóa vĩnh viễn",
+      "deleteUserWarning": "Hành động này không thể hoàn tác.",
+      "yesDelete": "Có, xóa",
+      "rejectWorker": "Từ chối đơn Worker",
+      "rejectWorkerConfirm": "Bạn có chắc muốn từ chối đơn của",
+      "yesReject": "Có, từ chối"
+    }
+  },
+  "upload": {
+    "image": {
+      "button": {
+        "upload": "Tải ảnh lên",
+        "change": "Thay đổi ảnh",
+        "delete": "Xóa",
+        "choose": "Chọn ảnh"
+      },
+      "messages": {
+        "uploadSuccess": "Tải ảnh lên thành công!",
+        "uploadFailed": "Tải ảnh lên thất bại",
+        "deleteSuccess": "Xóa ảnh thành công!",
+        "deleteFailed": "Xóa ảnh thất bại",
+        "invalidType": "Chỉ hỗ trợ định dạng JPEG, PNG, WebP và GIF.",
+        "fileTooLarge": "Kích thước file không được vượt quá 5MB.",
+        "uploadError": "Có lỗi xảy ra khi tải ảnh lên",
+        "deleteError": "Có lỗi xảy ra khi xóa ảnh"
+      },
+      "labels": {
+        "avatar": "Ảnh đại diện",
+        "general": "Hình ảnh",
+        "product": "Ảnh sản phẩm"
+      }
+    }
+  },
+  "errors": {
+    "404": {
+      "title": "404",
+      "subtitle": "Xin lỗi, trang bạn tìm kiếm không tồn tại.",
+      "button": "Về trang chủ"
+    },
+    "500": {
+      "title": "Có lỗi xảy ra",
+      "subtitle": "Xin lỗi, đã có lỗi xảy ra. Vui lòng thử lại.",
+      "button": "Thử lại"
+    }
+  },
+  "market": {
+    "title": "Chợ Worker",
+    "subtitle": "Khám phá và kết nối với hàng ngàn worker chuyên nghiệp",
+    "searchPlaceholder": "Tìm kiếm worker theo tên...",
+    "search": "Tìm kiếm",
+    "filters": "Bộ lọc",
+    "applyFilters": "Áp dụng bộ lọc",
+    "resetFilters": "Đặt lại bộ lọc",
+    "resultsCount": "{count} worker tìm thấy",
+    "noWorkers": "Không tìm thấy worker nào phù hợp",
+    "ageRange": "Độ tuổi",
+    "years": "tuổi",
+    "yearsOld": "tuổi",
+    "min": "Tối thiểu",
+    "max": "Tối đa",
+    "category": "Danh mục dịch vụ",
+    "selectCategory": "Chọn danh mục",
+    "service": "Dịch vụ",
+    "selectService": "Chọn dịch vụ cụ thể",
+    "priceRange": "Khoảng giá (USD/giờ)",
+    "priceNotSet": "Giá chưa thiết lập",
+    "available": "Sẵn sàng",
+    "services": "Dịch vụ",
+    "more": "thêm",
+    "viewProfile": "Xem hồ sơ",
+    "pagination": "Hiển thị {start} - {end} trên tổng {total} worker"
+  }
+}

@@ -1,0 +1,744 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "success": "Success",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "search": "Search",
+    "filter": "Filter",
+    "back": "Back",
+    "continue": "Continue",
+    "next": "Next",
+    "previous": "Previous",
+    "submit": "Submit",
+    "saveAndContinue": "Save & Continue",
+    "add": "Add",
+    "remove": "Remove",
+    "yes": "Yes",
+    "no": "No",
+    "close": "Close",
+    "homeButton": "Back to Home",
+    "backToDashboard": "Back to Dashboard"
+  },
+  "nav": {
+    "home": "Home",
+    "about": "About",
+    "contact": "Contact",
+    "login": "Login",
+    "signup": "Sign Up",
+    "logout": "Logout",
+    "profile": "Profile",
+    "settings": "Settings",
+    "becomeWorker": "Become a Worker"
+  },
+  "header": {
+    "brandName": "PR1AS",
+    "becomeWorker": "Become a Worker",
+    "userMenu": {
+      "profile": "My Profile",
+      "bookings": "Bookings",
+      "logout": "Logout",
+      "dashboard": "Dashboard",
+      "adminDashboard": "Admin Dashboard",
+      "workerDashboard": "Worker Dashboard",
+      "myJobs": "My Jobs",
+      "myWork": "My Work",
+      "settings": "Settings",
+      "user": "User",
+      "roles": {
+        "client": "Client",
+        "worker": "Worker",
+        "admin": "Administrator"
+      },
+      "logoutSuccess": "Logged out successfully",
+      "logoutError": "Error occurred during logout"
+    },
+    "menu": "Menu",
+    "login": "Log In",
+    "signup": "Sign Up"
+  },
+  "auth": {
+    "login": {
+      "title": "Welcome Back",
+      "subtitle": "Sign in to continue to PR1AS",
+      "continueWithGoogle": "Continue with Google",
+      "orLoginWithEmail": "or sign in with email",
+      "emailPlaceholder": "Enter your email",
+      "passwordPlaceholder": "Enter your password",
+      "emailRequired": "Please enter your email",
+      "emailInvalid": "Please enter a valid email",
+      "passwordRequired": "Please enter your password",
+      "forgotPassword": "Forgot password?",
+      "loginButton": "Sign In",
+      "noAccount": "Don't have an account?",
+      "signupLink": "Sign up now",
+      "loginSuccess": "Login successful!",
+      "googleLoginComingSoon": "Google login coming soon!"
+    },
+    "signup": {
+      "title": "Create Account",
+      "subtitle": "Join PR1AS community today",
+      "selectRole": "I want to:",
+      "clientRole": "Client - Find Services",
+      "clientDescription": "Find and hire workers for your tasks",
+      "workerRole": "Worker - Provide Services",
+      "workerDescription": "Provide services and earn income",
+      "continueWithGoogle": "Sign up with Google",
+      "orSignupWithEmail": "or sign up with email",
+      "namePlaceholder": "Enter your full name",
+      "emailPlaceholder": "Enter your email",
+      "passwordPlaceholder": "Create a password (min 6 characters)",
+      "nameRequired": "Please enter your full name",
+      "emailRequired": "Please enter your email",
+      "emailInvalid": "Please enter a valid email",
+      "passwordRequired": "Please enter your password",
+      "passwordMinLength": "Password must be at least 6 characters",
+      "signupButton": "Create Account",
+      "haveAccount": "Already have an account?",
+      "loginLink": "Sign in",
+      "signupSuccess": "Account created successfully!",
+      "googleSignupComingSoon": "Google signup coming soon!"
+    }
+  },
+  "footer": {
+    "about": {
+      "title": "About",
+      "aboutUs": "About Us",
+      "careers": "Careers",
+      "press": "Press",
+      "blog": "Blog"
+    },
+    "community": {
+      "title": "Community",
+      "diversity": "Diversity & Inclusion",
+      "accessibility": "Accessibility",
+      "partners": "Partners",
+      "safety": "Safety"
+    },
+    "worker": {
+      "title": "Worker",
+      "become": "Become a Worker",
+      "help": "Help Center",
+      "resources": "Resources",
+      "forum": "Forum"
+    },
+    "support": {
+      "title": "Support",
+      "helpCenter": "Help Center",
+      "cancellation": "Cancellation Policy",
+      "contact": "Contact",
+      "faq": "FAQ"
+    },
+    "copyright": "© 2025 PR1AS",
+    "terms": "Terms",
+    "privacy": "Privacy",
+    "sitemap": "Sitemap"
+  },
+  "home": {
+    "hero": {
+      "slide1": {
+        "title": "Find Professional Workers",
+        "description": "Connect with thousands of verified and highly-rated workers in your area",
+        "primaryCTA": "Find Worker Now",
+        "secondaryCTA": "Become a Worker"
+      },
+      "slide2": {
+        "title": "Safe & Reliable",
+        "description": "All workers are identity-verified with real customer reviews",
+        "primaryCTA": "Explore Now"
+      },
+      "slide3": {
+        "title": "Fast & Convenient",
+        "description": "Book online, easy payment, track progress anytime, anywhere",
+        "primaryCTA": "Get Started"
+      }
+    },
+    "statistics": {
+      "workers": "Active Workers",
+      "jobs": "Completed Jobs",
+      "clients": "Happy Clients",
+      "rating": "Average Rating"
+    },
+    "features": {
+      "title": "Why Choose PR1AS?",
+      "subtitle": "Leading platform with superior features",
+      "safety": {
+        "title": "Absolute Safety",
+        "description": "All workers are identity-verified, background-checked and strictly rated. Secure payment system with safe escrow mechanism."
+      },
+      "speed": {
+        "title": "Fast & Convenient",
+        "description": "Book in seconds, workers respond quickly. Track work progress in real-time on the app."
+      },
+      "quality": {
+        "title": "Quality Guaranteed",
+        "description": "Transparent reviews from thousands of real customers. 100% money-back guarantee if not satisfied."
+      }
+    },
+    "categories": {
+      "title": "Service Categories",
+      "subtitle": "Over 50+ diverse services from repairs to care",
+      "viewAll": "View All Categories",
+      "items": {
+        "homeRepair": {
+          "name": "Home Repair",
+          "count": "2,500+ Workers"
+        },
+        "electricity": {
+          "name": "Electricit",
+          "count": "1,800+ Workers"
+        },
+        "transport": {
+          "name": "Transportation",
+          "count": "3,200+ Workers"
+        },
+        "housekeeping": {
+          "name": "Housekeeping",
+          "count": "4,100+ Workers"
+        },
+        "care": {
+          "name": "Care Services",
+          "count": "1,600+ Workers"
+        },
+        "events": {
+          "name": "Events",
+          "count": "900+ Workers"
+        }
+      }
+    },
+    "howItWorks": {
+      "title": "How It Works",
+      "subtitle": "Just 4 simple steps to get perfect service",
+      "finalText": "Simple, fast and efficient!",
+      "steps": {
+        "step1": {
+          "title": "Create Account",
+          "description": "Create a free account in just 30 seconds"
+        },
+        "step2": {
+          "title": "Find Right Worker",
+          "description": "Browse thousands of workers with real reviews"
+        },
+        "step3": {
+          "title": "Book & Pay",
+          "description": "Choose suitable time and pay securely"
+        },
+        "step4": {
+          "title": "Job Completed",
+          "description": "Worker arrives on time and completes excellently"
+        }
+      }
+    },
+    "testimonials": {
+      "title": "What Customers Say About PR1AS",
+      "subtitle": "Over 25,000+ 5-star reviews from satisfied customers",
+      "items": {
+        "testimonial1": {
+          "name": "John Smith",
+          "role": "Homeowner",
+          "comment": "I found a very professional electrician through PR1AS. Fast and reliable service!"
+        },
+        "testimonial2": {
+          "name": "Mary Johnson",
+          "role": "Client",
+          "comment": "Excellent platform! I easily found a reliable housekeeper in my area."
+        },
+        "testimonial3": {
+          "name": "Robert Wilson",
+          "role": "Worker - Electrician",
+          "comment": "PR1AS helps me earn a stable income. The booking system is very convenient and professional."
+        },
+        "testimonial4": {
+          "name": "Sarah Davis",
+          "role": "Client",
+          "comment": "Peace of mind when hiring workers through PR1AS. Transparent reviews and fair prices!"
+        }
+      }
+    },
+    "trustBadges": {
+      "award": {
+        "title": "Awards",
+        "description": "Top 10 Startup 2024"
+      },
+      "security": {
+        "title": "Security",
+        "description": "ISO 27001 Certified"
+      },
+      "community": {
+        "title": "Community",
+        "description": "25,000+ Members"
+      }
+    },
+    "cta": {
+      "title": "Ready to Get Started?",
+      "subtitle": "Join thousands of users who trust PR1AS. Sign up for free today!",
+      "primaryButton": "Sign Up Free",
+      "secondaryButton": "Log In",
+      "benefits": {
+        "free": "Free registration",
+        "noCard": "No credit card required",
+        "cancel": "Cancel anytime"
+      }
+    }
+  },
+  "worker": {
+    "dashboard": {
+      "title": "Worker Dashboard",
+      "availableJobs": "Available Jobs",
+      "inProgress": "In Progress",
+      "completed": "Completed",
+      "totalEarnings": "Total Earnings"
+    },
+    "profile": {
+      "setupTitle": "Setup Your Worker Profile",
+      "step1Title": "Basic Information",
+      "step1Desc": "Tell us about yourself",
+      "step2Title": "Services & Pricing",
+      "step2Desc": "Add services and set prices",
+      "submitTitle": "Submit for Review",
+      "submitDesc": "Review and submit",
+      "basicInfoTitle": "Basic Information",
+      "basicInfoDesc": "Please fill in your personal information",
+      "personalInfo": "Personal Information",
+      "aboutYou": "About You",
+      "fullName": "Full Name",
+      "fullNameRequired": "Full name is required",
+      "fullNamePlaceholder": "Enter your full name",
+      "nickname": "Nickname",
+      "nicknamePlaceholder": "Enter a nickname (optional)",
+      "age": "Age",
+      "ageRequired": "Age is required",
+      "ageRange": "Age must be between 18 and 100",
+      "height": "Height",
+      "weight": "Weight",
+      "zodiacSign": "Zodiac Sign",
+      "zodiacSignPlaceholder": "Select your zodiac sign",
+      "lifestyle": "Lifestyle",
+      "lifestylePlaceholder": "Select your lifestyle",
+      "personalQuote": "Personal Quote",
+      "personalQuotePlaceholder": "A quote that represents you",
+      "bio": "Bio",
+      "bioPlaceholder": "Tell us about yourself...",
+      "interestsAndHobbies": "Interests & Hobbies",
+      "addTagPlaceholder": "Add a tag",
+      "basicInfoSubmit": "Save basic information",
+      "servicesAndPricingTitle": "Services & Pricing",
+      "servicesAndPricingDesc": "Add services you offer and set your prices",
+      "imagesSection": "Profile Images",
+      "avatar": "Avatar",
+      "avatarHint": "Upload a professional photo of yourself",
+      "avatarRequired": "Avatar is required",
+      "avatarUploaded": "Avatar uploaded successfully",
+      "gallery": "Gallery",
+      "galleryHint": "Add more photos to showcase yourself",
+      "imageAdded": "Image added successfully",
+      "servicesSection": "Services",
+      "addService": "Add Service",
+      "addFirstService": "Add Your First Service",
+      "noServicesYet": "No services added yet",
+      "atLeastOneService": "Please add at least one service",
+      "selectService": "Select a Service",
+      "selectServiceHint": "Choose a service and set your price",
+      "service": "Service",
+      "serviceRequired": "Please select a service",
+      "selectServicePlaceholder": "Search and select a service",
+      "serviceOption": "Service Option",
+      "serviceOptionRequired": "Please select an option",
+      "selectOptionPlaceholder": "Select an option",
+      "pricing": "Pricing",
+      "hourlyRate": "Hourly Rate",
+      "hourlyRateRequired": "Hourly rate is required",
+      "hourlyRateMin": "Hourly rate must be at least 1",
+      "currency": "Currency",
+      "optionalDiscounts": "Optional Discounts (for long-term bookings)",
+      "dailyDiscount": "Daily Discount",
+      "weeklyDiscount": "Weekly Discount",
+      "monthlyDiscount": "Monthly Discount",
+      "pricePreview": "Price Preview",
+      "hourly": "Hourly",
+      "daily": "Daily",
+      "weekly": "Weekly",
+      "monthly": "Monthly",
+      "serviceAddedSuccess": "Service added successfully",
+      "serviceRemoved": "Service removed successfully",
+      "confirmRemoveService": "Are you sure you want to remove this service?",
+      "readyToSubmit": "Ready to Submit!",
+      "readyToSubmitDesc": "Your profile is complete. Submit it for admin review to get started.",
+      "submitForReview": "Submit for Review",
+      "submitSuccess": "Profile submitted successfully! We'll review it soon.",
+      "underReview": "Profile Under Review",
+      "underReviewDesc": "Your profile is being reviewed by our team. We'll notify you once it's approved.",
+      "approved": "Profile Approved",
+      "approvedDesc": "Your profile has been approved! You can now publish it.",
+      "published": "Profile Published",
+      "publishedDesc": "Your profile is live and visible to clients!",
+      "rejected": "Profile Rejected",
+      "rejectedDesc": "Your profile was rejected. Please review the feedback and make necessary changes.",
+      "editProfile": "Edit Profile",
+      "step1SaveSuccess": "Basic information saved successfully"
+    },
+    "lifestyle": {
+      "LIFESTYLE_ACTIVE": "Active",
+      "LIFESTYLE_RELAXED": "Relaxed",
+      "LIFESTYLE_ADVENTUROUS": "Adventurous",
+      "LIFESTYLE_HOMEBODY": "Homebody",
+      "LIFESTYLE_SOCIAL": "Social",
+      "LIFESTYLE_INDEPENDENT": "Independent"
+    }
+  },
+  "services": {
+    "CATEGORY_HOMECARE": "Homecare",
+    "CATEGORY_GROOMING": "Grooming",
+    "CATEGORY_ASSISTANCE": "Assistance",
+    "CATEGORY_COMPANIONSHIP": "Companionship",
+    "SERVICE_HOMECARE_ORGANIZING": "Home Organizing",
+    "SERVICE_HOMECARE_COOKING": "Cooking",
+    "SERVICE_GROOMING_NAIL": "Nail Care",
+    "SERVICE_GROOMING_FACIAL": "Facial Care",
+    "SERVICE_GROOMING_BODY": "Body Care",
+    "SERVICE_GROOMING_HAIRCARE": "Hair Care",
+    "SERVICE_ASSISTANCE_PERSONAL": "Personal Assistant",
+    "SERVICE_ASSISTANCE_ONSITE": "On-site Assistant",
+    "SERVICE_ASSISTANCE_VIRTUAL": "Virtual Assistant",
+    "SERVICE_ASSISTANCE_TOUR_GUIDE": "Tour Guide",
+    "SERVICE_ASSISTANCE_INTERPRETER": "Interpreter",
+    "SERVICE_COMPANIONSHIP_LEVEL_1": "Companionship - Level 1",
+    "SERVICE_COMPANIONSHIP_LEVEL_2": "Companionship - Level 2",
+    "SERVICE_COMPANIONSHIP_LEVEL_3": "Companionship - Level 3",
+    "options": {
+      "COOKING_VIETNAMESE": "Vietnamese Cuisine",
+      "COOKING_KOREAN": "Korean Cuisine",
+      "COOKING_JAPANESE": "Japanese Cuisine",
+      "COOKING_CHINESE": "Chinese Cuisine",
+      "COOKING_WESTERN": "Western Cuisine",
+      "HAIRCARE_NON_CHEMICAL": "Non-chemical Hair Care",
+      "HAIRCARE_CHEMICAL": "Chemical Hair Care",
+      "INTERPRETER_VI_TO_EN": "Vietnamese → English",
+      "INTERPRETER_EN_TO_VI": "English → Vietnamese"
+    }
+  },
+  "client": {
+    "dashboard": {
+      "title": "Client Dashboard",
+      "activeJobs": "Active Jobs",
+      "inProgress": "In Progress",
+      "completed": "Completed",
+      "totalSpent": "Total Spent"
+    }
+  },
+  "wallet": {
+    "title": "My Wallet",
+    "myWallet": "My Wallet",
+    "balance": {
+      "title": "Wallet Balance",
+      "available": "Available Balance",
+      "pending": "Pending",
+      "totalEarned": "Total Earned",
+      "totalSpent": "Total Spent",
+      "activeEscrows": "Active Escrows",
+      "refresh": "Refresh",
+      "deposit": "Deposit",
+      "withdraw": "Withdraw",
+      "status": "Status",
+      "active": "Active",
+      "loading": "Loading...",
+      "failed": "Failed to load wallet",
+      "loginRequired": "Please login to view your wallet"
+    },
+    "transaction": {
+      "title": "Transaction History",
+      "refresh": "Refresh",
+      "filterByType": "Filter by type",
+      "filterByStatus": "Filter by status",
+      "date": "Date",
+      "type": "Type",
+      "amount": "Amount",
+      "status": "Status",
+      "paymentMethod": "Payment Method",
+      "description": "Description",
+      "balanceAfter": "Balance After",
+      "total": "Total {count} transactions",
+      "failed": "Failed to load transactions",
+      "types": {
+        "deposit": "Deposit",
+        "withdrawal": "Withdrawal",
+        "payment": "Payment",
+        "earning": "Earning",
+        "platformFee": "Platform Fee",
+        "refund": "Refund",
+        "escrowCreate": "Escrow Create",
+        "escrowRelease": "Escrow Release",
+        "withdrawalFee": "Withdrawal Fee"
+      },
+      "statuses": {
+        "pending": "Pending",
+        "processing": "Processing",
+        "completed": "Completed",
+        "failed": "Failed",
+        "cancelled": "Cancelled"
+      }
+    },
+    "deposit": {
+      "title": "Deposit Money",
+      "bankTransfer": "Bank Transfer",
+      "paypal": "PayPal",
+      "amount": "Amount (USD)",
+      "amountPlaceholder": "Enter amount",
+      "amountRequired": "Please enter amount",
+      "minimumDeposit": "Minimum deposit is $10",
+      "generateQR": "Generate QR Code",
+      "payWithPayPal": "Pay with PayPal",
+      "bankInfo": "Bank Transfer via QR Code",
+      "bankInfoDesc": "You will receive a QR code to scan with your banking app. Payment is confirmed automatically within minutes.",
+      "paypalInfo": "PayPal Payment",
+      "paypalInfoDesc": "You will be redirected to PayPal to complete your payment securely.",
+      "scanQR": "Scan QR Code to Pay",
+      "scanQRDesc": "Please transfer {amount} to complete your deposit.",
+      "bank": "Bank",
+      "account": "Account",
+      "transferContent": "Transfer Content",
+      "importantNote": "⚠️ Important: Please include the transfer content exactly as shown above.",
+      "autoConfirm": "Auto-confirmation",
+      "autoConfirmDesc": "Your deposit will be automatically confirmed within 1-5 minutes after we receive your transfer. The page will refresh automatically.",
+      "close": "Close",
+      "completed": "I've Completed the Transfer",
+      "qrSuccess": "QR code generated! Please scan to complete payment.",
+      "failed": "Failed to create deposit"
+    },
+    "withdraw": {
+      "title": "Withdraw Money",
+      "bankTransfer": "Bank Transfer",
+      "paypal": "PayPal",
+      "amount": "Amount (USD)",
+      "amountPlaceholder": "Enter amount",
+      "amountRequired": "Please enter amount",
+      "minimumWithdraw": "Minimum withdrawal is $50",
+      "bankName": "Bank Name",
+      "bankNamePlaceholder": "e.g., Vietcombank, BIDV, Techcombank",
+      "bankNameRequired": "Please enter bank name",
+      "accountNumber": "Bank Account Number",
+      "accountNumberPlaceholder": "Enter your account number",
+      "accountNumberRequired": "Please enter account number",
+      "accountNumberInvalid": "Account number must contain only digits",
+      "accountHolder": "Account Holder Name",
+      "accountHolderPlaceholder": "Enter full name as shown on bank account",
+      "accountHolderRequired": "Please enter account holder name",
+      "paypalEmail": "PayPal Email",
+      "paypalEmailPlaceholder": "your.email@example.com",
+      "paypalEmailRequired": "Please enter PayPal email",
+      "paypalEmailInvalid": "Please enter a valid email",
+      "bankInfo": "Bank Transfer Withdrawal",
+      "bankInfoDesc": "Your withdrawal will be processed within 1-3 business days. Make sure your bank details are correct.",
+      "paypalInfo": "PayPal Withdrawal",
+      "paypalInfoDesc": "Your withdrawal will be sent to your PayPal account within 1-2 business days. Make sure your PayPal email is correct.",
+      "cancel": "Cancel",
+      "submit": "Submit Withdrawal Request",
+      "success": "Withdrawal request submitted successfully!",
+      "failed": "Failed to process withdrawal"
+    },
+    "worker": {
+      "earnings": "💰 Your Earnings",
+      "earningsInfo": {
+        "withdraw": "💸 Withdraw: Transfer your earnings to your bank account",
+        "protected": "🔒 Protected: All payments are held in escrow for your safety",
+        "fast": "⚡ Fast: Withdrawals processed within 1-3 business days",
+        "track": "📊 Track: View all your earnings and transaction history"
+      }
+    }
+  },
+  "banned": {
+    "title": "Account Suspended",
+    "description": "Your account has been suspended due to violation of our",
+    "termsLink": "Terms of Service",
+    "or": "or",
+    "guidelinesLink": "Community Guidelines",
+    "ofUs": ".",
+    "whyTitle": "Why was my account suspended?",
+    "whyDescription": "Accounts may be suspended for the following reasons:",
+    "reasons": {
+      "payment": "Payment policy violations",
+      "fraud": "Fraudulent or deceptive behavior",
+      "complaints": "Multiple complaints from other users",
+      "terms": "Violation of terms of service"
+    },
+    "contactText": "If you believe this is a mistake or need more information, please contact our support team.",
+    "contactButton": "Contact Support",
+    "homeButton": "Go to Home",
+    "supportEmail": "Support Email:"
+  },
+  "admin": {
+    "sidebar": {
+      "dashboard": "Dashboard",
+      "seo": "SEO Settings",
+      "content": "Content Management",
+      "pages": "Pages",
+      "categories": "Categories",
+      "users": "User Management",
+      "settings": "Settings"
+    },
+    "dashboard": {
+      "title": "Dashboard",
+      "totalUsers": "Total Users",
+      "activeWorkers": "Active Workers",
+      "totalJobs": "Total Jobs",
+      "revenue": "Revenue"
+    },
+    "seo": {
+      "title": "SEO & Site Settings",
+      "subtitle": "Configure SEO metadata, header, and footer settings for your website",
+      "saveButton": "Save All Settings",
+      "saveSuccess": "SEO settings saved successfully!",
+      "saveFailed": "Failed to save settings",
+      "tabs": {
+        "general": "General SEO",
+        "header": "Header Settings",
+        "footer": "Footer Settings"
+      },
+      "fields": {
+        "siteName": "Site Name",
+        "siteTitle": "Site Title",
+        "siteDescription": "Site Description",
+        "siteKeywords": "Keywords (comma separated)",
+        "ogImage": "Open Graph Image URL",
+        "headerLogo": "Logo URL",
+        "headerTagline": "Tagline",
+        "headerContactPhone": "Contact Phone",
+        "headerContactEmail": "Contact Email",
+        "footerCompanyName": "Company Name",
+        "footerAddress": "Address",
+        "footerPhone": "Phone",
+        "footerEmail": "Email",
+        "footerAbout": "About Text",
+        "footerCopyright": "Copyright Text",
+        "socialMedia": "Social Media Links",
+        "facebookUrl": "Facebook URL",
+        "twitterUrl": "Twitter URL",
+        "instagramUrl": "Instagram URL",
+        "linkedinUrl": "LinkedIn URL"
+      },
+      "placeholders": {
+        "siteName": "PR1AS",
+        "siteTitle": "PR1AS - Nền tảng kết nối Client & Worker",
+        "siteDescription": "Tìm kiếm và thuê Worker chuyên nghiệp...",
+        "siteKeywords": "worker, client, dịch vụ, tìm việc, thuê người",
+        "headerTagline": "Connect. Work. Succeed.",
+        "footerAddress": "123 Street, City, Country",
+        "footerAbout": "Short description about your company...",
+        "footerCopyright": "© 2024 PR1AS. All rights reserved."
+      }
+    },
+    "users": {
+      "title": "User Management",
+      "searchPlaceholder": "Search users...",
+      "allRoles": "All Roles",
+      "actions": {
+        "edit": "Edit",
+        "ban": "Ban",
+        "unban": "Unban",
+        "delete": "Delete",
+        "refresh": "Refresh"
+      },
+      "columns": {
+        "user": "User",
+        "role": "Role",
+        "status": "Status",
+        "createdAt": "Created At",
+        "actions": "Actions"
+      },
+      "status": {
+        "active": "Active",
+        "banned": "Banned"
+      },
+      "confirmBan": {
+        "title": "Ban User",
+        "content": "Are you sure you want to ban {email}?",
+        "okText": "Yes, Ban",
+        "cancelText": "Cancel"
+      },
+      "confirmDelete": {
+        "title": "Delete User",
+        "content": "Are you sure you want to permanently delete {email}? This action cannot be undone.",
+        "okText": "Yes, Delete",
+        "cancelText": "Cancel"
+      },
+      "messages": {
+        "loadFailed": "Failed to load users",
+        "banSuccess": "User banned successfully",
+        "banFailed": "Failed to ban user",
+        "unbanSuccess": "User unbanned successfully",
+        "unbanFailed": "Failed to unban user",
+        "deleteSuccess": "User deleted successfully",
+        "deleteFailed": "Failed to delete user",
+        "editComingSoon": "Edit feature coming soon"
+      }
+    }
+  },
+  "upload": {
+    "image": {
+      "button": {
+        "upload": "Upload Image",
+        "change": "Change Image",
+        "delete": "Delete",
+        "choose": "Choose Image"
+      },
+      "messages": {
+        "uploadSuccess": "Image uploaded successfully!",
+        "uploadFailed": "Failed to upload image",
+        "deleteSuccess": "Image deleted successfully!",
+        "deleteFailed": "Failed to delete image",
+        "invalidType": "Only JPEG, PNG, WebP, and GIF formats are supported.",
+        "fileTooLarge": "File size must not exceed 5MB.",
+        "uploadError": "An error occurred while uploading the image",
+        "deleteError": "An error occurred while deleting the image"
+      },
+      "labels": {
+        "avatar": "Avatar",
+        "general": "Image",
+        "product": "Product Image"
+      }
+    }
+  },
+  "errors": {
+    "404": {
+      "title": "404",
+      "subtitle": "Sorry, the page you are looking for does not exist.",
+      "button": "Go to Home"
+    },
+    "500": {
+      "title": "Something went wrong",
+      "subtitle": "Sorry, an error occurred. Please try again.",
+      "button": "Try Again"
+    }
+  },
+  "market": {
+    "title": "Worker Marketplace",
+    "subtitle": "Discover and connect with thousands of professional workers",
+    "searchPlaceholder": "Search workers by name...",
+    "search": "Search",
+    "filters": "Filters",
+    "applyFilters": "Apply Filters",
+    "resetFilters": "Reset Filters",
+    "resultsCount": "{count} workers found",
+    "noWorkers": "No workers found matching your criteria",
+    "ageRange": "Age Range",
+    "years": "years",
+    "yearsOld": "years old",
+    "min": "Min",
+    "max": "Max",
+    "category": "Service Category",
+    "selectCategory": "Select category",
+    "service": "Service",
+    "selectService": "Select specific service",
+    "priceRange": "Price Range (USD/hr)",
+    "priceNotSet": "Price not set",
+    "available": "Available",
+    "services": "Services",
+    "more": "more",
+    "viewProfile": "View Profile",
+    "pagination": "Showing {start} - {end} of {total} workers"
+  }
+}

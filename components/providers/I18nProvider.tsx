@@ -1,0 +1,16 @@
+"use client";
+
+import { useEffect } from "react";
+import "@/i18n/config";
+
+export default function I18nProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  useEffect(() => {
+    // i18n đã được khởi tạo trong config.ts
+  }, []);
+
+  return <>{children}</>;
+}

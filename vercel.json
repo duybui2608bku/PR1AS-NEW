@@ -1,0 +1,12 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/release-escrows",
+      "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/cron/expire-deposits",
+      "schedule": "*/30 * * * *"
+    }
+  ]
+}

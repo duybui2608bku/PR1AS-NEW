@@ -1,0 +1,301 @@
+@import "tailwindcss";
+
+/* =============================================================================
+   LOADING ANIMATIONS
+   ============================================================================= */
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.loading-full-page {
+  animation: fadeIn 0.3s ease-in;
+}
+
+.loading-spinner,
+.loading-inline,
+.loading-card {
+  animation: fadeIn 0.2s ease-in;
+}
+
+:root {
+  /* Fonts */
+  --font-family-base: "JetBrains Mono", monospace !important;
+  --font-family-inter: "Inter", sans-serif;
+
+  /* Background Colors */
+  --background: #ffffff;
+  --foreground: #171717;
+  --background-secondary: #f7f7f7;
+
+  /* Brand Colors */
+  --color-primary: #690f0f;
+  --color-primary-hover: #4a0a0a;
+  --color-primary-light: #fef2f2;
+  --color-primary-text: #ffffff;
+  --color-secondary: #ffffff;
+  --color-secondary-text: #690f0f;
+
+  /* Text Colors */
+  --text-primary: #222222;
+  --text-secondary: #717171;
+  --text-light: #999999;
+
+  /* Border & Divider */
+  --border-color: #dddddd;
+  --border-light: #f0f0f0;
+  --border-dark: #e4e4e4;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-xl: 0 20px 60px rgba(0, 0, 0, 0.3);
+
+  /* Border Radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 16px;
+  --radius-xl: 28px;
+  --radius-full: 50%;
+
+  /* Spacing */
+  --spacing-xs: 8px;
+  --spacing-sm: 12px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-2xl: 48px;
+
+  /* Heights */
+  --height-button: 48px;
+  --height-button-large: 56px;
+  --height-input: 48px;
+  --height-input-large: 56px;
+  --height-header: 64px;
+
+  /* Font Sizes */
+  --font-size-xs: 12px;
+  --font-size-sm: 14px;
+  --font-size-base: 16px;
+  --font-size-lg: 18px;
+  --font-size-xl: 20px;
+  --font-size-2xl: 24px;
+  --font-size-3xl: 28px;
+  --font-size-4xl: 48px;
+
+  /* Font Weights */
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* Font Families */
+  --font-primary: var(--font-family-base);
+  --font-mono: "JetBrains Mono", monospace;
+
+  /* Gradients */
+  --gradient-primary: linear-gradient(90deg, #690f0f 0%, #4a0a0a 100%);
+  --gradient-hero: linear-gradient(135deg, #690f0f 0%, #8b1818 100%);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-family-inter);
+  --font-mono: var(--font-family-base);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-family-base) !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  margin: 0;
+  padding: 0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Animations */
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-spinner {
+  animation: spin 1s linear infinite;
+}
+
+/* Hero Carousel Styles */
+.hero-carousel .slick-dots {
+  bottom: 30px;
+}
+
+.hero-carousel .slick-dots li button {
+  background: rgba(255, 255, 255, 0.5);
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.hero-carousel .slick-dots li.slick-active button {
+  background: white;
+  width: 40px;
+  border-radius: 6px;
+}
+
+/* Testimonial Carousel Styles */
+.testimonial-carousel .slick-slide > div {
+  padding: 0 12px;
+}
+
+.testimonial-carousel .slick-dots {
+  bottom: -40px;
+}
+
+.testimonial-carousel .slick-dots li button {
+  background: rgba(255, 255, 255, 0.5);
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.testimonial-carousel .slick-dots li.slick-active button {
+  background: white;
+  width: 30px;
+  border-radius: 5px;
+}
+
+/* Smooth transitions */
+.transition-all {
+  transition: all 0.3s ease;
+}
+
+/* Hover effects */
+.hover\:shadow-xl:hover {
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+}
+
+.hover\:-translate-y-1:hover {
+  transform: translateY(-4px);
+}
+
+/* Mobile-specific responsive utilities */
+@media (max-width: 640px) {
+  /* Reduce padding on mobile */
+  .section-mobile-padding {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  /* Smaller fonts on mobile */
+  h1 {
+    font-size: clamp(1.75rem, 5vw, 3rem) !important;
+  }
+
+  h2 {
+    font-size: clamp(1.5rem, 4vw, 2.5rem) !important;
+  }
+
+  h3 {
+    font-size: clamp(1.25rem, 3.5vw, 2rem) !important;
+  }
+
+  /* Carousel adjustments for mobile */
+  .hero-carousel .slick-dots {
+    bottom: 15px;
+  }
+
+  .testimonial-carousel .slick-slide > div {
+    padding: 0 8px;
+  }
+
+  /* Touch-friendly button sizes */
+  .ant-btn {
+    min-height: 44px;
+  }
+
+  /* Statistic responsive sizing */
+  .statistic-responsive .ant-statistic-content {
+    font-size: clamp(1.25rem, 4vw, 2rem) !important;
+  }
+
+  .statistic-responsive .ant-statistic-title {
+    font-size: clamp(0.75rem, 2.5vw, 1rem) !important;
+  }
+}
+
+/* Tablet-specific utilities */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .section-tablet-padding {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+/* Improve touch targets on mobile */
+@media (hover: none) and (pointer: coarse) {
+  a,
+  button,
+  .clickable {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* Prevent text size adjustment on iOS */
+@supports (-webkit-touch-callout: none) {
+  body {
+  }
+}
+
+/* Safe area insets for notched devices */
+@supports (padding: max(0px)) {
+  body {
+    padding-left: max(0px, env(safe-area-inset-left));
+    padding-right: max(0px, env(safe-area-inset-right));
+  }
+}

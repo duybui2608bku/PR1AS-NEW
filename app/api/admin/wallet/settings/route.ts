@@ -1,0 +1,144 @@
+/**
+ * Admin Platform Settings API
+ * GET /api/admin/wallet/settings - Get platform settings
+ * PUT /api/admin/wallet/settings - Update platform settings
+ */
+
+import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
+import { WalletService } from '@/lib/wallet/service';
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+
+async function verifyAdmin(token: string, supabase: ReturnType<typeof createClient>) {
+  const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+
+  if (authError || !user) {
+    throw new Error('Invalid token');
+  }
+
+  const { data: profile } = await supabase
+    .from('user_profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single();
+
+  if (!profile || profile.role !== 'admin') {
+    throw new Error('Admin access required');
+  }
+
+  return user;
+}
+
+/**
+ * GET /api/admin/wallet/settings
+ * Get all platform settings
+ */
+export async function GET(request: NextRequest) {
+  try {
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const token = authHeader.replace('Bearer ', '');
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    await verifyAdmin(token, supabase);
+
+    // Get settings
+    const walletService = new WalletService(supabase);
+    const settings = await walletService.getPlatformSettings();
+
+    return NextResponse.json({
+      success: true,
+      settings,
+    });
+  } catch (error: any) {
+    console.error('[Admin Settings GET] Error:', error);
+    return NextResponse.json(
+      {
+        success: false,
+        error: error.message || 'Failed to fetch settings',
+      },
+      { status: error.message === 'Admin access required' ? 403 : 500 }
+    );
+  }
+}
+
+/**
+ * PUT /api/admin/wallet/settings
+ * Update platform settings
+ */
+export async function PUT(request: NextRequest) {
+  try {
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const token = authHeader.replace('Bearer ', '');
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    const user = await verifyAdmin(token, supabase);
+
+    // Parse request body
+    const body = await request.json();
+    const { key, value } = body;
+
+    if (!key) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Setting key is required',
+        },
+        { status: 400 }
+      );
+    }
+
+    // Validate setting key exists
+    const validKeys = [
+      'payment_fees_enabled',
+      'platform_fee_percentage',
+      'insurance_fund_percentage',
+      'escrow_cooling_period_days',
+      'minimum_deposit_usd',
+      'minimum_withdrawal_usd',
+      'bank_transfer_info',
+    ];
+
+    if (!validKeys.includes(key)) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Invalid setting key',
+        },
+        { status: 400 }
+      );
+    }
+
+    // Update setting
+    const walletService = new WalletService(supabase);
+    await walletService.updatePlatformSettings(key, value, user.id);
+
+    // Get updated settings
+    const settings = await walletService.getPlatformSettings();
+
+    return NextResponse.json({
+      success: true,
+      message: 'Settings updated successfully',
+      settings,
+    });
+  } catch (error: any) {
+    console.error('[Admin Settings PUT] Error:', error);
+    return NextResponse.json(
+      {
+        success: false,
+        error: error.message || 'Failed to update settings',
+      },
+      { status: error.message === 'Admin access required' ? 403 : 500 }
+    );
+  }
+}
+
