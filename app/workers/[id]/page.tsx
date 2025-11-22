@@ -25,6 +25,7 @@ import {
 import { useTranslation } from "react-i18next";
 import { WorkerProfileComplete } from "@/lib/worker/types";
 import PublicServiceCard from "@/components/worker/PublicServiceCard";
+import MainLayout from "@/components/layout/MainLayout";
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -61,21 +62,25 @@ export default function WorkerPublicProfilePage() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <Spin size="large" />
-      </div>
+      <MainLayout>
+        <div className="flex justify-center items-center min-h-screen">
+          <Spin size="large" />
+        </div>
+      </MainLayout>
     );
   }
 
   if (error || !profile) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <Result
-          status="404"
-          title={t("worker.profile.notFound")}
-          subTitle={error || t("worker.profile.notFoundDescription")}
-        />
-      </div>
+      <MainLayout>
+        <div className="container mx-auto px-4 py-8">
+          <Result
+            status="404"
+            title={t("worker.profile.notFound")}
+            subTitle={error || t("worker.profile.notFoundDescription")}
+          />
+        </div>
+      </MainLayout>
     );
   }
 
@@ -83,8 +88,9 @@ export default function WorkerPublicProfilePage() {
   const galleryImages = profile.gallery_images || [];
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <Row gutter={[24, 24]}>
+    <MainLayout>
+      <div className="container mx-auto px-4 py-8">
+        <Row gutter={[24, 24]}>
         {/* Profile Header */}
         <Col span={24}>
           <Card>
@@ -240,7 +246,8 @@ export default function WorkerPublicProfilePage() {
             </Card>
           </Col>
         )}
-      </Row>
-    </div>
+        </Row>
+      </div>
+    </MainLayout>
   );
 }

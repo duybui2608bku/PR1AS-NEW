@@ -23,7 +23,16 @@
     "close": "Đóng",
     "refresh": "Làm mới",
     "homeButton": "Về trang chủ",
-    "backToDashboard": "Về trang tổng quan"
+    "backToDashboard": "Về trang tổng quan",
+    "daysOfWeek": {
+      "1": "Thứ Hai",
+      "2": "Thứ Ba",
+      "3": "Thứ Tư",
+      "4": "Thứ Năm",
+      "5": "Thứ Sáu",
+      "6": "Thứ Bảy",
+      "7": "Chủ Nhật"
+    }
   },
   "nav": {
     "home": "Trang chủ",
@@ -400,7 +409,13 @@
       "rejected": "Hồ sơ bị từ chối",
       "rejectedDesc": "Hồ sơ bị từ chối. Vui lòng xem phản hồi và chỉnh sửa.",
       "editProfile": "Chỉnh sửa hồ sơ",
-      "step1SaveSuccess": "Đã lưu thông tin cơ bản"
+      "step1SaveSuccess": "Đã lưu thông tin cơ bản",
+      "notFound": "Không tìm thấy hồ sơ Worker",
+      "notFoundDescription": "Hồ sơ Worker này không tồn tại hoặc chưa được công khai",
+      "aboutMe": "Giới thiệu về tôi",
+      "interests": "Sở thích",
+      "availability": "Thời gian làm việc",
+      "servicesOffered": "Dịch vụ cung cấp"
     },
     "lifestyle": {
       "LIFESTYLE_ACTIVE": "Năng động",
@@ -409,7 +424,12 @@
       "LIFESTYLE_HOMEBODY": "Ưa ở nhà",
       "LIFESTYLE_SOCIAL": "Hướng ngoại",
       "LIFESTYLE_INDEPENDENT": "Độc lập"
-    }
+    },
+    "availability": {
+      "allDay": "Cả ngày",
+      "notAvailable": "Không có sẵn"
+    },
+    "tags": {}
   },
   "services": {
     "CATEGORY_HOMECARE": "Chăm sóc nhà cửa",

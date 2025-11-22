@@ -22,7 +22,16 @@
     "no": "아니오",
     "close": "닫기",
     "homeButton": "홈으로",
-    "backToDashboard": "대시보드로"
+    "backToDashboard": "대시보드로",
+    "daysOfWeek": {
+      "1": "월요일",
+      "2": "화요일",
+      "3": "수요일",
+      "4": "목요일",
+      "5": "금요일",
+      "6": "토요일",
+      "7": "일요일"
+    }
   },
   "nav": {
     "home": "홈",
@@ -399,7 +408,13 @@
       "rejected": "프로필 반려됨",
       "rejectedDesc": "프로필이 반려되었습니다. 피드백을 확인하고 수정해 주세요.",
       "editProfile": "프로필 수정",
-      "step1SaveSuccess": "기본 정보가 저장되었습니다"
+      "step1SaveSuccess": "기본 정보가 저장되었습니다",
+      "notFound": "워커 프로필을 찾을 수 없습니다",
+      "notFoundDescription": "이 워커 프로필은 존재하지 않거나 공개되지 않았습니다",
+      "aboutMe": "자기소개",
+      "interests": "관심사",
+      "availability": "이용 가능 시간",
+      "servicesOffered": "제공 서비스"
     },
     "lifestyle": {
       "LIFESTYLE_ACTIVE": "활동적",
@@ -408,7 +423,12 @@
       "LIFESTYLE_HOMEBODY": "집에 있는 것을 선호",
       "LIFESTYLE_SOCIAL": "사교적",
       "LIFESTYLE_INDEPENDENT": "독립적"
-    }
+    },
+    "availability": {
+      "allDay": "하루 종일",
+      "notAvailable": "이용 불가"
+    },
+    "tags": {}
   },
   "services": {
     "CATEGORY_HOMECARE": "가사 케어",

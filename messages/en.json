@@ -22,7 +22,16 @@
     "no": "No",
     "close": "Close",
     "homeButton": "Back to Home",
-    "backToDashboard": "Back to Dashboard"
+    "backToDashboard": "Back to Dashboard",
+    "daysOfWeek": {
+      "1": "Monday",
+      "2": "Tuesday",
+      "3": "Wednesday",
+      "4": "Thursday",
+      "5": "Friday",
+      "6": "Saturday",
+      "7": "Sunday"
+    }
   },
   "nav": {
     "home": "Home",
@@ -379,7 +388,13 @@
       "rejected": "Profile Rejected",
       "rejectedDesc": "Your profile was rejected. Please review the feedback and make necessary changes.",
       "editProfile": "Edit Profile",
-      "step1SaveSuccess": "Basic information saved successfully"
+      "step1SaveSuccess": "Basic information saved successfully",
+      "notFound": "Worker Profile Not Found",
+      "notFoundDescription": "This worker profile does not exist or is not publicly available",
+      "aboutMe": "About Me",
+      "interests": "Interests",
+      "availability": "Availability",
+      "servicesOffered": "Services Offered"
     },
     "lifestyle": {
       "LIFESTYLE_ACTIVE": "Active",
@@ -388,7 +403,12 @@
       "LIFESTYLE_HOMEBODY": "Homebody",
       "LIFESTYLE_SOCIAL": "Social",
       "LIFESTYLE_INDEPENDENT": "Independent"
-    }
+    },
+    "availability": {
+      "allDay": "All Day",
+      "notAvailable": "Not Available"
+    },
+    "tags": {}
   },
   "services": {
     "CATEGORY_HOMECARE": "Homecare",

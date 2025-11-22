@@ -22,7 +22,16 @@
     "no": "否",
     "close": "关闭",
     "homeButton": "返回首页",
-    "backToDashboard": "返回仪表板"
+    "backToDashboard": "返回仪表板",
+    "daysOfWeek": {
+      "1": "星期一",
+      "2": "星期二",
+      "3": "星期三",
+      "4": "星期四",
+      "5": "星期五",
+      "6": "星期六",
+      "7": "星期日"
+    }
   },
   "nav": {
     "home": "首页",
@@ -399,7 +408,13 @@
       "rejected": "档案被拒绝",
       "rejectedDesc": "档案被拒绝。请查看反馈并进行修改。",
       "editProfile": "编辑档案",
-      "step1SaveSuccess": "基础信息保存成功"
+      "step1SaveSuccess": "基础信息保存成功",
+      "notFound": "未找到工作者档案",
+      "notFoundDescription": "此工作者档案不存在或未公开",
+      "aboutMe": "关于我",
+      "interests": "兴趣",
+      "availability": "可用时间",
+      "servicesOffered": "提供的服务"
     },
     "lifestyle": {
       "LIFESTYLE_ACTIVE": "积极型",
@@ -408,7 +423,12 @@
       "LIFESTYLE_HOMEBODY": "喜居家",
       "LIFESTYLE_SOCIAL": "社交型",
       "LIFESTYLE_INDEPENDENT": "独立型"
-    }
+    },
+    "availability": {
+      "allDay": "全天",
+      "notAvailable": "不可用"
+    },
+    "tags": {}
   },
   "services": {
     "CATEGORY_HOMECARE": "家务护理",
