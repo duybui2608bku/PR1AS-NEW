@@ -12,7 +12,7 @@ import {
   TagType,
   Currency,
   DayOfWeek,
-} from '@/lib/utils/enums';
+} from "@/lib/utils/enums";
 
 // =============================================================================
 // SERVICE SYSTEM TYPES
@@ -23,7 +23,7 @@ import {
  */
 export interface ServiceCategory {
   id: string;
-  name_key: string;           // i18n key (e.g., 'CATEGORY_HOMECARE')
+  name_key: string; // i18n key (e.g., 'CATEGORY_HOMECARE')
   slug: string;
   description?: string;
   icon?: string;
@@ -39,11 +39,11 @@ export interface ServiceCategory {
 export interface Service {
   id: string;
   category_id: string;
-  name_key: string;           // i18n key (e.g., 'SERVICE_HOMECARE_COOKING')
+  name_key: string; // i18n key (e.g., 'SERVICE_HOMECARE_COOKING')
   slug: string;
   description?: string;
   icon?: string;
-  has_options: boolean;       // Whether service has additional options
+  has_options: boolean; // Whether service has additional options
   parent_service_id?: string;
   display_order: number;
   is_active: boolean;
@@ -63,9 +63,9 @@ export interface Service {
 export interface ServiceOption {
   id: string;
   service_id: string;
-  option_key: string;         // i18n key (e.g., 'COOKING_VIETNAMESE')
-  option_type: string;        // e.g., 'cuisine', 'language_pair', 'haircare_type'
-  option_value: string;       // e.g., 'vietnamese', 'EN_TO_JA'
+  option_key: string; // i18n key (e.g., 'COOKING_VIETNAMESE')
+  option_type: string; // e.g., 'cuisine', 'language_pair', 'haircare_type'
+  option_value: string; // e.g., 'vietnamese', 'EN_TO_JA'
   display_order: number;
   is_active: boolean;
   metadata?: Record<string, unknown>;
@@ -94,7 +94,7 @@ export interface WorkerProfile {
   height_cm?: number;
   weight_kg?: number;
   zodiac_sign?: string;
-  lifestyle?: string;         // i18n key
+  lifestyle?: string; // i18n key
   personal_quote?: string;
   bio?: string;
 
@@ -126,8 +126,8 @@ export interface WorkerProfile {
 export interface WorkerTag {
   id: string;
   worker_profile_id: string;
-  tag_key: string;            // Tag identifier
-  tag_value: string;          // Display value
+  tag_key: string; // Tag identifier
+  tag_value: string; // Display value
   tag_type: TagType;
   created_at: string;
 }
@@ -140,8 +140,8 @@ export interface WorkerAvailability {
   worker_profile_id: string;
   day_of_week: DayOfWeek;
   availability_type: AvailabilityType;
-  start_time?: string;        // HH:MM:SS format
-  end_time?: string;          // HH:MM:SS format
+  start_time?: string; // HH:MM:SS format
+  end_time?: string; // HH:MM:SS format
   notes?: string;
   created_at: string;
   updated_at: string;
@@ -447,7 +447,7 @@ export interface PriceCalculation {
     hourly: number;
     currency: Currency;
   };
-  tier: 'hourly' | 'daily' | 'weekly' | 'monthly';
+  tier: "hourly" | "daily" | "weekly" | "monthly";
   hours: number;
   discount: number;
   subtotal: number;

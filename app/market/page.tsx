@@ -30,7 +30,7 @@ import { ServiceCategory, Service } from "@/lib/worker/types";
 import WorkerCard from "@/components/market/WorkerCard";
 import WorkerFilter from "@/components/market/WorkerFilter";
 import { WorkerProfileService } from "@/lib/worker/service";
-import { createClient } from "@/lib/supabase/client";
+import { getSupabaseClient } from "@/lib/supabase/client";
 import Loading from "@/components/common/Loading";
 
 const { Title, Text } = Typography;
@@ -61,7 +61,7 @@ export default function MarketPage() {
   useEffect(() => {
     const loadCategoriesAndServices = async () => {
       try {
-        const supabase = createClient();
+        const supabase = getSupabaseClient();
         const workerService = new WorkerProfileService(supabase);
 
         const [categoriesData, servicesData] = await Promise.all([
