@@ -23,15 +23,11 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    console.log("[Cron] Starting expire deposits job");
-
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     const bankService = createBankTransferService();
 
     // Expire old deposits
     const expiredCount = await bankService.expireOldDeposits(supabase);
-
-    console.log(`[Cron] Expired ${expiredCount} old deposits`);
 
     return NextResponse.json({
       success: true,
@@ -40,7 +36,7 @@ export async function GET(request: NextRequest) {
       timestamp: new Date().toISOString(),
     });
   } catch (error: any) {
-    console.error("[Cron] Expire deposits job failed:", error);
+
     return NextResponse.json(
       {
         success: false,

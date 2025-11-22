@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
       await supabase.auth.admin.listUsers();
 
     if (authError) {
-      console.error("Auth error:", authError);
+
       return NextResponse.json(
         { error: "Failed to fetch users" },
         { status: 500 }
@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
       .select("*");
 
     if (profileError) {
-      console.error("Profile error:", profileError);
+
       // Continue without profiles if table doesn't exist
     }
 
@@ -64,7 +64,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ users, total: users.length });
   } catch (error) {
-    console.error("API error:", error);
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

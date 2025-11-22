@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
       transaction,
     });
   } catch (error: any) {
-    console.error('[Admin Escrow Release] Error:', error);
+
     return NextResponse.json(
       {
         success: false,

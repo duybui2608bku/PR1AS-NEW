@@ -72,7 +72,7 @@ export default function MarketPage() {
         setCategories(categoriesData);
         setServices(servicesData);
       } catch (error) {
-        console.error("Failed to load categories and services:", error);
+        // Silent error handling
       }
     };
 
@@ -87,7 +87,6 @@ export default function MarketPage() {
       setWorkers(response.workers);
       setPagination(response.pagination);
     } catch (error) {
-      console.error("Failed to load workers:", error);
       setWorkers([]);
     } finally {
       setSearchLoading(false);
@@ -100,32 +99,32 @@ export default function MarketPage() {
   }, [loadWorkers]);
 
   // Handle filter change
-  const handleFilterChange = (newFilters: WorkerFilters) => {
+  const handleFilterChange = useCallback((newFilters: WorkerFilters) => {
     setFilters({
       ...newFilters,
       page: 1,
       limit: 12,
     });
     setMobileFilterVisible(false);
-  };
+  }, []);
 
   // Handle search
-  const handleSearch = (value: string) => {
-    setFilters({
-      ...filters,
+  const handleSearch = useCallback((value: string) => {
+    setFilters((prev) => ({
+      ...prev,
       search: value || undefined,
       page: 1,
-    });
-  };
+    }));
+  }, []);
 
   // Handle pagination
-  const handlePageChange = (page: number) => {
-    setFilters({
-      ...filters,
+  const handlePageChange = useCallback((page: number) => {
+    setFilters((prev) => ({
+      ...prev,
       page,
-    });
+    }));
     window.scrollTo({ top: 0, behavior: "smooth" });
-  };
+  }, []);
 
   if (loading) {
     return <Loading />;

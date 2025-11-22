@@ -116,7 +116,7 @@ export async function POST(request: NextRequest) {
       });
 
     if (insertError) {
-      console.error("Insert error:", insertError);
+
       return NextResponse.json(
         { error: "Failed to create profile" },
         { status: 500 }
@@ -134,7 +134,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Callback error:", error);
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

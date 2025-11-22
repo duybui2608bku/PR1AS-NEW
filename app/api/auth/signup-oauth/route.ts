@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
       message: "Use Supabase client to call signInWithOAuth on the frontend",
     });
   } catch (error) {
-    console.error("OAuth signup prep error:", error);
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

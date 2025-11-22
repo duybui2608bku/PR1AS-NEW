@@ -1,31 +1,36 @@
 "use client";
 
+import { memo } from "react";
 import { Typography, Row, Col } from "antd";
 import { CheckCircleOutlined } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
 
 const { Title, Paragraph } = Typography;
 
-export default function HowItWorksSection() {
+const HowItWorksSection = memo(function HowItWorksSection() {
   const { t } = useTranslation();
 
   const STEPS = [
     {
+      id: "step1",
       number: "01",
       titleKey: "home.howItWorks.steps.step1.title",
       descriptionKey: "home.howItWorks.steps.step1.description",
     },
     {
+      id: "step2",
       number: "02",
       titleKey: "home.howItWorks.steps.step2.title",
       descriptionKey: "home.howItWorks.steps.step2.description",
     },
     {
+      id: "step3",
       number: "03",
       titleKey: "home.howItWorks.steps.step3.title",
       descriptionKey: "home.howItWorks.steps.step3.description",
     },
     {
+      id: "step4",
       number: "04",
       titleKey: "home.howItWorks.steps.step4.title",
       descriptionKey: "home.howItWorks.steps.step4.description",
@@ -49,7 +54,7 @@ export default function HowItWorksSection() {
 
         <Row gutter={[16, 32]}>
           {STEPS.map((step, index) => (
-            <Col xs={24} sm={12} md={6} key={index}>
+            <Col xs={24} sm={12} md={6} key={step.id}>
               <div className="relative text-center px-2">
                 <div className="inline-flex items-center justify-center w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-[#690F0F] to-[#8B1818] rounded-full mb-4 sm:mb-6 relative z-10">
                   <span className="text-3xl sm:text-4xl font-bold text-white">
@@ -82,4 +87,6 @@ export default function HowItWorksSection() {
       </div>
     </section>
   );
-}
+});
+
+export default HowItWorksSection;

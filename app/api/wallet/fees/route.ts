@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
       calculation,
     });
   } catch (error: any) {
-    console.error('[Wallet Fees] Error:', error);
+
     return NextResponse.json(
       {
         success: false,

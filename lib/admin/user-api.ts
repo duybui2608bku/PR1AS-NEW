@@ -92,7 +92,6 @@ class AdminUserAPI {
 
       return { data, message: data.message };
     } catch (error) {
-      console.error("API request error:", error);
       return { error: "Network error" };
     }
   }

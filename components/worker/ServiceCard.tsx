@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { Card, Typography, Space, Button, Tag, Descriptions, Popconfirm } from "antd";
 import { DeleteOutlined, DollarOutlined } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
@@ -13,7 +14,7 @@ interface ServiceCardProps {
   onRemove: () => void;
 }
 
-export default function ServiceCard({ service, onRemove }: ServiceCardProps) {
+const ServiceCard = memo(function ServiceCard({ service, onRemove }: ServiceCardProps) {
   const { t } = useTranslation();
 
   const pricing = service.pricing;
@@ -80,4 +81,6 @@ export default function ServiceCard({ service, onRemove }: ServiceCardProps) {
       </Descriptions>
     </Card>
   );
-}
+});
+
+export default ServiceCard;

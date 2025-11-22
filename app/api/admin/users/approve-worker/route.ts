@@ -20,8 +20,6 @@ export async function POST(request: NextRequest) {
   try {
     const { userId } = await request.json();
 
-    console.log("Approve worker request for userId:", userId);
-
     if (!userId) {
       return NextResponse.json(
         { error: "User ID is required" },
@@ -32,24 +30,19 @@ export async function POST(request: NextRequest) {
     const supabase = getAdminSupabase();
 
     // Update user role to worker in auth metadata
-    console.log("Updating auth metadata for user:", userId);
     const { data: authData, error: authError } =
       await supabase.auth.admin.updateUserById(userId, {
         user_metadata: { role: "worker" },
       });
 
     if (authError) {
-      console.error("Update auth metadata error:", authError);
       return NextResponse.json(
         { error: `Failed to update user role: ${authError.message}` },
         { status: 500 }
       );
     }
 
-    console.log("Auth metadata updated successfully");
-
     // Update user profile if exists
-    console.log("Updating user profile for user:", userId);
     const { error: profileError } = await supabase
       .from("user_profiles")
       .upsert({
@@ -60,14 +53,10 @@ export async function POST(request: NextRequest) {
       });
 
     if (profileError) {
-      console.error("Update profile error:", profileError);
       // Continue even if profile update fails
-    } else {
-      console.log("User profile updated successfully");
     }
 
     // Update worker profile status
-    console.log("Updating worker profile for user:", userId);
     const { error: workerError } = await supabase
       .from("worker_profiles")
       .update({
@@ -77,14 +66,11 @@ export async function POST(request: NextRequest) {
       .eq("user_id", userId);
 
     if (workerError) {
-      console.error("Update worker profile error:", workerError);
       return NextResponse.json(
         { error: `Failed to update worker profile: ${workerError.message}` },
         { status: 500 }
       );
     }
-
-    console.log("Worker profile updated successfully");
 
     // Get worker profile id
     const { data: workerProfile, error: getProfileError } = await supabase
@@ -94,13 +80,11 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (getProfileError || !workerProfile) {
-      console.error("Get worker profile error:", getProfileError);
       // Continue even if we can't get profile
     } else {
       const workerProfileId = workerProfile.id;
 
       // Approve all worker images
-      console.log("Approving worker images for profile:", workerProfileId);
       const { error: imagesError } = await supabase
         .from("worker_images")
         .update({
@@ -110,14 +94,10 @@ export async function POST(request: NextRequest) {
         .eq("worker_profile_id", workerProfileId);
 
       if (imagesError) {
-        console.error("Update worker images error:", imagesError);
         // Continue even if images update fails
-      } else {
-        console.log("Worker images approved successfully");
       }
 
       // Activate all worker services
-      console.log("Activating worker services for profile:", workerProfileId);
       const { error: servicesError } = await supabase
         .from("worker_services")
         .update({
@@ -126,10 +106,7 @@ export async function POST(request: NextRequest) {
         .eq("worker_profile_id", workerProfileId);
 
       if (servicesError) {
-        console.error("Update worker services error:", servicesError);
         // Continue even if services update fails
-      } else {
-        console.log("Worker services activated successfully");
       }
     }
 
@@ -140,22 +117,15 @@ export async function POST(request: NextRequest) {
         target_user_id: userId,
         details: {},
       });
-      console.log("Admin action logged");
     } catch (logError) {
-      console.warn(
-        "Failed to log admin action (table may not exist):",
-        logError
-      );
       // Ignore logging errors
     }
 
-    console.log("Worker approval completed successfully");
     return NextResponse.json({
       message: "Worker approved successfully",
       user: authData.user,
     });
   } catch (error) {
-    console.error("API error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

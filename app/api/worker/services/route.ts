@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
       data: services,
     });
   } catch (error: unknown) {
-    console.error('Error fetching worker services:', error);
+
     return NextResponse.json(
       {
         success: false,
@@ -114,7 +114,7 @@ export async function POST(request: NextRequest) {
       message: 'Service added successfully',
     });
   } catch (error: unknown) {
-    console.error('Error adding worker service:', error);
+
     const errorMessage = getErrorMessage(error, 'Failed to add service');
 
     // Check for duplicate error

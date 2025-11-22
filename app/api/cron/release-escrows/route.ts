@@ -29,15 +29,11 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    console.log('[Cron] Starting auto-release escrows job');
-
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     const walletService = new WalletService(supabase);
 
     // Get escrows ready for release
     const escrows = await walletService.getEscrowsReadyForRelease();
-
-    console.log(`[Cron] Found ${escrows.length} escrows ready for release`);
 
     const results = {
       total: escrows.length,
@@ -49,11 +45,9 @@ export async function GET(request: NextRequest) {
     // Release each escrow
     for (const escrow of escrows) {
       try {
-        console.log(`[Cron] Releasing escrow ${escrow.escrow_id} for worker ${escrow.worker_id}`);
         await walletService.releaseEscrow(escrow.escrow_id);
         results.released++;
       } catch (error: any) {
-        console.error(`[Cron] Failed to release escrow ${escrow.escrow_id}:`, error);
         results.failed++;
         results.errors.push({
           escrow_id: escrow.escrow_id,
@@ -62,8 +56,6 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    console.log('[Cron] Auto-release job completed:', results);
-
     return NextResponse.json({
       success: true,
       message: 'Auto-release job completed',
@@ -71,7 +63,6 @@ export async function GET(request: NextRequest) {
       timestamp: new Date().toISOString(),
     });
   } catch (error: any) {
-    console.error('[Cron] Auto-release job failed:', error);
     return NextResponse.json(
       {
         success: false,

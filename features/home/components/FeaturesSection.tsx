@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { Typography, Row, Col, Card } from "antd";
 import {
   SafetyOutlined,
@@ -10,23 +11,26 @@ import { useTranslation } from "react-i18next";
 
 const { Title, Paragraph } = Typography;
 
-export default function FeaturesSection() {
+const FeaturesSection = memo(function FeaturesSection() {
   const { t } = useTranslation();
 
   const features = [
     {
+      id: "safety",
       icon: <SafetyOutlined className="text-4xl text-[#690F0F]" />,
       title: t("home.features.safety.title"),
       description: t("home.features.safety.description"),
       colorClass: "purple",
     },
     {
+      id: "speed",
       icon: <ThunderboltOutlined className="text-4xl text-[#690F0F]" />,
       title: t("home.features.speed.title"),
       description: t("home.features.speed.description"),
       colorClass: "pink",
     },
     {
+      id: "quality",
       icon: <StarOutlined className="text-4xl text-[#690F0F]" />,
       title: t("home.features.quality.title"),
       description: t("home.features.quality.description"),
@@ -50,8 +54,8 @@ export default function FeaturesSection() {
         </div>
 
         <Row gutter={[16, 24]}>
-          {features.map((feature, index) => (
-            <Col xs={24} sm={24} md={8} key={index}>
+          {features.map((feature) => (
+            <Col xs={24} sm={24} md={8} key={feature.id}>
               <Card
                 hoverable
                 className={`!h-full !border-2 hover:!border-[#690F0F] !transition-all !duration-300 hover:!shadow-xl`}
@@ -79,4 +83,6 @@ export default function FeaturesSection() {
       </div>
     </section>
   );
-}
+});
+
+export default FeaturesSection;

@@ -164,7 +164,7 @@ export async function GET(request: NextRequest) {
     const { data, error, count } = await query;
 
     if (error) {
-      console.error("Error fetching workers:", error);
+
       return NextResponse.json(
         { error: "Failed to fetch workers" },
         { status: 500 }
@@ -244,7 +244,7 @@ export async function GET(request: NextRequest) {
       filters,
     });
   } catch (error) {
-    console.error("Market workers API error:", error);
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

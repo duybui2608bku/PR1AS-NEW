@@ -42,7 +42,7 @@ export async function PATCH(
       message: 'Pricing updated successfully',
     });
   } catch (error: unknown) {
-    console.error('Error updating service price:', error);
+
     return NextResponse.json(
       {
         success: false,

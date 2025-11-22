@@ -198,7 +198,7 @@ export async function POST(request: NextRequest) {
       { status: 400 }
     );
   } catch (error: any) {
-    console.error('[Wallet Withdraw] Error:', error);
+
     return NextResponse.json(
       {
         success: false,

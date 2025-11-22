@@ -27,7 +27,7 @@ export async function PATCH(request: NextRequest) {
       message: 'Profile submitted for review',
     });
   } catch (error: unknown) {
-    console.error('Error submitting profile:', error);
+
     const errorMessage = getErrorMessage(error, 'Failed to submit profile');
 
     // Check for validation errors

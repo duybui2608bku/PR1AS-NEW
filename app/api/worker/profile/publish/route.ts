@@ -27,7 +27,7 @@ export async function PATCH(request: NextRequest) {
       message: 'Profile published successfully',
     });
   } catch (error: unknown) {
-    console.error('Error publishing profile:', error);
+
     return NextResponse.json(
       {
         success: false,

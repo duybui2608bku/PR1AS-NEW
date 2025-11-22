@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (error) {
-      console.error("Unban user error:", error);
+
       return NextResponse.json(
         { error: "Failed to unban user" },
         { status: 500 }
@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (logError) {
-      console.error("Failed to log admin action:", logError);
+
     }
 
     return NextResponse.json({
@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
       user: data.user,
     });
   } catch (error) {
-    console.error("API error:", error);
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

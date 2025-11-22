@@ -5,6 +5,7 @@
 
 "use client";
 
+import { memo } from "react";
 import { Card, Tag, Typography, Space, Button, Avatar } from "antd";
 import {
   UserOutlined,
@@ -21,7 +22,7 @@ interface WorkerCardProps {
   worker: WorkerMarketProfile;
 }
 
-export default function WorkerCard({ worker }: WorkerCardProps) {
+const WorkerCard = memo(function WorkerCard({ worker }: WorkerCardProps) {
   const { t } = useTranslation();
 
   // Get display name
@@ -132,4 +133,6 @@ export default function WorkerCard({ worker }: WorkerCardProps) {
       </div>
     </Card>
   );
-}
+});
+
+export default WorkerCard;

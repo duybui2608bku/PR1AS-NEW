@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { Typography, Row, Col, Card, Button } from "antd";
 import Link from "next/link";
 import {
@@ -14,7 +15,7 @@ import { useTranslation } from "react-i18next";
 
 const { Title, Paragraph, Text } = Typography;
 
-export default function CategoriesSection() {
+const CategoriesSection = memo(function CategoriesSection() {
   const { t } = useTranslation();
 
   const CATEGORIES = [
@@ -42,8 +43,8 @@ export default function CategoriesSection() {
         </div>
 
         <Row gutter={[12, 16]}>
-          {CATEGORIES.map((category, index) => (
-            <Col xs={12} sm={8} md={6} lg={4} key={index}>
+          {CATEGORIES.map((category) => (
+            <Col xs={12} sm={8} md={6} lg={4} key={category.nameKey}>
               <Card
                 hoverable
                 className="!text-center !border-2 hover:!border-[#690F0F] !transition-all !duration-300 hover:!shadow-lg hover:!-translate-y-1"
@@ -79,4 +80,6 @@ export default function CategoriesSection() {
       </div>
     </section>
   );
-}
+});
+
+export default CategoriesSection;

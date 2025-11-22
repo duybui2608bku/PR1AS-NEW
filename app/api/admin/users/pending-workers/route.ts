@@ -20,8 +20,6 @@ export async function GET() {
   try {
     const supabase = getAdminSupabase();
 
-    console.log("Fetching pending workers...");
-
     // Get worker profiles that are pending approval
     const { data: pendingWorkers, error } = await supabase
       .from("worker_profiles")
@@ -29,14 +27,11 @@ export async function GET() {
       .eq("profile_status", "pending");
 
     if (error) {
-      console.error("Get pending workers error:", error);
       return NextResponse.json(
         { error: "Failed to fetch pending workers", details: error.message },
         { status: 500 }
       );
     }
-
-    console.log(`Found ${pendingWorkers?.length || 0} pending workers`);
 
     if (!pendingWorkers || pendingWorkers.length === 0) {
       return NextResponse.json({
@@ -49,8 +44,6 @@ export async function GET() {
     const workersWithDetails = await Promise.all(
       (pendingWorkers || []).map(async (worker) => {
         try {
-          console.log(`Processing worker ${worker.id}...`);
-
           // Get auth user data
           let userData = null;
           try {
@@ -58,11 +51,9 @@ export async function GET() {
               await supabase.auth.admin.getUserById(worker.user_id);
             if (!userError && data) {
               userData = data.user;
-            } else if (userError) {
-              console.error(`Error getting user ${worker.user_id}:`, userError);
             }
           } catch (err) {
-            console.error(`Exception getting user ${worker.user_id}:`, err);
+            // Silent error handling
           }
 
           // Get user profile
@@ -75,7 +66,7 @@ export async function GET() {
               .single();
             userProfile = data;
           } catch (err) {
-            console.error(`Error getting user profile ${worker.user_id}:`, err);
+            // Silent error handling
           }
 
           // Get worker images
@@ -88,7 +79,7 @@ export async function GET() {
               .order("display_order");
             images = data || [];
           } catch (err) {
-            console.error(`Error getting images for worker ${worker.id}:`, err);
+            // Silent error handling
           }
 
           // Get worker services
@@ -99,9 +90,7 @@ export async function GET() {
               .select("*")
               .eq("worker_profile_id", worker.id);
 
-            if (servicesError) {
-              console.error(`Error getting services:`, servicesError);
-            } else if (services && services.length > 0) {
+            if (!servicesError && services && services.length > 0) {
               // Get service details and prices for each service
               servicesWithPrices = await Promise.all(
                 services.map(async (service) => {
@@ -117,19 +106,11 @@ export async function GET() {
                         .eq("id", service.service_id)
                         .single();
 
-                    if (serviceError) {
-                      console.error(
-                        `Error getting service ${service.service_id}:`,
-                        serviceError
-                      );
-                    } else {
+                    if (!serviceError) {
                       serviceDetails = serviceData;
                     }
                   } catch (err) {
-                    console.error(
-                      `Exception getting service ${service.service_id}:`,
-                      err
-                    );
+                    // Silent error handling
                   }
 
                   // Get prices
@@ -140,10 +121,7 @@ export async function GET() {
                       .eq("worker_service_id", service.id);
                     prices = priceData || [];
                   } catch (err) {
-                    console.error(
-                      `Error getting prices for service ${service.id}:`,
-                      err
-                    );
+                    // Silent error handling
                   }
 
                   return {
@@ -155,10 +133,7 @@ export async function GET() {
               );
             }
           } catch (err) {
-            console.error(
-              `Error getting services for worker ${worker.id}:`,
-              err
-            );
+            // Silent error handling
           }
 
           return {
@@ -169,7 +144,6 @@ export async function GET() {
             worker_services: servicesWithPrices,
           };
         } catch (error) {
-          console.error(`Error processing worker ${worker.user_id}:`, error);
           return {
             ...worker,
             user: null,
@@ -181,14 +155,11 @@ export async function GET() {
       })
     );
 
-    console.log(`Returning ${workersWithDetails.length} workers with details`);
-
     return NextResponse.json({
       workers: workersWithDetails,
       total: workersWithDetails.length,
     });
   } catch (error) {
-    console.error("API error:", error);
     return NextResponse.json(
       {
         error: "Internal server error",
