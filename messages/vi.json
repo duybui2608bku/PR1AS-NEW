@@ -752,5 +752,93 @@
     "more": "thêm",
     "viewProfile": "Xem hồ sơ",
     "pagination": "Hiển thị {start} - {end} trên tổng {total} worker"
+  },
+  "fire": {
+    "title": "Điểm Fire",
+    "balance": "Số Fire hiện có",
+    "totalFires": "Tổng số Fire",
+    "earnedFires": "Fire đã kiếm",
+    "spentFires": "Fire đã tiêu",
+    "purchaseFire": "Mua Fire",
+    "dailyLogin": "Đăng nhập hàng ngày",
+    "claimReward": "Nhận thưởng",
+    "alreadyClaimed": "Đã nhận thưởng hôm nay",
+    "nextClaimAvailable": "Đăng nhập tiếp theo sau {time}",
+    "boost": {
+      "title": "Đẩy hồ sơ",
+      "featured": "Đẩy Top Đề xuất",
+      "topProfile": "Đẩy Top Hồ sơ",
+      "featuredDescription": "Xuất hiện ưu tiên trên danh sách đề xuất trong 12 giờ",
+      "topProfileDescription": "Xuất hiện ưu tiên trên kết quả tìm kiếm trong 2 giờ",
+      "cost": "{cost} Fire",
+      "duration": "{hours} giờ",
+      "activate": "Kích hoạt",
+      "active": "Đang hoạt động",
+      "timeRemaining": "Còn lại: {time}",
+      "extend": "Gia hạn",
+      "expires": "Hết hạn: {time}",
+      "confirmTitle": "Xác nhận kích hoạt buff",
+      "confirmMessage": "Bạn có chắc muốn sử dụng {cost} Fire để kích hoạt {type}?",
+      "confirmExtend": "Buff đang hoạt động. Kích hoạt lại sẽ gia hạn thêm {hours} giờ.",
+      "insufficientFire": "Không đủ Fire",
+      "insufficientMessage": "Bạn cần {required} Fire nhưng chỉ có {current} Fire"
+    },
+    "purchase": {
+      "title": "Mua Fire",
+      "amount": "Số lượng Fire",
+      "cost": "Giá",
+      "rate": "1 USD = 1 Fire",
+      "minAmount": "Tối thiểu {min} Fire",
+      "maxAmount": "Tối đa {max} Fire",
+      "walletBalance": "Số dư ví",
+      "totalCost": "Tổng chi phí",
+      "insufficientBalance": "Số dư ví không đủ",
+      "confirmPurchase": "Xác nhận mua",
+      "success": "Đã mua thành công {amount} Fire",
+      "error": "Mua Fire thất bại"
+    },
+    "history": {
+      "title": "Lịch sử giao dịch",
+      "type": "Loại",
+      "amount": "Số lượng",
+      "balance": "Số dư",
+      "date": "Ngày",
+      "description": "Mô tả",
+      "noTransactions": "Chưa có giao dịch nào",
+      "types": {
+        "purchase": "Mua Fire",
+        "daily_login": "Đăng nhập hàng ngày",
+        "boost_featured": "Đẩy Top Đề xuất",
+        "boost_top_profile": "Đẩy Top Hồ sơ",
+        "admin_adjustment": "Điều chỉnh bởi Admin",
+        "refund": "Hoàn tiền"
+      }
+    },
+    "dashboard": {
+      "title": "Quản lý Fire Points",
+      "subtitle": "Kiếm Fire và đẩy hồ sơ của bạn lên top",
+      "overview": "Tổng quan",
+      "earnFire": "Kiếm Fire",
+      "useFire": "Sử dụng Fire",
+      "dailyLoginReward": "+{amount} Fire mỗi ngày",
+      "purchaseWithWallet": "Mua Fire bằng số dư ví",
+      "activeBoosts": "Buff đang hoạt động",
+      "noActiveBoosts": "Không có buff nào đang hoạt động",
+      "activateBoost": "Kích hoạt buff để tăng độ hiển thị"
+    },
+    "menu": {
+      "fire": "Đẩy hồ sơ",
+      "firePoints": "Điểm Fire"
+    },
+    "notifications": {
+      "dailyLoginSuccess": "Đã nhận {amount} Fire từ đăng nhập hàng ngày!",
+      "dailyLoginAlready": "Bạn đã nhận thưởng đăng nhập hôm nay rồi",
+      "purchaseSuccess": "Đã mua thành công {amount} Fire",
+      "purchaseError": "Không thể mua Fire: {error}",
+      "boostActivated": "Đã kích hoạt {type} thành công!",
+      "boostError": "Không thể kích hoạt buff: {error}",
+      "boostExpired": "Buff {type} đã hết hạn",
+      "boostExpiring": "Buff {type} sắp hết hạn trong {minutes} phút"
+    }
   }
 }

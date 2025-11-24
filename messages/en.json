@@ -740,5 +740,93 @@
     "more": "more",
     "viewProfile": "View Profile",
     "pagination": "Showing {start} - {end} of {total} workers"
+  },
+  "fire": {
+    "title": "Fire Points",
+    "balance": "Current Fire Balance",
+    "totalFires": "Total Fire",
+    "earnedFires": "Fires Earned",
+    "spentFires": "Fires Spent",
+    "purchaseFire": "Purchase Fire",
+    "dailyLogin": "Daily Login",
+    "claimReward": "Claim Reward",
+    "alreadyClaimed": "Already claimed today",
+    "nextClaimAvailable": "Next login reward in {time}",
+    "boost": {
+      "title": "Boost Profile",
+      "featured": "Boost Featured",
+      "topProfile": "Boost Top Profile",
+      "featuredDescription": "Get priority placement in featured recommendations for 12 hours",
+      "topProfileDescription": "Get priority placement in search results for 2 hours",
+      "cost": "{cost} Fire",
+      "duration": "{hours} hours",
+      "activate": "Activate",
+      "active": "Active",
+      "timeRemaining": "Remaining: {time}",
+      "extend": "Extend",
+      "expires": "Expires: {time}",
+      "confirmTitle": "Confirm Boost Activation",
+      "confirmMessage": "Are you sure you want to spend {cost} Fire to activate {type}?",
+      "confirmExtend": "Boost is active. Activating again will extend by {hours} hours.",
+      "insufficientFire": "Insufficient Fire",
+      "insufficientMessage": "You need {required} Fire but only have {current} Fire"
+    },
+    "purchase": {
+      "title": "Purchase Fire",
+      "amount": "Fire Amount",
+      "cost": "Cost",
+      "rate": "1 USD = 1 Fire",
+      "minAmount": "Minimum {min} Fire",
+      "maxAmount": "Maximum {max} Fire",
+      "walletBalance": "Wallet Balance",
+      "totalCost": "Total Cost",
+      "insufficientBalance": "Insufficient wallet balance",
+      "confirmPurchase": "Confirm Purchase",
+      "success": "Successfully purchased {amount} Fire",
+      "error": "Failed to purchase Fire"
+    },
+    "history": {
+      "title": "Transaction History",
+      "type": "Type",
+      "amount": "Amount",
+      "balance": "Balance",
+      "date": "Date",
+      "description": "Description",
+      "noTransactions": "No transactions yet",
+      "types": {
+        "purchase": "Purchase Fire",
+        "daily_login": "Daily Login",
+        "boost_featured": "Featured Boost",
+        "boost_top_profile": "Top Profile Boost",
+        "admin_adjustment": "Admin Adjustment",
+        "refund": "Refund"
+      }
+    },
+    "dashboard": {
+      "title": "Fire Points Management",
+      "subtitle": "Earn Fire and boost your profile to the top",
+      "overview": "Overview",
+      "earnFire": "Earn Fire",
+      "useFire": "Use Fire",
+      "dailyLoginReward": "+{amount} Fire per day",
+      "purchaseWithWallet": "Purchase Fire with wallet balance",
+      "activeBoosts": "Active Boosts",
+      "noActiveBoosts": "No active boosts",
+      "activateBoost": "Activate boosts to increase visibility"
+    },
+    "menu": {
+      "fire": "Boost Profile",
+      "firePoints": "Fire Points"
+    },
+    "notifications": {
+      "dailyLoginSuccess": "Received {amount} Fire from daily login!",
+      "dailyLoginAlready": "You've already claimed today's login reward",
+      "purchaseSuccess": "Successfully purchased {amount} Fire",
+      "purchaseError": "Failed to purchase Fire: {error}",
+      "boostActivated": "Successfully activated {type}!",
+      "boostError": "Failed to activate boost: {error}",
+      "boostExpired": "{type} boost has expired",
+      "boostExpiring": "{type} boost expires in {minutes} minutes"
+    }
   }
 }

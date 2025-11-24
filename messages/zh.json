@@ -626,5 +626,93 @@
     "more": "更多",
     "viewProfile": "查看资料",
     "pagination": "显示 {start} - {end}，共 {total} 名工作者"
+  },
+  "fire": {
+    "title": "火焰积分",
+    "balance": "当前火焰余额",
+    "totalFires": "总火焰",
+    "earnedFires": "已获得火焰",
+    "spentFires": "已使用火焰",
+    "purchaseFire": "购买火焰",
+    "dailyLogin": "每日登录",
+    "claimReward": "领取奖励",
+    "alreadyClaimed": "今天已领取",
+    "nextClaimAvailable": "下次登录奖励还需 {time}",
+    "boost": {
+      "title": "推广资料",
+      "featured": "精选推广",
+      "topProfile": "顶部资料推广",
+      "featuredDescription": "12小时内在精选推荐列表中优先展示",
+      "topProfileDescription": "2小时内在搜索结果中优先展示",
+      "cost": "{cost} 火焰",
+      "duration": "{hours} 小时",
+      "activate": "激活",
+      "active": "活跃",
+      "timeRemaining": "剩余：{time}",
+      "extend": "延长",
+      "expires": "过期：{time}",
+      "confirmTitle": "确认激活推广",
+      "confirmMessage": "您确定要花费 {cost} 火焰来激活 {type} 吗？",
+      "confirmExtend": "推广正在激活中。再次激活将延长 {hours} 小时。",
+      "insufficientFire": "火焰不足",
+      "insufficientMessage": "您需要 {required} 火焰，但只有 {current} 火焰"
+    },
+    "purchase": {
+      "title": "购买火焰",
+      "amount": "火焰数量",
+      "cost": "费用",
+      "rate": "1 美元 = 1 火焰",
+      "minAmount": "最少 {min} 火焰",
+      "maxAmount": "最多 {max} 火焰",
+      "walletBalance": "钱包余额",
+      "totalCost": "总费用",
+      "insufficientBalance": "钱包余额不足",
+      "confirmPurchase": "确认购买",
+      "success": "成功购买 {amount} 火焰",
+      "error": "购买火焰失败"
+    },
+    "history": {
+      "title": "交易历史",
+      "type": "类型",
+      "amount": "数量",
+      "balance": "余额",
+      "date": "日期",
+      "description": "描述",
+      "noTransactions": "暂无交易记录",
+      "types": {
+        "purchase": "购买火焰",
+        "daily_login": "每日登录",
+        "boost_featured": "精选推广",
+        "boost_top_profile": "顶部资料推广",
+        "admin_adjustment": "管理员调整",
+        "refund": "退款"
+      }
+    },
+    "dashboard": {
+      "title": "火焰积分管理",
+      "subtitle": "赚取火焰并将您的资料推广到顶部",
+      "overview": "概览",
+      "earnFire": "赚取火焰",
+      "useFire": "使用火焰",
+      "dailyLoginReward": "每天 +{amount} 火焰",
+      "purchaseWithWallet": "使用钱包余额购买火焰",
+      "activeBoosts": "活跃推广",
+      "noActiveBoosts": "没有活跃的推广",
+      "activateBoost": "激活推广以提高可见性"
+    },
+    "menu": {
+      "fire": "推广资料",
+      "firePoints": "火焰积分"
+    },
+    "notifications": {
+      "dailyLoginSuccess": "从每日登录获得 {amount} 火焰！",
+      "dailyLoginAlready": "您今天已领取登录奖励",
+      "purchaseSuccess": "成功购买 {amount} 火焰",
+      "purchaseError": "购买火焰失败：{error}",
+      "boostActivated": "成功激活 {type}！",
+      "boostError": "激活推广失败：{error}",
+      "boostExpired": "{type} 推广已过期",
+      "boostExpiring": "{type} 推广将在 {minutes} 分钟后过期"
+    }
   }
 }

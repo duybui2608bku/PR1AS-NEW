@@ -626,5 +626,93 @@
     "more": "더보기",
     "viewProfile": "프로필 보기",
     "pagination": "{total}명 중 {start} - {end} 표시"
+  },
+  "fire": {
+    "title": "파이어 포인트",
+    "balance": "현재 파이어 잔액",
+    "totalFires": "총 파이어",
+    "earnedFires": "획득한 파이어",
+    "spentFires": "사용한 파이어",
+    "purchaseFire": "파이어 구매",
+    "dailyLogin": "일일 로그인",
+    "claimReward": "보상 받기",
+    "alreadyClaimed": "오늘 이미 받았습니다",
+    "nextClaimAvailable": "다음 로그인 보상까지 {time}",
+    "boost": {
+      "title": "프로필 부스트",
+      "featured": "추천 부스트",
+      "topProfile": "상위 프로필 부스트",
+      "featuredDescription": "12시간 동안 추천 목록에서 우선 노출",
+      "topProfileDescription": "2시간 동안 검색 결과에서 우선 노출",
+      "cost": "{cost} 파이어",
+      "duration": "{hours} 시간",
+      "activate": "활성화",
+      "active": "활성",
+      "timeRemaining": "남은 시간: {time}",
+      "extend": "연장",
+      "expires": "만료: {time}",
+      "confirmTitle": "부스트 활성화 확인",
+      "confirmMessage": "{cost} 파이어를 사용하여 {type}을(를) 활성화하시겠습니까?",
+      "confirmExtend": "부스트가 활성 상태입니다. 다시 활성화하면 {hours}시간 연장됩니다.",
+      "insufficientFire": "파이어 부족",
+      "insufficientMessage": "{required} 파이어가 필요하지만 {current} 파이어만 있습니다"
+    },
+    "purchase": {
+      "title": "파이어 구매",
+      "amount": "파이어 수량",
+      "cost": "비용",
+      "rate": "1 USD = 1 파이어",
+      "minAmount": "최소 {min} 파이어",
+      "maxAmount": "최대 {max} 파이어",
+      "walletBalance": "지갑 잔액",
+      "totalCost": "총 비용",
+      "insufficientBalance": "지갑 잔액 부족",
+      "confirmPurchase": "구매 확인",
+      "success": "{amount} 파이어를 성공적으로 구매했습니다",
+      "error": "파이어 구매 실패"
+    },
+    "history": {
+      "title": "거래 내역",
+      "type": "유형",
+      "amount": "수량",
+      "balance": "잔액",
+      "date": "날짜",
+      "description": "설명",
+      "noTransactions": "거래 내역이 없습니다",
+      "types": {
+        "purchase": "파이어 구매",
+        "daily_login": "일일 로그인",
+        "boost_featured": "추천 부스트",
+        "boost_top_profile": "상위 프로필 부스트",
+        "admin_adjustment": "관리자 조정",
+        "refund": "환불"
+      }
+    },
+    "dashboard": {
+      "title": "파이어 포인트 관리",
+      "subtitle": "파이어를 획득하고 프로필을 상위에 올리세요",
+      "overview": "개요",
+      "earnFire": "파이어 획득",
+      "useFire": "파이어 사용",
+      "dailyLoginReward": "하루 +{amount} 파이어",
+      "purchaseWithWallet": "지갑 잔액으로 파이어 구매",
+      "activeBoosts": "활성 부스트",
+      "noActiveBoosts": "활성 부스트 없음",
+      "activateBoost": "부스트를 활성화하여 가시성을 높이세요"
+    },
+    "menu": {
+      "fire": "프로필 부스트",
+      "firePoints": "파이어 포인트"
+    },
+    "notifications": {
+      "dailyLoginSuccess": "일일 로그인으로 {amount} 파이어를 받았습니다!",
+      "dailyLoginAlready": "오늘의 로그인 보상을 이미 받았습니다",
+      "purchaseSuccess": "{amount} 파이어를 성공적으로 구매했습니다",
+      "purchaseError": "파이어 구매 실패: {error}",
+      "boostActivated": "{type}을(를) 성공적으로 활성화했습니다!",
+      "boostError": "부스트 활성화 실패: {error}",
+      "boostExpired": "{type} 부스트가 만료되었습니다",
+      "boostExpiring": "{type} 부스트가 {minutes}분 후에 만료됩니다"
+    }
   }
 }

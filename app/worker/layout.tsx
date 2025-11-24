@@ -9,6 +9,7 @@ import {
   UserOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
+  FireOutlined,
 } from "@ant-design/icons";
 import { usePathname, useRouter } from "next/navigation";
 import { useMobileSidebar } from "@/hooks/useMobileSidebar";
@@ -55,6 +56,7 @@ export default function WorkerLayout({
       <DashboardOutlined />
     ),
     getItem("My Wallet", "/worker/wallet", <WalletOutlined />),
+    getItem(t("fire.menu.fire") || "Boost Profile", "/worker/fire", <FireOutlined />),
     getItem("My Jobs", "/worker/my-jobs", <UnorderedListOutlined />),
     getItem(t("nav.profile") || "Profile", "/worker/profile", <UserOutlined />),
   ];
