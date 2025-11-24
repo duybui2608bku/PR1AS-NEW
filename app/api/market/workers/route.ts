@@ -5,7 +5,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
-import { WorkerProfileStatus } from "@/lib/utils/enums";
+import { WorkerProfileStatus, BoostType, BoostStatus } from "@/lib/utils/enums";
 
 interface WorkerFilters {
   age_min?: number;
@@ -53,6 +53,9 @@ interface WorkerMarketProfile {
   }>;
   min_price?: number;
   max_price?: number;
+  has_recommendation_boost?: boolean;
+  has_profile_boost?: boolean;
+  boost_priority?: number; // Higher = better (2 = both boosts, 1 = one boost, 0 = no boost)
 }
 
 /**
@@ -63,6 +66,31 @@ export async function GET(request: NextRequest) {
   try {
     const supabase = createAdminClient();
     const { searchParams } = new URL(request.url);
+
+    // Get workers with active boosts (for prioritization)
+    const { data: boostedWorkers } = await supabase
+      .from("worker_boosts")
+      .select("user_id, boost_type")
+      .eq("status", BoostStatus.ACTIVE)
+      .gt("expires_at", new Date().toISOString());
+
+    // Create map of boosted workers
+    const boostMap = new Map<
+      string,
+      { hasRecommendation: boolean; hasProfile: boolean }
+    >();
+    boostedWorkers?.forEach((boost) => {
+      const existing = boostMap.get(boost.user_id) || {
+        hasRecommendation: false,
+        hasProfile: false,
+      };
+      if (boost.boost_type === BoostType.RECOMMENDATION) {
+        existing.hasRecommendation = true;
+      } else if (boost.boost_type === BoostType.PROFILE) {
+        existing.hasProfile = true;
+      }
+      boostMap.set(boost.user_id, existing);
+    });
 
     // Parse filters
     const filters: WorkerFilters = {
@@ -193,6 +221,13 @@ export async function GET(request: NextRequest) {
         }
       }
 
+      // Check if worker has boosts
+      const boostInfo = boostMap.get(worker.user_id);
+      const hasRecommendationBoost = boostInfo?.hasRecommendation || false;
+      const hasProfileBoost = boostInfo?.hasProfile || false;
+      const boostPriority =
+        (hasRecommendationBoost ? 1 : 0) + (hasProfileBoost ? 1 : 0);
+
       return {
         id: worker.id,
         full_name: worker.full_name,
@@ -215,8 +250,21 @@ export async function GET(request: NextRequest) {
         })),
         min_price: minPrice,
         max_price: maxPrice,
+        has_recommendation_boost: hasRecommendationBoost,
+        has_profile_boost: hasProfileBoost,
+        boost_priority: boostPriority,
       };
     }) as WorkerMarketProfile[];
+
+    // Sort by boost priority (boosted workers first)
+    workers.sort((a, b) => {
+      // Primary sort: boost priority (higher = better)
+      if (b.boost_priority !== a.boost_priority) {
+        return (b.boost_priority || 0) - (a.boost_priority || 0);
+      }
+      // Secondary sort: created_at (newer first)
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    });
 
     // Apply price filters (post-processing since we need to calculate from services)
     if (filters.price_min !== undefined) {
