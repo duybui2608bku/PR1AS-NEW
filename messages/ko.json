@@ -629,6 +629,7 @@
   },
   "fire": {
     "title": "파이어 포인트",
+    "fireUnit": "Fire",
     "balance": "현재 파이어 잔액",
     "totalFires": "총 파이어",
     "earnedFires": "획득한 파이어",
@@ -646,6 +647,7 @@
       "topProfileDescription": "2시간 동안 검색 결과에서 우선 노출",
       "cost": "{cost} 파이어",
       "duration": "{hours} 시간",
+      "hours": "시간",
       "activate": "활성화",
       "active": "활성",
       "timeRemaining": "남은 시간: {time}",
@@ -666,7 +668,7 @@
       "maxAmount": "최대 {max} 파이어",
       "walletBalance": "지갑 잔액",
       "totalCost": "총 비용",
-      "insufficientBalance": "지갑 잔액 부족",
+      "insufficientBalance": "이 거래를 위한 잔액이 부족합니다",
       "confirmPurchase": "구매 확인",
       "success": "{amount} 파이어를 성공적으로 구매했습니다",
       "error": "파이어 구매 실패"
@@ -707,7 +709,7 @@
     "notifications": {
       "dailyLoginSuccess": "일일 로그인으로 {amount} 파이어를 받았습니다!",
       "dailyLoginAlready": "오늘의 로그인 보상을 이미 받았습니다",
-      "purchaseSuccess": "{amount} 파이어를 성공적으로 구매했습니다",
+      "purchaseSuccess": "{amount} Fire Points를 성공적으로 구매했습니다",
       "purchaseError": "파이어 구매 실패: {error}",
       "boostActivated": "{type}을(를) 성공적으로 활성화했습니다!",
       "boostError": "부스트 활성화 실패: {error}",

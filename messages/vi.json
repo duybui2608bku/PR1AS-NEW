@@ -754,7 +754,8 @@
     "pagination": "Hiển thị {start} - {end} trên tổng {total} worker"
   },
   "fire": {
-    "title": "Điểm Fire",
+    "title": "Fire Points",
+    "fireUnit": "Fire",
     "balance": "Số Fire hiện có",
     "totalFires": "Tổng số Fire",
     "earnedFires": "Fire đã kiếm",
@@ -772,6 +773,7 @@
       "topProfileDescription": "Xuất hiện ưu tiên trên kết quả tìm kiếm trong 2 giờ",
       "cost": "{cost} Fire",
       "duration": "{hours} giờ",
+      "hours": "giờ",
       "activate": "Kích hoạt",
       "active": "Đang hoạt động",
       "timeRemaining": "Còn lại: {time}",
@@ -833,7 +835,7 @@
     "notifications": {
       "dailyLoginSuccess": "Đã nhận {amount} Fire từ đăng nhập hàng ngày!",
       "dailyLoginAlready": "Bạn đã nhận thưởng đăng nhập hôm nay rồi",
-      "purchaseSuccess": "Đã mua thành công {amount} Fire",
+      "purchaseSuccess": "Đã mua thành công {amount} Fire Points",
       "purchaseError": "Không thể mua Fire: {error}",
       "boostActivated": "Đã kích hoạt {type} thành công!",
       "boostError": "Không thể kích hoạt buff: {error}",

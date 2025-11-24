@@ -3,38 +3,56 @@
  * Get worker's Fire points balance and active boosts
  */
 
-import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
-import { FireService } from '@/lib/fire/service';
-import { GetFireBalanceResponse } from '@/lib/fire/types';
+import { NextRequest, NextResponse } from "next/server";
+import { createAdminClient } from "@/lib/supabase/server";
+import { FireService } from "@/lib/fire/service";
+import { GetFireBalanceResponse } from "@/lib/fire/types";
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient();
+    // Try to get token from cookies first (for httpOnly cookie authentication)
+    let token = request.cookies.get("sb-access-token")?.value;
+
+    // If no cookie, check Authorization header (for client-side auth)
+    if (!token) {
+      const authHeader = request.headers.get("Authorization");
+      if (authHeader) {
+        token = authHeader.replace("Bearer ", "");
+      }
+    }
+
+    if (!token) {
+      return NextResponse.json<GetFireBalanceResponse>(
+        { success: false, error: "Not authenticated" },
+        { status: 401 }
+      );
+    }
+
+    const supabase = await createAdminClient();
 
     // Get authenticated user
     const {
       data: { user },
       error: authError,
-    } = await supabase.auth.getUser();
+    } = await supabase.auth.getUser(token);
 
     if (authError || !user) {
       return NextResponse.json<GetFireBalanceResponse>(
-        { success: false, error: 'Unauthorized' },
+        { success: false, error: "Invalid or expired token" },
         { status: 401 }
       );
     }
 
     // Get worker profile
     const { data: workerProfile, error: profileError } = await supabase
-      .from('worker_profiles')
-      .select('id')
-      .eq('user_id', user.id)
+      .from("worker_profiles")
+      .select("id")
+      .eq("user_id", user.id)
       .single();
 
     if (profileError || !workerProfile) {
       return NextResponse.json<GetFireBalanceResponse>(
-        { success: false, error: 'Worker profile not found' },
+        { success: false, error: "Worker profile not found" },
         { status: 404 }
       );
     }
@@ -54,9 +72,12 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error: any) {
-    console.error('Fire balance error:', error);
+    console.error("Fire balance error:", error);
     return NextResponse.json<GetFireBalanceResponse>(
-      { success: false, error: error.message || 'Failed to fetch Fire balance' },
+      {
+        success: false,
+        error: error.message || "Failed to fetch Fire balance",
+      },
       { status: error.statusCode || 500 }
     );
   }

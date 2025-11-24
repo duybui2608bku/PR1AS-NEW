@@ -743,6 +743,7 @@
   },
   "fire": {
     "title": "Fire Points",
+    "fireUnit": "Fire",
     "balance": "Current Fire Balance",
     "totalFires": "Total Fire",
     "earnedFires": "Fires Earned",
@@ -760,6 +761,7 @@
       "topProfileDescription": "Get priority placement in search results for 2 hours",
       "cost": "{cost} Fire",
       "duration": "{hours} hours",
+      "hours": "hours",
       "activate": "Activate",
       "active": "Active",
       "timeRemaining": "Remaining: {time}",
@@ -780,7 +782,7 @@
       "maxAmount": "Maximum {max} Fire",
       "walletBalance": "Wallet Balance",
       "totalCost": "Total Cost",
-      "insufficientBalance": "Insufficient wallet balance",
+      "insufficientBalance": "Insufficient balance for this transaction",
       "confirmPurchase": "Confirm Purchase",
       "success": "Successfully purchased {amount} Fire",
       "error": "Failed to purchase Fire"
@@ -821,7 +823,7 @@
     "notifications": {
       "dailyLoginSuccess": "Received {amount} Fire from daily login!",
       "dailyLoginAlready": "You've already claimed today's login reward",
-      "purchaseSuccess": "Successfully purchased {amount} Fire",
+      "purchaseSuccess": "Successfully purchased {amount} Fire Points",
       "purchaseError": "Failed to purchase Fire: {error}",
       "boostActivated": "Successfully activated {type}!",
       "boostError": "Failed to activate boost: {error}",

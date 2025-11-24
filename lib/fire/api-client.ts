@@ -14,7 +14,7 @@ import {
   GetActiveBoostsResponse,
   FireBoostType,
   FireTransactionType,
-} from './types';
+} from "./types";
 
 // =============================================================================
 // API CLIENT
@@ -24,9 +24,9 @@ import {
  * Get worker's Fire balance
  */
 export async function getFireBalance(): Promise<GetFireBalanceResponse> {
-  const response = await fetch('/api/fire/balance', {
-    method: 'GET',
-    credentials: 'include',
+  const response = await fetch("/api/fire/balance", {
+    method: "GET",
+    credentials: "include",
   });
 
   return response.json();
@@ -35,13 +35,15 @@ export async function getFireBalance(): Promise<GetFireBalanceResponse> {
 /**
  * Purchase Fire with wallet balance
  */
-export async function purchaseFire(amount: number): Promise<PurchaseFireResponse> {
+export async function purchaseFire(
+  amount: number
+): Promise<PurchaseFireResponse> {
   const body: PurchaseFireRequest = { amount };
 
-  const response = await fetch('/api/fire/purchase', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    credentials: 'include',
+  const response = await fetch("/api/fire/purchase", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
     body: JSON.stringify(body),
   });
 
@@ -52,9 +54,9 @@ export async function purchaseFire(amount: number): Promise<PurchaseFireResponse
  * Claim daily login reward
  */
 export async function claimDailyLogin(): Promise<ClaimDailyLoginResponse> {
-  const response = await fetch('/api/fire/daily-login', {
-    method: 'POST',
-    credentials: 'include',
+  const response = await fetch("/api/fire/daily-login", {
+    method: "POST",
+    credentials: "include",
   });
 
   return response.json();
@@ -63,13 +65,15 @@ export async function claimDailyLogin(): Promise<ClaimDailyLoginResponse> {
 /**
  * Activate Fire boost
  */
-export async function activateBoost(boostType: FireBoostType): Promise<ActivateBoostResponse> {
+export async function activateBoost(
+  boostType: FireBoostType
+): Promise<ActivateBoostResponse> {
   const body: ActivateBoostRequest = { boost_type: boostType };
 
-  const response = await fetch('/api/fire/boost', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    credentials: 'include',
+  const response = await fetch("/api/fire/boost", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
     body: JSON.stringify(body),
   });
 
@@ -80,9 +84,9 @@ export async function activateBoost(boostType: FireBoostType): Promise<ActivateB
  * Get active boosts
  */
 export async function getActiveBoosts(): Promise<GetActiveBoostsResponse> {
-  const response = await fetch('/api/fire/boosts/active', {
-    method: 'GET',
-    credentials: 'include',
+  const response = await fetch("/api/fire/boosts/active", {
+    method: "GET",
+    credentials: "include",
   });
 
   return response.json();
@@ -98,15 +102,18 @@ export async function getFireTransactions(params?: {
 }): Promise<GetFireTransactionsResponse> {
   const searchParams = new URLSearchParams();
 
-  if (params?.page) searchParams.set('page', params.page.toString());
-  if (params?.per_page) searchParams.set('per_page', params.per_page.toString());
-  if (params?.type) searchParams.set('type', params.type);
+  if (params?.page) searchParams.set("page", params.page.toString());
+  if (params?.per_page)
+    searchParams.set("per_page", params.per_page.toString());
+  if (params?.type) searchParams.set("type", params.type);
 
-  const url = `/api/fire/transactions${searchParams.toString() ? '?' + searchParams.toString() : ''}`;
+  const url = `/api/fire/transactions${
+    searchParams.toString() ? "?" + searchParams.toString() : ""
+  }`;
 
   const response = await fetch(url, {
-    method: 'GET',
-    credentials: 'include',
+    method: "GET",
+    credentials: "include",
   });
 
   return response.json();
@@ -122,7 +129,7 @@ export async function checkBoostEligibility(
   const activeBoostsResponse = await getActiveBoosts();
 
   if (!balanceResponse.success || !activeBoostsResponse.success) {
-    return { can_activate: false, reason: 'Failed to check eligibility' };
+    return { can_activate: false, reason: "Failed to check eligibility" };
   }
 
   const balance = balanceResponse.data!.total_fires;
@@ -136,7 +143,7 @@ export async function checkBoostEligibility(
   if (hasActiveBoost) {
     return {
       can_activate: true,
-      reason: 'Boost is active. Activating again will extend duration.',
+      reason: "Boost is active. Activating again will extend duration.",
     };
   }
 
@@ -185,12 +192,12 @@ export function formatTimeRemaining(minutes: number): string {
  */
 export function getTransactionTypeLabel(type: FireTransactionType): string {
   const labels: Record<FireTransactionType, string> = {
-    [FireTransactionType.PURCHASE]: 'Purchase',
-    [FireTransactionType.DAILY_LOGIN]: 'Daily Login',
-    [FireTransactionType.BOOST_FEATURED]: 'Featured Boost',
-    [FireTransactionType.BOOST_TOP_PROFILE]: 'Top Profile Boost',
-    [FireTransactionType.ADMIN_ADJUSTMENT]: 'Admin Adjustment',
-    [FireTransactionType.REFUND]: 'Refund',
+    [FireTransactionType.PURCHASE]: "Purchase",
+    [FireTransactionType.DAILY_LOGIN]: "Daily Login",
+    [FireTransactionType.BOOST_FEATURED]: "Featured Boost",
+    [FireTransactionType.BOOST_TOP_PROFILE]: "Top Profile Boost",
+    [FireTransactionType.ADMIN_ADJUSTMENT]: "Admin Adjustment",
+    [FireTransactionType.REFUND]: "Refund",
   };
 
   return labels[type] || type;
@@ -201,15 +208,15 @@ export function getTransactionTypeLabel(type: FireTransactionType): string {
  */
 export function getTransactionTypeColor(type: FireTransactionType): string {
   const colors: Record<FireTransactionType, string> = {
-    [FireTransactionType.PURCHASE]: 'green',
-    [FireTransactionType.DAILY_LOGIN]: 'blue',
-    [FireTransactionType.BOOST_FEATURED]: 'orange',
-    [FireTransactionType.BOOST_TOP_PROFILE]: 'orange',
-    [FireTransactionType.ADMIN_ADJUSTMENT]: 'purple',
-    [FireTransactionType.REFUND]: 'green',
+    [FireTransactionType.PURCHASE]: "green",
+    [FireTransactionType.DAILY_LOGIN]: "blue",
+    [FireTransactionType.BOOST_FEATURED]: "orange",
+    [FireTransactionType.BOOST_TOP_PROFILE]: "orange",
+    [FireTransactionType.ADMIN_ADJUSTMENT]: "purple",
+    [FireTransactionType.REFUND]: "green",
   };
 
-  return colors[type] || 'default';
+  return colors[type] || "default";
 }
 
 /**
@@ -217,8 +224,8 @@ export function getTransactionTypeColor(type: FireTransactionType): string {
  */
 export function getBoostTypeName(type: FireBoostType): string {
   const names: Record<FireBoostType, string> = {
-    [FireBoostType.FEATURED_RECOMMENDATION]: 'Featured Recommendation',
-    [FireBoostType.TOP_PROFILE]: 'Top Profile',
+    [FireBoostType.FEATURED_RECOMMENDATION]: "Featured Recommendation",
+    [FireBoostType.TOP_PROFILE]: "Top Profile",
   };
 
   return names[type] || type;
@@ -229,9 +236,81 @@ export function getBoostTypeName(type: FireBoostType): string {
  */
 export function getBoostTypeIcon(type: FireBoostType): string {
   const icons: Record<FireBoostType, string> = {
-    [FireBoostType.FEATURED_RECOMMENDATION]: '🔥',
-    [FireBoostType.TOP_PROFILE]: '⭐',
+    [FireBoostType.FEATURED_RECOMMENDATION]: "🔥",
+    [FireBoostType.TOP_PROFILE]: "⭐",
   };
 
-  return icons[type] || '🚀';
+  return icons[type] || "🚀";
 }
+
+// =============================================================================
+// MAIN API OBJECT
+// =============================================================================
+
+/**
+ * Main Fire API object with all methods
+ */
+export const fireAPI = {
+  /**
+   * Get worker's Fire balance and active boosts
+   */
+  async getBalance(): Promise<GetFireBalanceResponse> {
+    return getFireBalance();
+  },
+
+  /**
+   * Purchase Fire with wallet balance
+   */
+  async purchaseFire(amount: number): Promise<PurchaseFireResponse> {
+    return purchaseFire(amount);
+  },
+
+  /**
+   * Claim daily login reward
+   */
+  async claimDailyLogin(): Promise<ClaimDailyLoginResponse> {
+    return claimDailyLogin();
+  },
+
+  /**
+   * Activate boost
+   */
+  async activateBoost(
+    request: ActivateBoostRequest
+  ): Promise<ActivateBoostResponse> {
+    return activateBoost(request.boost_type);
+  },
+
+  /**
+   * Get Fire transaction history
+   */
+  async getTransactions(
+    options: {
+      page?: number;
+      perPage?: number;
+      type?: FireTransactionType;
+    } = {}
+  ): Promise<GetFireTransactionsResponse> {
+    const { page = 1, perPage = 20, type } = options;
+    return getFireTransactions({
+      page,
+      per_page: perPage,
+      type,
+    });
+  },
+
+  /**
+   * Get active boosts status
+   */
+  async getBoostStatus(): Promise<GetActiveBoostsResponse> {
+    return getActiveBoosts();
+  },
+
+  // Convenience methods
+  activateRecommendationBoost: () =>
+    fireAPI.activateBoost({
+      boost_type: FireBoostType.FEATURED_RECOMMENDATION,
+    }),
+  activateProfileBoost: () =>
+    fireAPI.activateBoost({ boost_type: FireBoostType.TOP_PROFILE }),
+};

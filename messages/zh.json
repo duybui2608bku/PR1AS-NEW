@@ -629,6 +629,7 @@
   },
   "fire": {
     "title": "火焰积分",
+    "fireUnit": "Fire",
     "balance": "当前火焰余额",
     "totalFires": "总火焰",
     "earnedFires": "已获得火焰",
@@ -646,6 +647,7 @@
       "topProfileDescription": "2小时内在搜索结果中优先展示",
       "cost": "{cost} 火焰",
       "duration": "{hours} 小时",
+      "hours": "小时",
       "activate": "激活",
       "active": "活跃",
       "timeRemaining": "剩余：{time}",
@@ -666,7 +668,7 @@
       "maxAmount": "最多 {max} 火焰",
       "walletBalance": "钱包余额",
       "totalCost": "总费用",
-      "insufficientBalance": "钱包余额不足",
+      "insufficientBalance": "余额不足，无法进行此交易",
       "confirmPurchase": "确认购买",
       "success": "成功购买 {amount} 火焰",
       "error": "购买火焰失败"
@@ -707,7 +709,7 @@
     "notifications": {
       "dailyLoginSuccess": "从每日登录获得 {amount} 火焰！",
       "dailyLoginAlready": "您今天已领取登录奖励",
-      "purchaseSuccess": "成功购买 {amount} 火焰",
+      "purchaseSuccess": "成功购买 {amount} Fire Points",
       "purchaseError": "购买火焰失败：{error}",
       "boostActivated": "成功激活 {type}！",
       "boostError": "激活推广失败：{error}",

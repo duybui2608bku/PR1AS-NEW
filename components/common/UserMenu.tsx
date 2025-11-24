@@ -164,6 +164,8 @@ export default function UserMenu() {
       router.push(getProfileUrl(user.role));
     } else if (key === "settings") {
       router.push("/settings");
+    } else if (key === "fire") {
+      router.push("/worker/fire");
     }
   };
 
