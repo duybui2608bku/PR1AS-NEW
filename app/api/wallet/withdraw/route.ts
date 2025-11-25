@@ -97,13 +97,21 @@ export async function POST(request: NextRequest) {
         });
 
         // Deduct from wallet
-        await supabase
+        const { data: currentWallet } = await supabase
           .from('wallets')
-          .update({
-            balance_usd: supabase.raw(`balance_usd - ${amount_usd}`),
-            total_spent_usd: supabase.raw(`total_spent_usd + ${amount_usd}`),
-          })
-          .eq('user_id', user.id);
+          .select('balance_usd, total_spent_usd')
+          .eq('user_id', user.id)
+          .single();
+
+        if (currentWallet) {
+          await supabase
+            .from('wallets')
+            .update({
+              balance_usd: currentWallet.balance_usd - amount_usd,
+              total_spent_usd: currentWallet.total_spent_usd + amount_usd,
+            })
+            .eq('user_id', user.id);
+        }
 
         // Update transaction with payout info
         await supabase
@@ -171,13 +179,21 @@ export async function POST(request: NextRequest) {
       });
 
       // Deduct from wallet (move to pending)
-      await supabase
+      const { data: currentWallet } = await supabase
         .from('wallets')
-        .update({
-          balance_usd: supabase.raw(`balance_usd - ${amount_usd}`),
-          pending_usd: supabase.raw(`pending_usd + ${amount_usd}`),
-        })
-        .eq('user_id', user.id);
+        .select('balance_usd, pending_usd')
+        .eq('user_id', user.id)
+        .single();
+
+      if (currentWallet) {
+        await supabase
+          .from('wallets')
+          .update({
+            balance_usd: currentWallet.balance_usd - amount_usd,
+            pending_usd: currentWallet.pending_usd + amount_usd,
+          })
+          .eq('user_id', user.id);
+      }
 
       return NextResponse.json({
         success: true,

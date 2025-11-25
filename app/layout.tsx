@@ -1,18 +1,10 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
 import "./globals.css";
 import "./globals-layout.css";
 import { AntdRegistry } from "@ant-design/nextjs-registry";
 import I18nProvider from "@/components/providers/I18nProvider";
 import { AntdAppProvider } from "@/components/providers/AntdProvider";
 import { getSiteSettingsServer } from "@/lib/utils/site-settings";
-
-const inter = Inter({
-  subsets: ["latin", "vietnamese"],
-  weight: ["300", "400", "500", "600", "700"],
-  variable: "--font-inter",
-  display: "swap",
-});
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -95,7 +87,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="vi">
-      <body className={`${inter.variable} antialiased`}>
+      <body className="antialiased font-sans">
         <AntdRegistry>
           <AntdAppProvider>
             <I18nProvider>{children}</I18nProvider>

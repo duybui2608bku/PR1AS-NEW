@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
     // Handle bank transfer
     if (payment_method === 'bank_transfer') {
       const bankService = createBankTransferService();
-      const amountVnd = metadata?.amount_vnd || Math.round(amount_usd * 24000);
+      const amountVnd = (typeof metadata?.amount_vnd === 'number' ? metadata.amount_vnd : undefined) || Math.round(amount_usd * 24000);
 
       const deposit = await bankService.createDepositRequest(
         supabase,

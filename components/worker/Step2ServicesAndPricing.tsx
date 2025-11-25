@@ -82,7 +82,9 @@ export default function Step2ServicesAndPricing({
     }
   };
 
-  const handleAvatarChange = async (url: string, filePath: string) => {
+  const handleAvatarChange = async (url: string | undefined, filePath?: string) => {
+    if (!url || !filePath) return;
+
     try {
       setSavingImage(true);
       setAvatarUrl(url);
@@ -101,7 +103,9 @@ export default function Step2ServicesAndPricing({
     }
   };
 
-  const handleGalleryAdd = async (url: string, filePath: string) => {
+  const handleGalleryAdd = async (url: string | undefined, filePath?: string) => {
+    if (!url || !filePath) return;
+
     try {
       setSavingImage(true);
       setGalleryUrls([...galleryUrls, url]);
@@ -181,7 +185,6 @@ export default function Step2ServicesAndPricing({
               onChange={handleAvatarChange}
               folder="worker-avatars"
               type="avatar"
-              disabled={savingImage}
             />
             {!avatarUrl && (
               <Paragraph
@@ -214,8 +217,7 @@ export default function Step2ServicesAndPricing({
                 value={undefined}
                 onChange={handleGalleryAdd}
                 folder="worker-gallery"
-                type="gallery"
-                disabled={savingImage}
+                type="image"
               />
             </Space>
             <Paragraph type="secondary" style={{ marginTop: 8, fontSize: 12 }}>

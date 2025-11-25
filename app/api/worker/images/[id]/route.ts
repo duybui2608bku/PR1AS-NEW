@@ -10,9 +10,10 @@ import { getErrorMessage } from '@/lib/utils/common';
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const { user, supabase, error: authError } = await getAuthenticatedUser(request);
 
     if (authError || !user.id) {
@@ -33,7 +34,7 @@ export async function DELETE(
       );
     }
 
-    await service.deleteWorkerImage(params.id, profile.id);
+    await service.deleteWorkerImage(id, profile.id);
 
     return NextResponse.json({
       success: true,

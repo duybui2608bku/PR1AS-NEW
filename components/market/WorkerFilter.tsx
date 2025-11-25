@@ -116,7 +116,7 @@ export default function WorkerFilter({
             min={18}
             max={60}
             value={ageRange}
-            onChange={setAgeRange}
+            onChange={(value) => setAgeRange(value as [number, number])}
             marks={{
               18: "18",
               30: "30",
@@ -204,7 +204,7 @@ export default function WorkerFilter({
             max={200}
             step={5}
             value={priceRange}
-            onChange={setPriceRange}
+            onChange={(value) => setPriceRange(value as [number, number])}
             marks={{
               0: "$0",
               50: "$50",
