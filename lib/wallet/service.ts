@@ -3,7 +3,7 @@
  * Handles all wallet-related business logic and database operations
  */
 
-import { createClient } from '@supabase/supabase-js';
+import { SupabaseClient } from '@supabase/supabase-js';
 import {
   Wallet,
   Transaction,
@@ -32,7 +32,7 @@ import {
 // =============================================================================
 
 export class WalletService {
-  constructor(private supabase: ReturnType<typeof createClient>) {}
+  constructor(private supabase: SupabaseClient<any>) {}
 
   // ===========================================================================
   // PLATFORM SETTINGS
@@ -62,7 +62,7 @@ export class WalletService {
       else settings[setting.key] = value;
     });
 
-    return settings as PlatformSettings;
+    return settings as unknown as PlatformSettings;
   }
 
   /**
@@ -251,36 +251,6 @@ export class WalletService {
     return data as Wallet;
   }
 
-  /**
-   * Get wallet summary
-   */
-  async getWalletSummary(userId: string): Promise<WalletSummary> {
-    const wallet = await this.getWallet(userId);
-
-    // Count active escrows
-    const { count: escrowCount } = await this.supabase
-      .from('escrow_holds')
-      .select('*', { count: 'exact', head: true })
-      .or(`employer_id.eq.${userId},worker_id.eq.${userId}`)
-      .eq('status', 'held');
-
-    // Count pending withdrawals
-    const { count: withdrawalCount } = await this.supabase
-      .from('transactions')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', userId)
-      .eq('type', 'withdrawal')
-      .eq('status', 'pending');
-
-    return {
-      available_balance: wallet.balance_usd,
-      pending_balance: wallet.pending_usd,
-      total_earned: wallet.total_earned_usd,
-      total_spent: wallet.total_spent_usd,
-      active_escrows: escrowCount || 0,
-      pending_withdrawals: withdrawalCount || 0,
-    };
-  }
 
   // ===========================================================================
   // TRANSACTION OPERATIONS

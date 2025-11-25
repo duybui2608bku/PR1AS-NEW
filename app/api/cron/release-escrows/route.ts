@@ -11,11 +11,9 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createAdminClient } from '@/lib/supabase/server';
 import { WalletService } from '@/lib/wallet/service';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 const cronSecret = process.env.CRON_SECRET;
 
 export async function GET(request: NextRequest) {
@@ -29,7 +27,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    const supabase = createAdminClient();
     const walletService = new WalletService(supabase);
 
     // Get escrows ready for release
@@ -45,12 +43,12 @@ export async function GET(request: NextRequest) {
     // Release each escrow
     for (const escrow of escrows) {
       try {
-        await walletService.releaseEscrow(escrow.escrow_id);
+        await walletService.releaseEscrow(escrow.id);
         results.released++;
       } catch (error: any) {
         results.failed++;
         results.errors.push({
-          escrow_id: escrow.escrow_id,
+          escrow_id: escrow.id,
           error: error.message,
         });
       }

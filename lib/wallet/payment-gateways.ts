@@ -3,7 +3,7 @@
  * Handles external payment processing (Bank Transfer QR, PayPal, etc.)
  */
 
-import { createClient } from '@supabase/supabase-js';
+import { SupabaseClient } from '@supabase/supabase-js';
 import {
   BankDeposit,
   BankWebhookData,
@@ -65,7 +65,7 @@ export class BankTransferService {
    * Create bank deposit request
    */
   async createDepositRequest(
-    supabase: ReturnType<typeof createClient>,
+    supabase: SupabaseClient<any>,
     userId: string,
     amountUsd: number,
     amountVnd?: number
@@ -121,7 +121,7 @@ export class BankTransferService {
    * Process bank webhook notification
    */
   async processWebhook(
-    supabase: ReturnType<typeof createClient>,
+    supabase: SupabaseClient<any>,
     webhookData: BankWebhookData
   ): Promise<BankDeposit | null> {
     const {
@@ -204,7 +204,7 @@ export class BankTransferService {
    * Complete bank deposit (credit wallet)
    */
   async completeDeposit(
-    supabase: ReturnType<typeof createClient>,
+    supabase: SupabaseClient<any>,
     depositId: string
   ): Promise<BankDeposit> {
     const { data, error } = await supabase
@@ -227,7 +227,7 @@ export class BankTransferService {
   /**
    * Expire old pending deposits
    */
-  async expireOldDeposits(supabase: ReturnType<typeof createClient>): Promise<number> {
+  async expireOldDeposits(supabase: SupabaseClient<any>): Promise<number> {
     const { data, error } = await supabase
       .from('bank_deposits')
       .update({ status: 'expired' })
@@ -305,6 +305,14 @@ export class PayPalService {
     this.accessToken = data.access_token;
     this.tokenExpiry = Date.now() + (data.expires_in * 1000) - 60000; // Refresh 1 minute early
 
+    if (!this.accessToken) {
+      throw new WalletError(
+        'Failed to retrieve PayPal access token',
+        WalletErrorCodes.PAYMENT_GATEWAY_ERROR,
+        500
+      );
+    }
+
     return this.accessToken;
   }
 
@@ -359,6 +367,14 @@ export class PayPalService {
       href: string;
     }
     const approvalUrl = (order.links as PayPalLink[]).find((link) => link.rel === 'approve')?.href;
+
+    if (!approvalUrl) {
+      throw new WalletError(
+        'PayPal approval URL not found',
+        WalletErrorCodes.PAYMENT_GATEWAY_ERROR,
+        500
+      );
+    }
 
     return {
       orderId: order.id,

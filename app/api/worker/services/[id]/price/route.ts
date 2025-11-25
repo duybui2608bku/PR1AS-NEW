@@ -11,9 +11,10 @@ import { UpdateServicePriceRequest } from '@/lib/worker/types';
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const { user, supabase, error: authError } = await getAuthenticatedUser(request);
 
     if (authError || !user.id) {
@@ -44,7 +45,7 @@ export async function PATCH(
       );
     }
 
-    const updatedPrice = await service.updateWorkerServicePrice(params.id, profile.id, body);
+    const updatedPrice = await service.updateWorkerServicePrice(id, profile.id, body);
 
     return NextResponse.json({
       success: true,

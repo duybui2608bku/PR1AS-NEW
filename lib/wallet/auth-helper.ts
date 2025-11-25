@@ -4,17 +4,15 @@
  */
 
 import { NextRequest } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+import { SupabaseClient } from '@supabase/supabase-js';
+import { createAdminClient } from '@/lib/supabase/server';
 
 export interface AuthResult {
   user: {
     id: string;
     email?: string;
   };
-  supabase: ReturnType<typeof createClient>;
+  supabase: SupabaseClient<any>;
   error?: string;
 }
 
@@ -34,12 +32,12 @@ export async function getAuthenticatedUser(request: NextRequest): Promise<AuthRe
   if (!token) {
     return {
       user: { id: '' },
-      supabase: createClient(supabaseUrl, supabaseServiceKey),
+      supabase: createAdminClient(),
       error: 'Unauthorized',
     };
   }
 
-  const supabase = createClient(supabaseUrl, supabaseServiceKey);
+  const supabase = createAdminClient();
 
   // Verify token and get user
   const { data: { user }, error: authError } = await supabase.auth.getUser(token);

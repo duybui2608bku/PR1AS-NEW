@@ -10,13 +10,14 @@ import { getErrorMessage } from '@/lib/utils/common';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const supabase = await createClient();
     const service = new WorkerProfileService(supabase);
 
-    const profile = await service.getWorkerProfileById(params.id);
+    const profile = await service.getWorkerProfileById(id);
 
     if (!profile) {
       return NextResponse.json(

@@ -5,13 +5,11 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createAdminClient } from '@/lib/supabase/server';
 import { WalletService } from '@/lib/wallet/service';
+import { SupabaseClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-
-async function verifyAdmin(token: string, supabase: ReturnType<typeof createClient>) {
+async function verifyAdmin(token: string, supabase: SupabaseClient<any>) {
   const { data: { user }, error: authError } = await supabase.auth.getUser(token);
 
   if (authError || !user) {
@@ -22,7 +20,7 @@ async function verifyAdmin(token: string, supabase: ReturnType<typeof createClie
     .from('user_profiles')
     .select('role')
     .eq('id', user.id)
-    .single();
+    .single() as { data: { role: string } | null };
 
   if (!profile || profile.role !== 'admin') {
     throw new Error('Admin access required');
@@ -43,7 +41,7 @@ export async function GET(request: NextRequest) {
     }
 
     const token = authHeader.replace('Bearer ', '');
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    const supabase = createAdminClient();
 
     await verifyAdmin(token, supabase);
 
@@ -79,7 +77,7 @@ export async function PUT(request: NextRequest) {
     }
 
     const token = authHeader.replace('Bearer ', '');
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    const supabase = createAdminClient();
 
     const user = await verifyAdmin(token, supabase);
 

@@ -177,7 +177,7 @@ export default function WorkerPublicProfilePage() {
         {/* Availability */}
         {profile.availabilities && profile.availabilities.length > 0 && (
           <Col span={24}>
-            <Card title={t("worker.profile.availability")} icon={<CalendarOutlined />}>
+            <Card title={<><CalendarOutlined /> {t("worker.profile.availability")}</>}>
               <Space direction="vertical" style={{ width: "100%" }}>
                 {profile.availabilities.map((avail) => (
                   <div key={avail.id}>
@@ -207,9 +207,18 @@ export default function WorkerPublicProfilePage() {
           <Col span={24}>
             <Card title={t("worker.profile.servicesOffered")}>
               <Space direction="vertical" style={{ width: "100%" }}>
-                {profile.services.map((service) => (
-                  <PublicServiceCard key={service.id} service={service} />
-                ))}
+                {profile.services
+                  .filter((ws) => ws.service)
+                  .map((ws) => (
+                    <PublicServiceCard
+                      key={ws.id}
+                      service={{
+                        ...ws.service!,
+                        worker_service: ws,
+                        pricing: ws.pricing,
+                      }}
+                    />
+                  ))}
               </Space>
             </Card>
           </Col>
