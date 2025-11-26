@@ -121,16 +121,20 @@ export default function Header() {
         {/* Desktop Menu */}
         <div className="flex-none lg:flex-1 flex justify-end items-center gap-4">
           <div className="hidden md:flex items-center gap-2">
-            <Button
-              type="text"
-              style={{
-                fontWeight: 500,
-                color: "#222",
-                borderRadius: "22px",
-              }}
-            >
-              {t("header.becomeWorker")}
-            </Button>
+            {/* Only show "Become Worker" button if user is logged in and is a client */}
+            {isAuthenticated && userRole === "client" && (
+              <Button
+                type="text"
+                style={{
+                  fontWeight: 500,
+                  color: "#222",
+                  borderRadius:  "22px",
+                }}
+                onClick={() => router.push("/worker/setup")}
+              >
+                {t("header.becomeWorker")}
+              </Button>
+            )}
 
             <LanguageSwitcher />
           </div>
