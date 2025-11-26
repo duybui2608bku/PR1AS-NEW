@@ -228,6 +228,42 @@
         "events": {
           "name": "Sự kiện",
           "count": "900+ Workers"
+        },
+        "assistance": {
+          "personal": {
+            "name": "Trợ lý cá nhân",
+            "description": "Dịch vụ trợ lý cá nhân chuyên nghiệp hỗ trợ các công việc hàng ngày"
+          },
+          "onsite": {
+            "name": "Trợ lý tại chỗ",
+            "description": "Hỗ trợ tại chỗ cho sự kiện, cuộc họp và những dịp đặc biệt"
+          },
+          "remote": {
+            "name": "Trợ lý từ xa",
+            "description": "Dịch vụ hỗ trợ ảo cho làm việc từ xa và công việc trực tuyến"
+          },
+          "tourGuide": {
+            "name": "Hướng dẫn viên du lịch",
+            "description": "Dịch vụ hướng dẫn du lịch chuyên nghiệp cho các điểm đến trong và ngoài nước"
+          },
+          "interpreter": {
+            "name": "Phiên dịch viên",
+            "description": "Dịch vụ phiên dịch chuyên nghiệp cho nhu cầu công việc và cá nhân"
+          }
+        },
+        "companionship": {
+          "level1": {
+            "name": "Đồng hành - Cấp 1",
+            "description": "Dịch vụ đồng hành cơ bản bao gồm trò chuyện và các hoạt động xã hội"
+          },
+          "level2": {
+            "name": "Đồng hành - Cấp 2",
+            "description": "Đồng hành nâng cao với sự quan tâm và hoạt động được cá nhân hóa"
+          },
+          "level3": {
+            "name": "Đồng hành - Cấp 3",
+            "description": "Dịch vụ đồng hành cao cấp với hỗ trợ toàn diện"
+          }
         }
       }
     },

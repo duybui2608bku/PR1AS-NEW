@@ -1,84 +1,164 @@
 "use client";
 
-import { memo } from "react";
-import { Typography, Row, Col, Card, Button } from "antd";
-import Link from "next/link";
+import { Fragment, memo, useState } from "react";
 import {
-  HomeOutlined,
-  ToolOutlined,
-  CarOutlined,
-  ShoppingOutlined,
   UserOutlined,
   TeamOutlined,
+  GlobalOutlined,
+  EnvironmentOutlined,
+  LaptopOutlined,
+  HeartOutlined,
+  SmileOutlined,
+  SafetyCertificateOutlined,
+  FilterOutlined,
 } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
+import { Button, Modal, Typography } from "antd";
 
-const { Title, Paragraph, Text } = Typography;
+const { Title, Paragraph } = Typography;
 
-const CategoriesSection = memo(function CategoriesSection() {
+interface CategoriesSectionProps {
+  selectedCategory: string | null;
+  onSelectCategory: (category: string | null) => void;
+}
+
+const CategoriesSection = memo(function CategoriesSection({ selectedCategory, onSelectCategory }: CategoriesSectionProps) {
   const { t } = useTranslation();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedService, setSelectedService] = useState<any>(null);
 
   const CATEGORIES = [
-    { icon: <HomeOutlined />, nameKey: "home.categories.items.homeRepair.name", countKey: "home.categories.items.homeRepair.count" },
-    { icon: <ToolOutlined />, nameKey: "home.categories.items.electricity.name", countKey: "home.categories.items.electricity.count" },
-    { icon: <CarOutlined />, nameKey: "home.categories.items.transport.name", countKey: "home.categories.items.transport.count" },
-    { icon: <ShoppingOutlined />, nameKey: "home.categories.items.housekeeping.name", countKey: "home.categories.items.housekeeping.count" },
-    { icon: <UserOutlined />, nameKey: "home.categories.items.care.name", countKey: "home.categories.items.care.count" },
-    { icon: <TeamOutlined />, nameKey: "home.categories.items.events.name", countKey: "home.categories.items.events.count" },
+    // Assistance
+    {
+      id: "personal",
+      icon: <UserOutlined />,
+      nameKey: "home.categories.items.assistance.personal.name",
+      descKey: "home.categories.items.assistance.personal.description",
+      group: "assistance"
+    },
+    {
+      id: "onsite",
+      icon: <EnvironmentOutlined />,
+      nameKey: "home.categories.items.assistance.onsite.name",
+      descKey: "home.categories.items.assistance.onsite.description",
+      group: "assistance"
+    },
+    {
+      id: "remote",
+      icon: <LaptopOutlined />,
+      nameKey: "home.categories.items.assistance.remote.name",
+      descKey: "home.categories.items.assistance.remote.description",
+      group: "assistance"
+    },
+    {
+      id: "tourGuide",
+      icon: <GlobalOutlined />,
+      nameKey: "home.categories.items.assistance.tourGuide.name",
+      descKey: "home.categories.items.assistance.tourGuide.description",
+      group: "assistance"
+    },
+    {
+      id: "interpreter",
+      icon: <TeamOutlined />,
+      nameKey: "home.categories.items.assistance.interpreter.name",
+      descKey: "home.categories.items.assistance.interpreter.description",
+      group: "assistance"
+    },
+    // Companionship
+    {
+      id: "level1",
+      icon: <SmileOutlined />,
+      nameKey: "home.categories.items.companionship.level1.name",
+      descKey: "home.categories.items.companionship.level1.description",
+      group: "companionship"
+    },
+    {
+      id: "level2",
+      icon: <HeartOutlined />,
+      nameKey: "home.categories.items.companionship.level2.name",
+      descKey: "home.categories.items.companionship.level2.description",
+      group: "companionship"
+    },
+    {
+      id: "level3",
+      icon: <SafetyCertificateOutlined />,
+      nameKey: "home.categories.items.companionship.level3.name",
+      descKey: "home.categories.items.companionship.level3.description",
+      group: "companionship"
+    },
   ];
 
+  const handleCategoryClick = (category: any) => {
+    if (selectedCategory === category.id) {
+      onSelectCategory(null);
+    } else {
+      onSelectCategory(category.id);
+    }
+    setSelectedService(category);
+    setIsModalOpen(true);
+  };
+
   return (
-    <section className="py-12 sm:py-16 md:py-20 bg-gradient-to-br from-gray-50 to-gray-100">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-8 sm:mb-12 md:mb-16">
-          <Title
-            level={2}
-            className="!text-3xl sm:!text-4xl md:!text-5xl !font-bold !mb-3 sm:!mb-4"
-          >
-            {t("home.categories.title")}
-          </Title>
-          <Paragraph className="!text-base sm:!text-lg md:!text-xl !text-gray-600 max-w-2xl mx-auto px-4">
-            {t("home.categories.subtitle")}
-          </Paragraph>
-        </div>
-
-        <Row gutter={[12, 16]}>
-          {CATEGORIES.map((category) => (
-            <Col xs={12} sm={8} md={6} lg={4} key={category.nameKey}>
-              <Card
-                hoverable
-                className="!text-center !border-2 hover:!border-[#690F0F] !transition-all !duration-300 hover:!shadow-lg hover:!-translate-y-1"
-              >
-                <div className="text-3xl sm:text-4xl md:text-5xl mb-2 sm:mb-4 text-[#690F0F]">
-                  {category.icon}
-                </div>
-                <Title
-                  level={5}
-                  className="!mb-1 sm:!mb-2 !text-xs sm:!text-sm md:!text-base"
+    <Fragment>
+      <section className="sticky top-[80px] z-40 bg-white shadow-sm pt-4 pb-0">
+        <div className="max-w-[2520px] mx-auto xl:px-20 md:px-10 sm:px-2 px-4">
+          <div className="flex flex-row items-center justify-between overflow-x-auto pt-4 pb-2 gap-8 no-scrollbar">
+            {CATEGORIES.map((category) => {
+              const isSelected = selectedCategory === category.id;
+              return (
+                <div
+                  key={category.id}
+                  onClick={() => handleCategoryClick(category)}
+                  className={`
+                    flex flex-col items-center justify-center gap-2 p-3 border-b-2 hover:text-neutral-800 transition cursor-pointer min-w-fit
+                    ${isSelected ? "border-neutral-800 text-neutral-800" : "border-transparent text-neutral-500"}
+                  `}
                 >
-                  {t(category.nameKey)}
-                </Title>
-                <Text type="secondary" className="!text-xs sm:!text-sm">
-                  {t(category.countKey)}
-                </Text>
-              </Card>
-            </Col>
-          ))}
-        </Row>
+                  <div className="text-2xl">{category.icon}</div>
+                  <div className="font-medium text-xs">
+                    {t(category.nameKey)}
+                  </div>
+                </div>
+              );
+            })}
 
-        <div className="text-center mt-8 sm:mt-12">
-          <Link href="/auth/signup">
-            <Button
-              type="primary"
-              size="large"
-              className="!h-11 sm:!h-12 !px-6 sm:!px-8 !text-sm sm:!text-base !font-semibold"
-            >
-              {t("home.categories.viewAll")}
-            </Button>
-          </Link>
+            <div className="hidden md:flex items-center ml-auto pl-4">
+              <Button
+                icon={<FilterOutlined />}
+                className="flex items-center gap-2 !rounded-xl !border-gray-300 !h-12 !px-4 !text-xs !font-semibold"
+              >
+                {t("common.filter")}
+              </Button>
+            </div>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+
+      <Modal
+        title={selectedService ? t(selectedService.nameKey) : ""}
+        open={isModalOpen}
+        onCancel={() => setIsModalOpen(false)}
+        footer={[
+          <Button key="close" onClick={() => setIsModalOpen(false)}>
+            {t("common.close")}
+          </Button>,
+          <Button key="book" type="primary">
+            {t("home.hero.slide1.primaryCTA")}
+          </Button>
+        ]}
+      >
+        {selectedService && (
+          <div className="py-4">
+            <div className="text-4xl text-[#FF385C] mb-4 flex justify-center">
+              {selectedService.icon}
+            </div>
+            <Paragraph className="text-lg text-center">
+              {t(selectedService.descKey)}
+            </Paragraph>
+          </div>
+        )}
+      </Modal>
+    </Fragment>
   );
 });
 

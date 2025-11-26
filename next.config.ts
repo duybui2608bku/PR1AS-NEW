@@ -8,6 +8,10 @@ const nextConfig: NextConfig = {
         hostname: "qr.sepay.vn",
         pathname: "/img/**",
       },
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+      },
     ],
   },
 };

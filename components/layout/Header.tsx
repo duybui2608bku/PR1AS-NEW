@@ -11,6 +11,7 @@ import UserMenu from "@/components/common/UserMenu";
 import { useTranslation } from "react-i18next";
 import { authAPI } from "@/lib/auth/api-client";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
+import SearchBar from "@/components/common/SearchBar";
 
 const { Header: AntHeader } = Layout;
 
@@ -57,92 +58,91 @@ export default function Header() {
           width: "100%",
           backgroundColor: "#fff",
           borderBottom: "1px solid #f0f0f0",
-          padding: "0 16px",
+          padding: "0 24px",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
           boxShadow: "0 1px 2px rgba(0,0,0,0.08)",
-          height: "64px",
+          height: "80px",
         }}
       >
         {/* Logo */}
-        <Link
-          href="/"
-          style={{ display: "flex", alignItems: "center", gap: "8px" }}
-        >
-          {settings &&
-          settings.headerLogo &&
-          settings.headerLogo !== "/logo.png" ? (
-            settings.headerLogo.startsWith("http") ? (
-              // External URL (Supabase storage) - use unoptimized
-              <Image
-                src={settings.headerLogo}
-                alt={settings.siteName || "Logo"}
-                width={120}
-                height={40}
-                style={{ objectFit: "contain", height: "auto" }}
-                unoptimized
-                priority
-              />
+        <div className="flex-none lg:flex-1 flex justify-start">
+          <Link
+            href="/"
+            style={{ display: "flex", alignItems: "center", gap: "8px" }}
+          >
+            {settings &&
+              settings.headerLogo &&
+              settings.headerLogo !== "/logo.png" ? (
+              settings.headerLogo.startsWith("http") ? (
+                // External URL (Supabase storage) - use unoptimized
+                <Image
+                  src={settings.headerLogo}
+                  alt={settings.siteName || "Logo"}
+                  width={102}
+                  height={32}
+                  style={{ objectFit: "contain", height: "auto" }}
+                  unoptimized
+                  priority
+                />
+              ) : (
+                // Local path
+                <Image
+                  src={settings.headerLogo}
+                  alt={settings.siteName || "Logo"}
+                  width={102}
+                  height={32}
+                  style={{ objectFit: "contain", height: "auto" }}
+                  priority
+                />
+              )
             ) : (
-              // Local path
-              <Image
-                src={settings.headerLogo}
-                alt={settings.siteName || "Logo"}
-                width={120}
-                height={40}
-                style={{ objectFit: "contain", height: "auto" }}
-                priority
-              />
-            )
-          ) : (
-            <div
-              style={{
-                fontSize: "20px",
-                fontWeight: "bold",
-                color: "#FF385C",
-                letterSpacing: "-0.5px",
-              }}
-              className="sm:text-2xl"
-            >
-              {settings?.siteName || "PR1AS"}
-            </div>
-          )}
-          {settings?.headerTagline && (
-            <span
-              style={{
-                fontSize: "12px",
-                color: "#666",
-                display: "none",
-              }}
-              className="hidden lg:inline"
-            >
-              {settings.headerTagline}
-            </span>
-          )}
-        </Link>
+              <div
+                style={{
+                  fontSize: "22px",
+                  fontWeight: "bold",
+                  color: "#FF385C",
+                  letterSpacing: "-0.5px",
+                }}
+                className="sm:text-2xl"
+              >
+                {settings?.siteName || "PR1AS"}
+              </div>
+            )}
+          </Link>
+        </div>
+
+        {/* Search Bar - Centered */}
+        <div className="hidden md:flex flex-1 justify-center px-8">
+          <SearchBar />
+        </div>
 
         {/* Desktop Menu */}
-        <div className="hidden md:flex items-center gap-4">
-          <Button
-            type="text"
-            style={{
-              fontWeight: 500,
-              color: "#222",
-              borderRadius: "22px",
-            }}
-          >
-            {t("header.becomeWorker")}
-          </Button>
+        <div className="flex-none lg:flex-1 flex justify-end items-center gap-4">
+          <div className="hidden md:flex items-center gap-2">
+            <Button
+              type="text"
+              style={{
+                fontWeight: 500,
+                color: "#222",
+                borderRadius: "22px",
+              }}
+            >
+              {t("header.becomeWorker")}
+            </Button>
 
-          <LanguageSwitcher />
+            <LanguageSwitcher />
+          </div>
 
           {isAuthenticated ? (
-            <UserMenu />
+            <div className="hidden md:block">
+              <UserMenu />
+            </div>
           ) : (
             <div
+              className="hidden md:flex"
               style={{
-                display: "flex",
                 alignItems: "center",
                 gap: "12px",
                 padding: "5px 5px 5px 12px",
@@ -171,17 +171,17 @@ export default function Header() {
               </Link>
             </div>
           )}
-        </div>
 
-        {/* Mobile Menu Button */}
-        <div className="flex md:hidden items-center gap-3">
-          <LanguageSwitcher />
-          <Button
-            type="text"
-            icon={<MenuOutlined />}
-            onClick={() => setMobileMenuOpen(true)}
-            style={{ fontSize: "20px" }}
-          />
+          {/* Mobile Menu Button */}
+          <div className="flex md:hidden items-center gap-3">
+            <LanguageSwitcher />
+            <Button
+              type="text"
+              icon={<MenuOutlined />}
+              onClick={() => setMobileMenuOpen(true)}
+              style={{ fontSize: "20px" }}
+            />
+          </div>
         </div>
       </AntHeader>
 
@@ -224,9 +224,9 @@ export default function Header() {
                     {userRole === "admin"
                       ? t("header.userMenu.adminDashboard") || "Admin Dashboard"
                       : userRole === "worker"
-                      ? t("header.userMenu.workerDashboard") ||
+                        ? t("header.userMenu.workerDashboard") ||
                         "Worker Dashboard"
-                      : t("header.userMenu.dashboard") || "Dashboard"}
+                        : t("header.userMenu.dashboard") || "Dashboard"}
                   </Button>
                 </Link>
               )}

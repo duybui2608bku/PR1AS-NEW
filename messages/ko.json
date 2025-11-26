@@ -164,6 +164,42 @@
         "events": {
           "name": "이벤트",
           "count": "900+ 워커"
+        },
+        "assistance": {
+          "personal": {
+            "name": "개인 비서",
+            "description": "일상 업무 및 조직화를 돕는 전문 개인 비서 서비스"
+          },
+          "onsite": {
+            "name": "현장 어시스턴트",
+            "description": "이벤트, 회의 및 특별한 행사를 위한 현장 지원 서비스"
+          },
+          "remote": {
+            "name": "원격 어시스턴트",
+            "description": "원격 근무 및 온라인 작업을 위한 가상 지원 서비스"
+          },
+          "tourGuide": {
+            "name": "관광 가이드",
+            "description": "국내 및 해외 목적지를 위한 전문 관광 가이드 서비스"
+          },
+          "interpreter": {
+            "name": "통역사",
+            "description": "비즈니스 및 개인 요구를 위한 전문 통역 서비스"
+          }
+        },
+        "companionship": {
+          "level1": {
+            "name": "동행 서비스 - 레벨 1",
+            "description": "대화 및 사교 활동을 포함한 기본 동행 서비스"
+          },
+          "level2": {
+            "name": "동행 서비스 - 레벨 2",
+            "description": "맞춤형 관심과 활동이 포함된 향상된 동행 서비스"
+          },
+          "level3": {
+            "name": "동행 서비스 - 레벨 3",
+            "description": "종합적인 지원이 포함된 프리미엄 동행 서비스"
+          }
         }
       }
     },

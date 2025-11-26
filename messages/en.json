@@ -207,6 +207,42 @@
         "events": {
           "name": "Events",
           "count": "900+ Workers"
+        },
+        "assistance": {
+          "personal": {
+            "name": "Personal Assistant",
+            "description": "Professional personal assistant services to help with daily tasks and organization"
+          },
+          "onsite": {
+            "name": "On-site Assistant",
+            "description": "On-site assistance for events, meetings, and special occasions"
+          },
+          "remote": {
+            "name": "Remote Assistant",
+            "description": "Virtual assistance services for remote work and online tasks"
+          },
+          "tourGuide": {
+            "name": "Tour Guide",
+            "description": "Professional tour guide services for local and international destinations"
+          },
+          "interpreter": {
+            "name": "Interpreter",
+            "description": "Professional interpretation services for business and personal needs"
+          }
+        },
+        "companionship": {
+          "level1": {
+            "name": "Companionship - Level 1",
+            "description": "Basic companionship services including conversation and social activities"
+          },
+          "level2": {
+            "name": "Companionship - Level 2",
+            "description": "Enhanced companionship with personalized attention and activities"
+          },
+          "level3": {
+            "name": "Companionship - Level 3",
+            "description": "Premium companionship services with comprehensive support"
+          }
         }
       }
     },

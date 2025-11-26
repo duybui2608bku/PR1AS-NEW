@@ -1,28 +1,22 @@
 "use client";
 
+import { useState } from "react";
 import MainLayout from "@/components/layout/MainLayout";
 import {
-  HeroSection,
-  StatisticsSection,
-  FeaturesSection,
   CategoriesSection,
-  HowItWorksSection,
-  TestimonialsSection,
-  TrustBadgesSection,
-  CTASection,
+  ListingGrid,
 } from "@/features/home/components";
 
 export default function Home() {
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+
   return (
     <MainLayout>
-      <HeroSection />
-      <StatisticsSection />
-      <FeaturesSection />
-      <CategoriesSection />
-      <HowItWorksSection />
-      <TestimonialsSection />
-      <TrustBadgesSection />
-      <CTASection />
+      <CategoriesSection
+        selectedCategory={selectedCategory}
+        onSelectCategory={setSelectedCategory}
+      />
+      <ListingGrid selectedCategory={selectedCategory} />
     </MainLayout>
   );
 }

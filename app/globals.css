@@ -8,16 +8,19 @@
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
 }
 
 @keyframes pulse {
+
   0%,
   100% {
     opacity: 1;
   }
+
   50% {
     opacity: 0.5;
   }
@@ -27,6 +30,7 @@
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -144,7 +148,7 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-family-base) !important;
+  font-family: var(--font-family-inter) !important;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   margin: 0;
@@ -160,6 +164,7 @@ body {
   0% {
     transform: rotate(0deg);
   }
+
   100% {
     transform: rotate(360deg);
   }
@@ -188,7 +193,7 @@ body {
 }
 
 /* Testimonial Carousel Styles */
-.testimonial-carousel .slick-slide > div {
+.testimonial-carousel .slick-slide>div {
   padding: 0 12px;
 }
 
@@ -225,6 +230,7 @@ body {
 
 /* Mobile-specific responsive utilities */
 @media (max-width: 640px) {
+
   /* Reduce padding on mobile */
   .section-mobile-padding {
     padding-left: 1rem;
@@ -249,7 +255,7 @@ body {
     bottom: 15px;
   }
 
-  .testimonial-carousel .slick-slide > div {
+  .testimonial-carousel .slick-slide>div {
     padding: 0 8px;
   }
 
@@ -278,6 +284,7 @@ body {
 
 /* Improve touch targets on mobile */
 @media (hover: none) and (pointer: coarse) {
+
   a,
   button,
   .clickable {
@@ -288,8 +295,7 @@ body {
 
 /* Prevent text size adjustment on iOS */
 @supports (-webkit-touch-callout: none) {
-  body {
-  }
+  body {}
 }
 
 /* Safe area insets for notched devices */
@@ -297,5 +303,16 @@ body {
   body {
     padding-left: max(0px, env(safe-area-inset-left));
     padding-right: max(0px, env(safe-area-inset-right));
+  }
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 }
