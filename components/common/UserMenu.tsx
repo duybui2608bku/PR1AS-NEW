@@ -121,6 +121,16 @@ export default function UserMenu() {
       label: t("header.userMenu.profile"),
       icon: <IdcardOutlined />,
     },
+    // Only show Profile Setup for workers
+    ...(user.role === "worker"
+      ? [
+          {
+            key: "profile-setup",
+            label: t("header.userMenu.profileSetup") || "Profile Setup",
+            icon: <SettingOutlined />,
+          },
+        ]
+      : []),
     {
       key: "settings",
       label: t("header.userMenu.settings"),
@@ -162,6 +172,8 @@ export default function UserMenu() {
       router.push(getDashboardUrl(user.role));
     } else if (key === "profile") {
       router.push(getProfileUrl(user.role));
+    } else if (key === "profile-setup") {
+      router.push("/worker/profile/setup");
     } else if (key === "settings") {
       router.push("/settings");
     }

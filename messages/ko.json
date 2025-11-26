@@ -55,7 +55,8 @@
         "admin": "관리자"
       },
       "logoutSuccess": "로그아웃 성공",
-      "logoutError": "로그아웃 중 오류 발생"
+      "logoutError": "로그아웃 중 오류 발생",
+      "profileSetup": "프로필 설정"
     },
     "menu": "메뉴",
     "login": "로그인",

@@ -54,6 +54,7 @@ export default function WorkerLayout({
       "/worker/dashboard",
       <DashboardOutlined />
     ),
+    getItem("Profile Setup", "/worker/profile/setup", <UserOutlined />),
     getItem("My Wallet", "/worker/wallet", <WalletOutlined />),
     getItem("My Jobs", "/worker/my-jobs", <UnorderedListOutlined />),
     getItem(t("nav.profile") || "Profile", "/worker/profile", <UserOutlined />),

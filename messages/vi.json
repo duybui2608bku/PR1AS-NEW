@@ -56,7 +56,8 @@
         "admin": "Quản trị viên"
       },
       "logoutSuccess": "Đăng xuất thành công",
-      "logoutError": "Có lỗi xảy ra khi đăng xuất"
+      "logoutError": "Có lỗi xảy ra khi đăng xuất",
+      "profileSetup": "Thiết lập hồ sơ"
     },
     "menu": "Menu",
     "login": "Đăng nhập",

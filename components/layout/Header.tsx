@@ -130,7 +130,7 @@ export default function Header() {
                   color: "#222",
                   borderRadius:  "22px",
                 }}
-                onClick={() => router.push("/worker/setup")}
+                onClick={() => router.push("/worker/profile/setup")}
               >
                 {t("header.becomeWorker")}
               </Button>

@@ -55,7 +55,8 @@
         "admin": "Administrator"
       },
       "logoutSuccess": "Logged out successfully",
-      "logoutError": "Error occurred during logout"
+      "logoutError": "Error occurred during logout",
+      "profileSetup": "Profile Setup"
     },
     "menu": "Menu",
     "login": "Log In",
