@@ -227,3 +227,54 @@ export const MAX_DISCOUNT_PERCENT = 100;
 export const DEFAULT_PLATFORM_FEE_PERCENT = 10;
 export const DEFAULT_INSURANCE_FEE_PERCENT = 2;
 
+// =============================================================================
+// FIRE SYSTEM ENUMS
+// =============================================================================
+
+// Fire transaction types
+export enum FireTransactionType {
+  DAILY_LOGIN = 'daily_login',
+  PURCHASE = 'purchase',
+  BOOST_RECOMMENDATION = 'boost_recommendation',
+  BOOST_PROFILE = 'boost_profile',
+  ADMIN_ADJUSTMENT = 'admin_adjustment',
+  REFUND = 'refund',
+}
+
+// Fire purchase status
+export enum FirePurchaseStatus {
+  PENDING = 'pending',
+  COMPLETED = 'completed',
+  FAILED = 'failed',
+  REFUNDED = 'refunded',
+}
+
+// Worker boost types
+export enum BoostType {
+  RECOMMENDATION = 'recommendation', // Top recommendation boost (12 hours)
+  PROFILE = 'profile', // Top profile boost (2 hours)
+}
+
+// Worker boost status
+export enum BoostStatus {
+  ACTIVE = 'active',
+  EXPIRED = 'expired',
+  CANCELLED = 'cancelled',
+}
+
+// =============================================================================
+// FIRE SYSTEM CONSTANTS
+// =============================================================================
+
+// Exchange rates
+export const USD_TO_FIRE_RATE = 5; // 1 USD = 5 Fire
+export const FIRE_DAILY_LOGIN_REWARD = 1; // 1 Fire per daily login
+
+// Boost costs
+export const FIRE_BOOST_RECOMMENDATION_COST = 1; // 1 Fire
+export const FIRE_BOOST_PROFILE_COST = 1; // 1 Fire
+
+// Boost durations (in hours)
+export const FIRE_BOOST_RECOMMENDATION_HOURS = 12; // 12 hours
+export const FIRE_BOOST_PROFILE_HOURS = 2; // 2 hours
+
