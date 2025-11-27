@@ -10,7 +10,6 @@ import {
   Space,
   Tag,
   Avatar,
-  Divider,
   Descriptions,
   Spin,
   Result,

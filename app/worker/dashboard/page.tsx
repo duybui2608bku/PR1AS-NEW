@@ -21,7 +21,7 @@ export default function WorkerDashboard() {
           <Card>
             <Statistic
               title={t("worker.dashboard.availableJobs")}
-              value={45}
+              value={0}
               prefix={<FileTextOutlined />}
               valueStyle={{ color: "#3f8600" }}
             />
@@ -31,7 +31,7 @@ export default function WorkerDashboard() {
           <Card>
             <Statistic
               title={t("worker.dashboard.inProgress")}
-              value={3}
+              value={0}
               prefix={<ClockCircleOutlined />}
               valueStyle={{ color: "#1890ff" }}
             />
@@ -41,7 +41,7 @@ export default function WorkerDashboard() {
           <Card>
             <Statistic
               title={t("worker.dashboard.completed")}
-              value={28}
+              value={0}
               prefix={<CheckCircleOutlined />}
               valueStyle={{ color: "#cf1322" }}
             />
@@ -51,7 +51,7 @@ export default function WorkerDashboard() {
           <Card>
             <Statistic
               title={t("worker.dashboard.totalEarnings")}
-              value={5420}
+              value={0}
               prefix={<DollarOutlined />}
               precision={2}
             />
