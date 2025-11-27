@@ -789,5 +789,37 @@
     "more": "thêm",
     "viewProfile": "Xem hồ sơ",
     "pagination": "Hiển thị {start} - {end} trên tổng {total} worker"
+  },
+  "mockdata": {
+    "workers": {
+      "role": {
+        "interpreterEnJp": "Phiên dịch viên (Tiếng Anh - Tiếng Nhật)",
+        "interpreterPlEn": "Phiên dịch viên (Tiếng Ba Lan - Tiếng Anh)",
+        "personalAssistant": "Trợ lý cá nhân",
+        "tourGuide": "Hướng dẫn viên du lịch",
+        "remoteAssistant": "Trợ lý từ xa",
+        "companionshipLevel1": "Dịch vụ đồng hành - Cấp 1",
+        "companionshipLevel2": "Dịch vụ đồng hành - Cấp 2",
+        "onsiteProfessional": "Chuyên gia tại chỗ"
+      },
+      "location": {
+        "tokyo": "Tokyo, Nhật Bản",
+        "newYork": "New York, Hoa Kỳ",
+        "barcelona": "Barcelona, Tây Ban Nha",
+        "singapore": "Singapore",
+        "kyoto": "Kyoto, Nhật Bản",
+        "london": "London, Vương quốc Anh",
+        "warsaw": "Warsaw, Ba Lan",
+        "osaka": "Osaka, Nhật Bản",
+        "paris": "Paris, Pháp",
+        "dublin": "Dublin, Ireland"
+      },
+      "distance": {
+        "kmAway": "Cách {distance} km",
+        "remote": "Từ xa"
+      }
+    },
+    "hour": "giờ",
+    "noWorkersInCategory": "Không tìm thấy worker nào trong danh mục này"
   }
 }

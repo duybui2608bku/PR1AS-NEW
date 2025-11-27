@@ -663,5 +663,37 @@
     "more": "더보기",
     "viewProfile": "프로필 보기",
     "pagination": "{total}명 중 {start} - {end} 표시"
+  },
+  "mockdata": {
+    "workers": {
+      "role": {
+        "interpreterEnJp": "통역사 (영어 - 일본어)",
+        "interpreterPlEn": "통역사 (폴란드어 - 영어)",
+        "personalAssistant": "개인 비서",
+        "tourGuide": "투어 가이드",
+        "remoteAssistant": "원격 비서",
+        "companionshipLevel1": "동반 서비스 - 레벨 1",
+        "companionshipLevel2": "동반 서비스 - 레벨 2",
+        "onsiteProfessional": "현장 전문가"
+      },
+      "location": {
+        "tokyo": "일본 도쿄",
+        "newYork": "미국 뉴욕",
+        "barcelona": "스페인 바르셀로나",
+        "singapore": "싱가포르",
+        "kyoto": "일본 교토",
+        "london": "영국 런던",
+        "warsaw": "폴란드 바르샤바",
+        "osaka": "일본 오사카",
+        "paris": "프랑스 파리",
+        "dublin": "아일랜드 더블린"
+      },
+      "distance": {
+        "kmAway": "{distance}km 거리",
+        "remote": "원격"
+      }
+    },
+    "hour": "시간",
+    "noWorkersInCategory": "이 카테고리에서 작업자를 찾을 수 없습니다"
   }
 }

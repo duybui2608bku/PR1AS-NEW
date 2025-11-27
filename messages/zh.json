@@ -626,5 +626,37 @@
     "more": "更多",
     "viewProfile": "查看资料",
     "pagination": "显示 {start} - {end}，共 {total} 名工作者"
+  },
+  "mockdata": {
+    "workers": {
+      "role": {
+        "interpreterEnJp": "口译员（英语 - 日语）",
+        "interpreterPlEn": "口译员（波兰语 - 英语）",
+        "personalAssistant": "私人助理",
+        "tourGuide": "导游",
+        "remoteAssistant": "远程助理",
+        "companionshipLevel1": "陪伴服务 - 一级",
+        "companionshipLevel2": "陪伴服务 - 二级",
+        "onsiteProfessional": "现场专业人员"
+      },
+      "location": {
+        "tokyo": "日本东京",
+        "newYork": "美国纽约",
+        "barcelona": "西班牙巴塞罗那",
+        "singapore": "新加坡",
+        "kyoto": "日本京都",
+        "london": "英国伦敦",
+        "warsaw": "波兰华沙",
+        "osaka": "日本大阪",
+        "paris": "法国巴黎",
+        "dublin": "爱尔兰都柏林"
+      },
+      "distance": {
+        "kmAway": "距离 {distance} 公里",
+        "remote": "远程"
+      }
+    },
+    "hour": "小时",
+    "noWorkersInCategory": "此类别中未找到工作者"
   }
 }

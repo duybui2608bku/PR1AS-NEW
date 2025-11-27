@@ -777,5 +777,37 @@
     "more": "more",
     "viewProfile": "View Profile",
     "pagination": "Showing {start} - {end} of {total} workers"
+  },
+  "mockdata": {
+    "workers": {
+      "role": {
+        "interpreterEnJp": "Interpreter (English - Japanese)",
+        "interpreterPlEn": "Interpreter (Polish - English)",
+        "personalAssistant": "Personal Assistant",
+        "tourGuide": "Tour Guide",
+        "remoteAssistant": "Remote Assistant",
+        "companionshipLevel1": "Companionship - Level 1",
+        "companionshipLevel2": "Companionship - Level 2",
+        "onsiteProfessional": "On-site Professional"
+      },
+      "location": {
+        "tokyo": "Tokyo, Japan",
+        "newYork": "New York, USA",
+        "barcelona": "Barcelona, Spain",
+        "singapore": "Singapore",
+        "kyoto": "Kyoto, Japan",
+        "london": "London, UK",
+        "warsaw": "Warsaw, Poland",
+        "osaka": "Osaka, Japan",
+        "paris": "Paris, France",
+        "dublin": "Dublin, Ireland"
+      },
+      "distance": {
+        "kmAway": "{distance} km away",
+        "remote": "Remote"
+      }
+    },
+    "hour": "hour",
+    "noWorkersInCategory": "No workers found in this category"
   }
 }
