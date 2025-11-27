@@ -56,7 +56,6 @@ export async function generateMetadata(): Promise<Metadata> {
       metadataBase: new URL(siteUrl),
     };
   } catch (error) {
-    // Fallback to default metadata
     return {
       title: "PR1AS - Nền tảng kết nối Client & Worker",
       description:
