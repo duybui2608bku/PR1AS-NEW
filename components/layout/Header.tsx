@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Fragment } from "react";
 import { Layout, Button, Avatar, Drawer } from "antd";
 import { UserOutlined, MenuOutlined } from "@ant-design/icons";
 import Link from "next/link";
@@ -20,7 +20,7 @@ export default function Header() {
   const [userRole, setUserRole] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { t } = useTranslation();
-  const { settings, loading: settingsLoading } = useSiteSettings();
+  const { settings } = useSiteSettings();
   const router = useRouter();
 
   useEffect(() => {
@@ -49,7 +49,7 @@ export default function Header() {
   }, []);
 
   return (
-    <>
+    <Fragment>
       <AntHeader
         style={{
           position: "sticky",
@@ -73,8 +73,8 @@ export default function Header() {
             style={{ display: "flex", alignItems: "center", gap: "8px" }}
           >
             {settings &&
-              settings.headerLogo &&
-              settings.headerLogo !== "/logo.png" ? (
+            settings.headerLogo &&
+            settings.headerLogo !== "/logo.png" ? (
               settings.headerLogo.startsWith("http") ? (
                 // External URL (Supabase storage) - use unoptimized
                 <Image
@@ -128,7 +128,7 @@ export default function Header() {
                 style={{
                   fontWeight: 500,
                   color: "#222",
-                  borderRadius:  "22px",
+                  borderRadius: "22px",
                 }}
                 onClick={() => router.push("/worker/profile/setup")}
               >
@@ -215,7 +215,7 @@ export default function Header() {
           )}
 
           {isAuthenticated ? (
-            <>
+            <Fragment>
               {/* Show dashboard link based on role */}
               {userRole && (
                 <Link href={`/${userRole}/dashboard`}>
@@ -228,9 +228,9 @@ export default function Header() {
                     {userRole === "admin"
                       ? t("header.userMenu.adminDashboard") || "Admin Dashboard"
                       : userRole === "worker"
-                        ? t("header.userMenu.workerDashboard") ||
+                      ? t("header.userMenu.workerDashboard") ||
                         "Worker Dashboard"
-                        : t("header.userMenu.dashboard") || "Dashboard"}
+                      : t("header.userMenu.dashboard") || "Dashboard"}
                   </Button>
                 </Link>
               )}
@@ -274,7 +274,7 @@ export default function Header() {
               )}
 
               {userRole === "admin" && (
-                <>
+                <Fragment>
                   <Link href="/admin/users">
                     <Button
                       type="text"
@@ -295,7 +295,7 @@ export default function Header() {
                       {t("admin.sidebar.settings") || "Settings"}
                     </Button>
                   </Link>
-                </>
+                </Fragment>
               )}
 
               <Button
@@ -312,15 +312,15 @@ export default function Header() {
                     setMobileMenuOpen(false);
                     router.push("/");
                   } catch (error) {
-                    // Silent error handling
+                    console.error(error);
                   }
                 }}
               >
                 {t("header.userMenu.logout")}
               </Button>
-            </>
+            </Fragment>
           ) : (
-            <>
+            <Fragment>
               <Link href="/auth/login">
                 <Button type="primary" block size="large">
                   {t("header.login")}
@@ -331,10 +331,10 @@ export default function Header() {
                   {t("header.signup")}
                 </Button>
               </Link>
-            </>
+            </Fragment>
           )}
         </div>
       </Drawer>
-    </>
+    </Fragment>
   );
 }

@@ -42,7 +42,6 @@ export default function UserMenu() {
       const profile = await authAPI.getProfile();
       setUser(profile);
     } catch (error) {
-      // If can't fetch profile, user is not authenticated
       setUser(null);
     } finally {
       setLoading(false);
@@ -121,21 +120,15 @@ export default function UserMenu() {
       label: t("header.userMenu.profile"),
       icon: <IdcardOutlined />,
     },
-    // Only show Profile Setup for workers
     ...(user.role === "worker"
       ? [
           {
             key: "profile-setup",
-            label: t("header.userMenu.profileSetup") || "Profile Setup",
+            label: t("header.userMenu.profileSetup"),
             icon: <SettingOutlined />,
           },
         ]
       : []),
-    {
-      key: "settings",
-      label: t("header.userMenu.settings"),
-      icon: <SettingOutlined />,
-    },
     {
       type: "divider",
     },
@@ -159,7 +152,7 @@ export default function UserMenu() {
   const getProfileUrl = (role: string) => {
     const profileUrls = {
       client: "/client/profile",
-      worker: "/worker/profile",
+      worker: `/workers/${user.id}`,
       admin: "/admin/profile",
     };
     return profileUrls[role as keyof typeof profileUrls] || "/profile";
@@ -174,8 +167,6 @@ export default function UserMenu() {
       router.push(getProfileUrl(user.role));
     } else if (key === "profile-setup") {
       router.push("/worker/profile/setup");
-    } else if (key === "settings") {
-      router.push("/settings");
     }
   };
 
