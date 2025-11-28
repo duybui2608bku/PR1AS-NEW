@@ -124,8 +124,8 @@ const WorkerCard = memo(function WorkerCard({ worker }: WorkerCardProps) {
           </Space>
         </div>
 
-        {/* Action Button */}
-        <Link href={`/worker/profile/${worker.id}`} className="w-full">
+        {/* Action Button - link to public worker profile */}
+        <Link href={`/workers/${worker.id}`} className="w-full">
           <Button type="primary" block size="large" className="font-semibold">
             {t("market.viewProfile")}
           </Button>

@@ -3,10 +3,10 @@
  * Get public worker profile by ID
  */
 
-import { NextRequest, NextResponse } from 'next/server';
-import { WorkerProfileService } from '@/lib/worker/service';
-import { createClient } from '@/lib/supabase/server';
-import { getErrorMessage } from '@/lib/utils/common';
+import { NextRequest, NextResponse } from "next/server";
+import { WorkerProfileService } from "@/lib/worker/service";
+import { createAdminClient } from "@/lib/supabase/server";
+import { getErrorMessage } from "@/lib/utils/common";
 
 export async function GET(
   request: NextRequest,
@@ -14,14 +14,15 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const supabase = await createClient();
+    // Use admin client so RLS does not block public read of published profiles
+    const supabase = createAdminClient();
     const service = new WorkerProfileService(supabase);
 
     const profile = await service.getWorkerProfileById(id);
 
     if (!profile) {
       return NextResponse.json(
-        { success: false, error: 'Worker profile not found or not published' },
+        { success: false, error: "Worker profile not found or not published" },
         { status: 404 }
       );
     }
@@ -34,7 +35,7 @@ export async function GET(
     return NextResponse.json(
       {
         success: false,
-        error: getErrorMessage(error, 'Failed to fetch worker profile'),
+        error: getErrorMessage(error, "Failed to fetch worker profile"),
       },
       { status: 500 }
     );
