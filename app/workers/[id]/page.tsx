@@ -285,11 +285,11 @@ export default function WorkerPublicProfilePage() {
                           overflow: "hidden",
                           border:
                             index === currentImageIndex
-                              ? "2px solid #1677ff"
+                              ? "2px solid #FF385C"
                               : "2px solid transparent",
                           boxShadow:
                             index === currentImageIndex
-                              ? "0 0 0 1px rgba(22,119,255,0.3)"
+                              ? "0 0 0 1px rgba(255,56,92,0.3)"
                               : "none",
                         }}
                       >
@@ -348,7 +348,7 @@ export default function WorkerPublicProfilePage() {
                             <CalendarOutlined
                               style={{
                                 fontSize: 24,
-                                color: "#1677ff",
+                                color: "#FF385C",
                                 marginBottom: 8,
                               }}
                             />
@@ -380,7 +380,7 @@ export default function WorkerPublicProfilePage() {
                             <VerticalAlignTopOutlined
                               style={{
                                 fontSize: 24,
-                                color: "#1677ff",
+                                color: "#FF385C",
                                 marginBottom: 8,
                               }}
                             />
@@ -412,7 +412,7 @@ export default function WorkerPublicProfilePage() {
                             <ArrowsAltOutlined
                               style={{
                                 fontSize: 24,
-                                color: "#1677ff",
+                                color: "#FF385C",
                                 marginBottom: 8,
                               }}
                             />
@@ -444,7 +444,7 @@ export default function WorkerPublicProfilePage() {
                             <StarOutlined
                               style={{
                                 fontSize: 24,
-                                color: "#1677ff",
+                                color: "#FF385C",
                                 marginBottom: 8,
                               }}
                             />
@@ -516,8 +516,8 @@ export default function WorkerPublicProfilePage() {
                         type="inner"
                         title={t("worker.profile.personalQuote")}
                         style={{
-                          borderLeft: "4px solid #1677ff",
-                          backgroundColor: "#f0f7ff",
+                          borderLeft: "4px solid #FF385C",
+                          backgroundColor: "#fff5f7",
                         }}
                       >
                         <Paragraph

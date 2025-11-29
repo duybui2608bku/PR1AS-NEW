@@ -119,7 +119,8 @@ export async function GET(request: NextRequest) {
             primary_currency,
             daily_discount_percent,
             weekly_discount_percent,
-            monthly_discount_percent
+            monthly_discount_percent,
+            is_active
           )
         )
       `,
@@ -184,8 +185,14 @@ export async function GET(request: NextRequest) {
 
       if (worker.services && worker.services.length > 0) {
         const prices = worker.services
-          .map((s: any) => s.pricing?.[0]?.price_usd)
-          .filter((p: any) => p !== undefined && p !== null);
+          .map((s: any) => {
+            // Get active pricing
+            const activePricing = Array.isArray(s.pricing)
+              ? s.pricing.find((p: any) => p.is_active !== false)
+              : s.pricing;
+            return activePricing?.price_usd;
+          })
+          .filter((p: any) => p !== undefined && p !== null && !isNaN(p));
 
         if (prices.length > 0) {
           minPrice = Math.min(...prices);
@@ -206,13 +213,20 @@ export async function GET(request: NextRequest) {
               image_url: avatar.image_url,
             }
           : undefined,
-        services: worker.services?.map((s: any) => ({
-          id: s.id,
-          service_id: s.service_id,
-          service: s.service,
-          service_option: s.service_option,
-          pricing: s.pricing?.[0] || null,
-        })),
+        services: worker.services?.map((s: any) => {
+          // Get active pricing (first active pricing or first pricing if no is_active field)
+          const pricing = Array.isArray(s.pricing)
+            ? s.pricing.find((p: any) => p.is_active !== false) || s.pricing[0] || null
+            : s.pricing || null;
+          
+          return {
+            id: s.id,
+            service_id: s.service_id,
+            service: s.service,
+            service_option: s.service_option,
+            pricing: pricing,
+          };
+        }),
         min_price: minPrice,
         max_price: maxPrice,
       };

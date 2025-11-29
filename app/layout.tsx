@@ -11,7 +11,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 5,
   userScalable: true,
-  themeColor: "#690F0F",
+  themeColor: "#FF385C",
 };
 
 // Generate metadata dynamically from site settings

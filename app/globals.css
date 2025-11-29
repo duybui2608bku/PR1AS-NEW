@@ -57,12 +57,12 @@
   --background-secondary: #f7f7f7;
 
   /* Brand Colors */
-  --color-primary: #690f0f;
-  --color-primary-hover: #4a0a0a;
-  --color-primary-light: #fef2f2;
+  --color-primary: #FF385C;
+  --color-primary-hover: #e61e4d;
+  --color-primary-light: #fff5f7;
   --color-primary-text: #ffffff;
   --color-secondary: #ffffff;
-  --color-secondary-text: #690f0f;
+  --color-secondary-text: #FF385C;
 
   /* Text Colors */
   --text-primary: #222222;
@@ -123,8 +123,8 @@
   --font-mono: "JetBrains Mono", monospace;
 
   /* Gradients */
-  --gradient-primary: linear-gradient(90deg, #690f0f 0%, #4a0a0a 100%);
-  --gradient-hero: linear-gradient(135deg, #690f0f 0%, #8b1818 100%);
+  --gradient-primary: linear-gradient(90deg, #FF385C 0%, #e61e4d 100%);
+  --gradient-hero: linear-gradient(135deg, #FF385C 0%, #e61e4d 100%);
 }
 
 @theme inline {
