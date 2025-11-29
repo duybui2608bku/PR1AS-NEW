@@ -27,8 +27,13 @@ export function AntdAppProvider({ children }: { children: React.ReactNode }) {
         token: {
           fontFamily: "var(--font-family-base)",
           fontSize: 14,
-          colorPrimary: "#667eea",
+          colorPrimary: "#FF385C",
           borderRadius: 8,
+        },
+        components: {
+          Rate: {
+            colorFillContent: "#FF385C",
+          },
         },
       }}
     >

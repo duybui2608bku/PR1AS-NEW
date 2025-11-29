@@ -32,6 +32,9 @@ export default function MainLayout({ children }: MainLayoutProps) {
             controlHeight: 48,
             fontSize: 16,
           },
+          Rate: {
+            colorFillContent: "#FF385C",
+          },
         },
       }}
     >

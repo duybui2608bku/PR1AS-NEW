@@ -2,6 +2,7 @@
 
 import { HeartOutlined, StarFilled, HeartFilled } from "@ant-design/icons";
 import Image from "next/image";
+import Link from "next/link";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -26,7 +27,10 @@ export default function ListingCard({ data }: ListingCardProps) {
   const { t } = useTranslation();
 
   return (
-    <div className="col-span-1 cursor-pointer group">
+    <Link
+      href={`/workers/${data.id}`}
+      className="col-span-1 cursor-pointer group"
+    >
       <div className="flex flex-col gap-1 w-full">
         <div className="aspect-square w-full relative overflow-hidden rounded-xl mb-1">
           <Image
@@ -38,6 +42,7 @@ export default function ListingCard({ data }: ListingCardProps) {
           <div className="absolute top-3 right-3">
             <button
               onClick={(e) => {
+                e.preventDefault();
                 e.stopPropagation();
                 setIsFavorite(!isFavorite);
               }}
@@ -47,8 +52,8 @@ export default function ListingCard({ data }: ListingCardProps) {
                 <HeartFilled className="text-2xl text-[#FF385C]" />
               ) : (
                 <HeartOutlined
-                  className="text-2xl text-white drop-shadow-md"
-                  style={{ strokeWidth: "20px" }}
+                  className="text-2xl text-[#FF385C] drop-shadow-md"
+                  style={{ strokeWidth: "20px", opacity: 0.8 }}
                 />
               )}
             </button>
@@ -59,7 +64,7 @@ export default function ListingCard({ data }: ListingCardProps) {
             {data.name}
           </div>
           <div className="flex items-center gap-1 text-[15px]">
-            <StarFilled className="text-black text-[14px]" />
+            <StarFilled className="text-[#FF385C] text-[14px]" />
             <span className="text-gray-900 font-light">{data.rating}</span>
           </div>
         </div>
@@ -78,6 +83,6 @@ export default function ListingCard({ data }: ListingCardProps) {
           </div>
         </div>
       </div>
-    </div>
+    </Link>
   );
 }

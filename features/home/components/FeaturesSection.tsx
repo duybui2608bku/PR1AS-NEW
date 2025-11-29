@@ -17,21 +17,21 @@ const FeaturesSection = memo(function FeaturesSection() {
   const features = [
     {
       id: "safety",
-      icon: <SafetyOutlined className="text-4xl text-[#690F0F]" />,
+      icon: <SafetyOutlined className="text-4xl text-[#FF385C]" />,
       title: t("home.features.safety.title"),
       description: t("home.features.safety.description"),
       colorClass: "purple",
     },
     {
       id: "speed",
-      icon: <ThunderboltOutlined className="text-4xl text-[#690F0F]" />,
+      icon: <ThunderboltOutlined className="text-4xl text-[#FF385C]" />,
       title: t("home.features.speed.title"),
       description: t("home.features.speed.description"),
       colorClass: "pink",
     },
     {
       id: "quality",
-      icon: <StarOutlined className="text-4xl text-[#690F0F]" />,
+      icon: <StarOutlined className="text-4xl text-[#FF385C]" />,
       title: t("home.features.quality.title"),
       description: t("home.features.quality.description"),
       colorClass: "red",
@@ -58,7 +58,7 @@ const FeaturesSection = memo(function FeaturesSection() {
             <Col xs={24} sm={24} md={8} key={feature.id}>
               <Card
                 hoverable
-                className={`!h-full !border-2 hover:!border-[#690F0F] !transition-all !duration-300 hover:!shadow-xl`}
+                className={`!h-full !border-2 hover:!border-[#FF385C] !transition-all !duration-300 hover:!shadow-xl`}
               >
                 <div className="text-center p-2 sm:p-4">
                   <div
