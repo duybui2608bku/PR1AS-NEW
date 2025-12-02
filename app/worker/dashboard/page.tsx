@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, Row, Col, Statistic, Typography } from "antd";
+import { Card, Row, Col, Statistic, Typography, Divider } from "antd";
 import {
   FileTextOutlined,
   DollarOutlined,
@@ -8,6 +8,7 @@ import {
   CheckCircleOutlined,
 } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
+import { FireDashboard } from "@/components/fire";
 
 const { Title } = Typography;
 
@@ -58,6 +59,11 @@ export default function WorkerDashboard() {
           </Card>
         </Col>
       </Row>
+
+      {/* Fire Points System */}
+      <Divider />
+      <Title level={3}>Fire Points System</Title>
+      <FireDashboard />
     </div>
   );
 }
