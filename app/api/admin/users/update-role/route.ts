@@ -1,87 +1,67 @@
-import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
-
-// Admin Supabase client with service role key
-const getAdminSupabase = () => {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false,
-      },
-    }
-  );
-};
+import { NextRequest } from "next/server";
+import { requireAdmin } from "@/lib/auth/middleware";
+import { successResponse } from "@/lib/http/response";
+import { withErrorHandling, ApiError, ErrorCode } from "@/lib/http/errors";
+import { ERROR_MESSAGES, getErrorMessage } from "@/lib/constants/errors";
+import { HttpStatus, UserRole } from "@/lib/utils/enums";
 
 // POST /api/admin/users/update-role
-export async function POST(request: NextRequest) {
-  try {
-    const { userId, role } = await request.json();
+export const POST = withErrorHandling(async (request: NextRequest) => {
+  // Require admin authentication
+  const { supabase } = await requireAdmin(request);
 
-    if (!userId || !role) {
-      return NextResponse.json(
-        { error: "User ID and role are required" },
-        { status: 400 }
-      );
-    }
+  const { userId, role } = await request.json();
 
-    const validRoles = ["client", "worker", "admin"];
-    if (!validRoles.includes(role)) {
-      return NextResponse.json({ error: "Invalid role" }, { status: 400 });
-    }
-
-    const supabase = getAdminSupabase();
-
-    // Update user role in auth metadata
-    const { data: authData, error: authError } =
-      await supabase.auth.admin.updateUserById(userId, {
-        user_metadata: { role },
-      });
-
-    if (authError) {
-
-      return NextResponse.json(
-        { error: "Failed to update user role" },
-        { status: 500 }
-      );
-    }
-
-    // Update user profile if exists
-    const { error: profileError } = await supabase
-      .from("user_profiles")
-      .upsert({
-        id: userId,
-        role: role,
-        updated_at: new Date().toISOString(),
-      });
-
-    if (profileError) {
-
-      // Continue even if profile update fails
-    }
-
-    // Log admin action
-    const { error: logError } = await supabase.from("admin_logs").insert({
-      action: "update_user_role",
-      target_user_id: userId,
-      details: { new_role: role },
-    });
-
-    if (logError) {
-
-    }
-
-    return NextResponse.json({
-      message: `User role updated to ${role} successfully`,
-      user: authData.user,
-    });
-  } catch (error) {
-
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
+  if (!userId || !role) {
+    throw new ApiError(
+      "User ID and role are required",
+      HttpStatus.BAD_REQUEST,
+      ErrorCode.MISSING_REQUIRED_FIELDS
     );
   }
-}
+
+  const validRoles = [UserRole.CLIENT, UserRole.WORKER, UserRole.ADMIN];
+  if (!validRoles.includes(role as UserRole)) {
+    throw new ApiError(
+      getErrorMessage(ERROR_MESSAGES.INVALID_ROLE),
+      HttpStatus.BAD_REQUEST,
+      ErrorCode.INVALID_ROLE
+    );
+  }
+
+  // Update user role in auth metadata
+  const { data: authData, error: authError } =
+    await supabase.auth.admin.updateUserById(userId, {
+      user_metadata: { role },
+    });
+
+  if (authError) {
+    throw authError;
+  }
+
+  // Update user profile if exists (non-blocking)
+  await supabase
+    .from("user_profiles")
+    .upsert({
+      id: userId,
+      role: role,
+      updated_at: new Date().toISOString(),
+    })
+    .catch(() => {
+      // Continue even if profile update fails
+    });
+
+  // Log admin action (non-blocking)
+  await supabase.from("admin_logs").insert({
+    action: "update_user_role",
+    target_user_id: userId,
+    details: { new_role: role },
+  }).catch(() => {
+    // Ignore logging errors
+  });
+
+  return successResponse(
+    { user: authData.user },
+    `User role updated to ${role} successfully`
+  );
+});

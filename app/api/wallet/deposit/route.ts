@@ -3,24 +3,19 @@
  * POST /api/wallet/deposit - Initiate deposit (bank transfer or PayPal)
  */
 
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { WalletService } from '@/lib/wallet/service';
 import { createBankTransferService, createPayPalService } from '@/lib/wallet/payment-gateways';
 import { DepositRequest } from '@/lib/wallet/types';
-import { getAuthenticatedUser } from '@/lib/wallet/auth-helper';
-import { getErrorMessage } from '@/lib/utils/common';
+import { requireAuth } from '@/lib/auth/middleware';
+import { successResponse } from '@/lib/http/response';
+import { withErrorHandling, ApiError, ErrorCode } from '@/lib/http/errors';
+import { ERROR_MESSAGES, getErrorMessage } from '@/lib/constants/errors';
+import { HttpStatus } from '@/lib/utils/enums';
 
-export async function POST(request: NextRequest) {
-  try {
-    // Authenticate user
-    const { user, supabase, error: authError } = await getAuthenticatedUser(request);
-    
-    if (authError || !user.id) {
-      return NextResponse.json(
-        { error: authError || 'Unauthorized' },
-        { status: 401 }
-      );
-    }
+export const POST = withErrorHandling(async (request: NextRequest) => {
+  // Authenticate user
+  const { user, supabase } = await requireAuth(request);
 
     // Parse request body
     const body: DepositRequest = await request.json();
@@ -31,12 +26,10 @@ export async function POST(request: NextRequest) {
     const settings = await walletService.getPlatformSettings();
 
     if (amount_usd < settings.minimum_deposit_usd) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: `Minimum deposit amount is $${settings.minimum_deposit_usd}`,
-        },
-        { status: 400 }
+      throw new ApiError(
+        `Minimum deposit amount is $${settings.minimum_deposit_usd}`,
+        HttpStatus.BAD_REQUEST,
+        ErrorCode.VALIDATION_ERROR
       );
     }
 
@@ -52,20 +45,21 @@ export async function POST(request: NextRequest) {
         amountVnd
       );
 
-      return NextResponse.json({
-        success: true,
-        message: 'Bank deposit request created. Please scan QR code to complete payment.',
-        deposit: {
-          id: deposit.id,
-          qr_code_url: deposit.qr_code_url,
-          transfer_content: deposit.transfer_content,
-          bank_name: deposit.bank_name,
-          bank_account: deposit.bank_account,
-          amount_usd: deposit.amount_usd,
-          amount_vnd: deposit.amount_vnd,
-          expires_at: deposit.expires_at,
+      return successResponse(
+        {
+          deposit: {
+            id: deposit.id,
+            qr_code_url: deposit.qr_code_url,
+            transfer_content: deposit.transfer_content,
+            bank_name: deposit.bank_name,
+            bank_account: deposit.bank_account,
+            amount_usd: deposit.amount_usd,
+            amount_vnd: deposit.amount_vnd,
+            expires_at: deposit.expires_at,
+          },
         },
-      });
+        'Bank deposit request created. Please scan QR code to complete payment.'
+      );
     }
 
     // Handle PayPal
@@ -88,33 +82,22 @@ export async function POST(request: NextRequest) {
         },
       });
 
-      return NextResponse.json({
-        success: true,
-        message: 'PayPal order created. Redirect user to approval URL.',
-        paypal: {
-          order_id: order.orderId,
-          approval_url: order.approvalUrl,
+      return successResponse(
+        {
+          paypal: {
+            order_id: order.orderId,
+            approval_url: order.approvalUrl,
+          },
+          transaction_id: transaction.id,
         },
-        transaction_id: transaction.id,
-      });
+        'PayPal order created. Redirect user to approval URL.'
+      );
     }
 
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Invalid payment method',
-      },
-      { status: 400 }
+    throw new ApiError(
+      getErrorMessage(ERROR_MESSAGES.INVALID_PAYMENT_METHOD),
+      HttpStatus.BAD_REQUEST,
+      ErrorCode.INVALID_PAYMENT_METHOD
     );
-  } catch (error: unknown) {
-    const errorMessage = getErrorMessage(error, 'Failed to process deposit');
-    return NextResponse.json(
-      {
-        success: false,
-        error: errorMessage,
-      },
-      { status: 500 }
-    );
-  }
-}
+});
 

@@ -1,64 +1,40 @@
-import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
-
-// Admin Supabase client with service role key
-const getAdminSupabase = () => {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false,
-      },
-    }
-  );
-};
+import { NextRequest } from "next/server";
+import { requireAdmin } from "@/lib/auth/middleware";
+import { successResponse } from "@/lib/http/response";
+import { withErrorHandling, ApiError, ErrorCode } from "@/lib/http/errors";
+import { ERROR_MESSAGES, getErrorMessage } from "@/lib/constants/errors";
+import { HttpStatus } from "@/lib/utils/enums";
 
 // DELETE /api/admin/users/delete
-export async function DELETE(request: NextRequest) {
-  try {
-    const { userId } = await request.json();
+export const DELETE = withErrorHandling(async (request: NextRequest) => {
+  // Require admin authentication
+  const { supabase } = await requireAdmin(request);
 
-    if (!userId) {
-      return NextResponse.json(
-        { error: "User ID is required" },
-        { status: 400 }
-      );
-    }
+  const { userId } = await request.json();
 
-    const supabase = getAdminSupabase();
-
-    // Delete user from auth (this will cascade to related tables)
-    const { error } = await supabase.auth.admin.deleteUser(userId);
-
-    if (error) {
-
-      return NextResponse.json(
-        { error: "Failed to delete user" },
-        { status: 500 }
-      );
-    }
-
-    // Log admin action
-    const { error: logError } = await supabase.from("admin_logs").insert({
-      action: "delete_user",
-      target_user_id: userId,
-      details: {},
-    });
-
-    if (logError) {
-
-    }
-
-    return NextResponse.json({
-      message: "User deleted successfully",
-    });
-  } catch (error) {
-
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
+  if (!userId) {
+    throw new ApiError(
+      "User ID is required",
+      HttpStatus.BAD_REQUEST,
+      ErrorCode.MISSING_REQUIRED_FIELDS
     );
   }
-}
+
+  // Delete user from auth (this will cascade to related tables)
+  const { error } = await supabase.auth.admin.deleteUser(userId);
+
+  if (error) {
+    throw error;
+  }
+
+  // Log admin action (non-blocking)
+  await supabase.from("admin_logs").insert({
+    action: "delete_user",
+    target_user_id: userId,
+    details: {},
+  }).catch(() => {
+    // Ignore logging errors
+  });
+
+  return successResponse(null, "User deleted successfully");
+});

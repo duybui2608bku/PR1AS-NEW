@@ -1,17 +1,21 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
-import { UserRole } from "@/lib/auth/api-client";
+import { UserRole } from "@/lib/utils/enums";
+import { successResponse } from "@/lib/http/response";
+import { withErrorHandling, ApiError, ErrorCode } from "@/lib/http/errors";
+import { ERROR_MESSAGES, getErrorMessage } from "@/lib/constants/errors";
+import { HttpStatus } from "@/lib/utils/enums";
 
-export async function POST(request: NextRequest) {
-  try {
-    const { userId, email, role } = await request.json();
+export const POST = withErrorHandling(async (request: NextRequest) => {
+  const { userId, email, role } = await request.json();
 
-    if (!userId || !email) {
-      return NextResponse.json(
-        { error: "UserId and email are required" },
-        { status: 400 }
-      );
-    }
+  if (!userId || !email) {
+    throw new ApiError(
+      "UserId and email are required",
+      HttpStatus.BAD_REQUEST,
+      ErrorCode.MISSING_REQUIRED_FIELDS
+    );
+  }
 
     const supabase = createAdminClient();
 
@@ -22,123 +26,94 @@ export async function POST(request: NextRequest) {
       .eq("id", userId)
       .single();
 
-    // If profile exists, return it
-    if (existingProfile) {
-      // Check if banned
-      if (existingProfile.status === "banned") {
-        return NextResponse.json(
-          {
-            error: "ACCOUNT_BANNED",
-            message: "Tài khoản này đã bị khóa",
-          },
-          { status: 403 }
-        );
-      }
-
-      return NextResponse.json({
-        success: true,
-        created: false,
-        user: {
-          id: existingProfile.id,
-          email: existingProfile.email,
-          role: existingProfile.role,
-          status: existingProfile.status,
-        },
-      });
-    }
-
-    // No profile exists, need to create one
-    if (!role) {
-      // Need role to create profile
-      return NextResponse.json(
-        {
-          error: "NO_PROFILE_NO_ROLE",
-          message: "Email này chưa có tài khoản. Bạn muốn đăng ký Client hay Worker?",
-          userId,
-          email,
-        },
-        { status: 404 }
+  // If profile exists, return it
+  if (existingProfile) {
+    // Check if banned
+    if (existingProfile.status === "banned") {
+      throw new ApiError(
+        getErrorMessage(ERROR_MESSAGES.ACCOUNT_BANNED),
+        HttpStatus.FORBIDDEN,
+        ErrorCode.ACCOUNT_BANNED
       );
     }
 
-    // Validate role
-    if (!["client", "worker"].includes(role)) {
-      return NextResponse.json(
-        { error: "Invalid role. Must be 'client' or 'worker'" },
-        { status: 400 }
-      );
-    }
-
-    // Check if email is already used with different account
-    const { data: emailProfile } = await supabase
-      .from("user_profiles")
-      .select("role, status")
-      .eq("email", email)
-      .single();
-
-    if (emailProfile) {
-      if (emailProfile.status === "banned") {
-        return NextResponse.json(
-          {
-            error: "ACCOUNT_BANNED",
-            message: "Tài khoản này đã bị khóa",
-          },
-          { status: 403 }
-        );
-      }
-
-      if (emailProfile.role !== role) {
-        const roleNames: Record<UserRole, string> = {
-          client: "KHÁCH HÀNG",
-          worker: "THỢ",
-          admin: "ADMIN",
-        };
-
-        return NextResponse.json(
-          {
-            error: "EMAIL_ALREADY_REGISTERED_WITH_DIFFERENT_ROLE",
-            message: `Email này đã được đăng ký với vai trò ${roleNames[emailProfile.role as UserRole]}. Vui lòng đăng nhập hoặc sử dụng email khác.`,
-            existingRole: emailProfile.role,
-          },
-          { status: 409 }
-        );
-      }
-    }
-
-    // Create new profile
-    const { error: insertError } = await supabase
-      .from("user_profiles")
-      .insert({
-        id: userId,
-        email,
-        role,
-        status: "active",
-      });
-
-    if (insertError) {
-
-      return NextResponse.json(
-        { error: "Failed to create profile" },
-        { status: 500 }
-      );
-    }
-
-    return NextResponse.json({
-      success: true,
-      created: true,
+    return successResponse({
+      created: false,
       user: {
-        id: userId,
-        email,
-        role,
-        status: "active",
+        id: existingProfile.id,
+        email: existingProfile.email,
+        role: existingProfile.role,
+        status: existingProfile.status,
       },
     });
-  } catch (error) {
+  }
 
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
+  // No profile exists, need to create one
+  if (!role) {
+    // Need role to create profile
+    throw new ApiError(
+      getErrorMessage(ERROR_MESSAGES.NO_PROFILE_NO_ROLE),
+      HttpStatus.NOT_FOUND,
+      ErrorCode.NO_PROFILE_NO_ROLE
     );
   }
-}
+
+  // Validate role
+  if (![UserRole.CLIENT, UserRole.WORKER].includes(role as UserRole)) {
+    throw new ApiError(
+      getErrorMessage(ERROR_MESSAGES.INVALID_ROLE),
+      HttpStatus.BAD_REQUEST,
+      ErrorCode.INVALID_ROLE
+    );
+  }
+
+  // Check if email is already used with different account
+  const { data: emailProfile } = await supabase
+    .from("user_profiles")
+    .select("role, status")
+    .eq("email", email)
+    .single();
+
+  if (emailProfile) {
+    if (emailProfile.status === "banned") {
+      throw new ApiError(
+        getErrorMessage(ERROR_MESSAGES.ACCOUNT_BANNED),
+        HttpStatus.FORBIDDEN,
+        ErrorCode.ACCOUNT_BANNED
+      );
+    }
+
+    if (emailProfile.role !== role) {
+      throw new ApiError(
+        getErrorMessage(ERROR_MESSAGES.EMAIL_ALREADY_REGISTERED_WITH_DIFFERENT_ROLE),
+        HttpStatus.BAD_REQUEST,
+        ErrorCode.EMAIL_ALREADY_REGISTERED_WITH_DIFFERENT_ROLE
+      );
+    }
+  }
+
+  // Create new profile
+  const { error: insertError } = await supabase
+    .from("user_profiles")
+    .insert({
+      id: userId,
+      email,
+      role,
+      status: "active",
+    });
+
+  if (insertError) {
+    throw insertError;
+  }
+
+  return successResponse({
+    created: true,
+    user: {
+      id: userId,
+      email,
+      role,
+      status: "active",
+    },
+  });
+});
 

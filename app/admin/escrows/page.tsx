@@ -12,6 +12,7 @@ import {
   Statistic,
   Row,
   Col,
+  notification,
 } from "antd";
 import {
   ReloadOutlined,
@@ -22,6 +23,7 @@ import {
 } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import { useTranslation } from "react-i18next";
+import { useRouter } from "next/navigation";
 import dayjs from "dayjs";
 import type { EscrowHold, EscrowStatus } from "@/lib/wallet/types";
 import { adminWalletAPI } from "@/lib/admin/wallet-api";
@@ -36,6 +38,7 @@ interface EscrowFiltersState {
 
 export default function AdminEscrowsPage() {
   const { t } = useTranslation();
+  const router = useRouter();
   const [escrows, setEscrows] = useState<EscrowHold[]>([]);
   const [loading, setLoading] = useState(false);
   const [filters, setFilters] = useState<EscrowFiltersState>({});
@@ -69,10 +72,10 @@ export default function AdminEscrowsPage() {
         total_disputed,
         total_count,
       });
-    } catch {
+    } catch (error: any) {
       showNotification.error(
-        "Không thể tải danh sách escrow",
-        "Vui lòng thử lại sau. Nếu lỗi tiếp tục xảy ra, hãy liên hệ quản trị viên."
+        "Error fetching escrows",
+        error.message || "Failed to fetch escrows"
       );
     } finally {
       setLoading(false);

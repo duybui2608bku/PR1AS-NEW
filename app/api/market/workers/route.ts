@@ -3,9 +3,11 @@
  * Public endpoint to fetch published worker profiles with filtering
  */
 
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
 import { WorkerProfileStatus } from "@/lib/utils/enums";
+import { successResponse } from "@/lib/http/response";
+import { withErrorHandling } from "@/lib/http/errors";
 
 interface WorkerFilters {
   age_min?: number;
@@ -59,8 +61,7 @@ interface WorkerMarketProfile {
  * GET /api/market/workers
  * Fetch published workers with filters
  */
-export async function GET(request: NextRequest) {
-  try {
+export const GET = withErrorHandling(async (request: NextRequest) => {
     const supabase = createAdminClient();
     const { searchParams } = new URL(request.url);
 
@@ -165,10 +166,7 @@ export async function GET(request: NextRequest) {
     const { data, error, count } = await query;
 
     if (error) {
-      return NextResponse.json(
-        { error: "Failed to fetch workers" },
-        { status: 500 }
-      );
+      throw error;
     }
 
     // Process data
@@ -248,7 +246,7 @@ export async function GET(request: NextRequest) {
     // Calculate pagination
     const totalPages = Math.ceil((count || 0) / (filters.limit || 12));
 
-    return NextResponse.json({
+    return successResponse({
       workers,
       pagination: {
         page: filters.page || 1,
@@ -258,10 +256,4 @@ export async function GET(request: NextRequest) {
       },
       filters,
     });
-  } catch (error) {
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
   }
-}

@@ -3,114 +3,60 @@
  * POST /api/admin/wallet/escrow/resolve - Resolve a disputed escrow
  */
 
-import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { NextRequest } from 'next/server';
 import { WalletService } from '@/lib/wallet/service';
 import { ComplaintResolution } from '@/lib/wallet/types';
+import { requireAdmin } from '@/lib/auth/middleware';
+import { successResponse } from '@/lib/http/response';
+import { withErrorHandling, ApiError, ErrorCode } from '@/lib/http/errors';
+import { ERROR_MESSAGES, getErrorMessage } from '@/lib/constants/errors';
+import { HttpStatus } from '@/lib/utils/enums';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+export const POST = withErrorHandling(async (request: NextRequest) => {
+  // Require admin authentication
+  const { user, supabase } = await requireAdmin(request);
 
-export async function POST(request: NextRequest) {
-  try {
-    // Get user from session
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
+  // Parse request body
+  const body: ComplaintResolution = await request.json();
+  const { escrow_id, action, worker_amount, employer_refund, resolution_notes } = body;
 
-    const token = authHeader.replace('Bearer ', '');
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
-    // Verify token and get user
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Invalid token' },
-        { status: 401 }
-      );
-    }
-
-    // Verify user is admin
-    const { data: profile } = await supabase
-      .from('user_profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single();
-
-    if (!profile || profile.role !== 'admin') {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Admin access required',
-        },
-        { status: 403 }
-      );
-    }
-
-    // Parse request body
-    const body: ComplaintResolution = await request.json();
-    const { escrow_id, action, worker_amount, employer_refund, resolution_notes } = body;
-
-    // Validate required fields
-    if (!escrow_id || !action || !resolution_notes) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Escrow ID, action, and resolution notes are required',
-        },
-        { status: 400 }
-      );
-    }
-
-    // Validate action
-    const validActions = ['release_to_worker', 'refund_to_employer', 'partial_refund'];
-    if (!validActions.includes(action)) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Invalid action. Must be: release_to_worker, refund_to_employer, or partial_refund',
-        },
-        { status: 400 }
-      );
-    }
-
-    // For partial refund, validate amounts
-    if (action === 'partial_refund') {
-      if (!worker_amount || !employer_refund) {
-        return NextResponse.json(
-          {
-            success: false,
-            error: 'Worker amount and employer refund are required for partial refund',
-          },
-          { status: 400 }
-        );
-      }
-    }
-
-    // Resolve complaint
-    const walletService = new WalletService(supabase);
-    const escrow = await walletService.resolveComplaint(body, user.id);
-
-    return NextResponse.json({
-      success: true,
-      message: 'Complaint resolved successfully',
-      escrow,
-    });
-  } catch (error: any) {
-
-    return NextResponse.json(
-      {
-        success: false,
-        error: error.message || 'Failed to resolve complaint',
-        code: error.code,
-      },
-      { status: error.statusCode || 500 }
+  // Validate required fields
+  if (!escrow_id || !action || !resolution_notes) {
+    throw new ApiError(
+      getErrorMessage(ERROR_MESSAGES.MISSING_REQUIRED_FIELDS),
+      HttpStatus.BAD_REQUEST,
+      ErrorCode.MISSING_REQUIRED_FIELDS
     );
   }
-}
+
+  // Validate action
+  const validActions = ['release_to_worker', 'refund_to_employer', 'partial_refund'];
+  if (!validActions.includes(action)) {
+    throw new ApiError(
+      'Invalid action. Must be: release_to_worker, refund_to_employer, or partial_refund',
+      HttpStatus.BAD_REQUEST,
+      ErrorCode.VALIDATION_ERROR
+    );
+  }
+
+  // For partial refund, validate amounts
+  if (action === 'partial_refund') {
+    if (!worker_amount || !employer_refund) {
+      throw new ApiError(
+        'Worker amount and employer refund are required for partial refund',
+        HttpStatus.BAD_REQUEST,
+        ErrorCode.VALIDATION_ERROR
+      );
+    }
+  }
+
+  // Resolve complaint
+  const walletService = new WalletService(supabase);
+  const escrow = await walletService.resolveComplaint(body, user.id);
+
+  return successResponse(
+    { escrow },
+    'Complaint resolved successfully'
+  );
+});
 

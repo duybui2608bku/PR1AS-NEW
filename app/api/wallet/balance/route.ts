@@ -3,48 +3,23 @@
  * GET /api/wallet/balance - Get user's wallet balance and summary
  */
 
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { WalletService } from "@/lib/wallet/service";
-import { getAuthenticatedUser } from "@/lib/wallet/auth-helper";
-import { getErrorMessage } from "@/lib/utils/common";
+import { requireAuth } from "@/lib/auth/middleware";
+import { successResponse } from "@/lib/http/response";
+import { withErrorHandling } from "@/lib/http/errors";
 
-export async function GET(request: NextRequest) {
-  try {
-    // Authenticate user
-    const {
-      user,
-      supabase,
-      error: authError,
-    } = await getAuthenticatedUser(request);
+export const GET = withErrorHandling(async (request: NextRequest) => {
+  // Authenticate user
+  const { user, supabase } = await requireAuth(request);
 
-    if (authError || !user.id) {
-      return NextResponse.json(
-        { error: authError || "Unauthorized" },
-        { status: 401 }
-      );
-    }
+  // Get wallet and summary
+  const walletService = new WalletService(supabase);
+  const wallet = await walletService.getOrCreateWallet(user.id);
+  const summary = await walletService.getWalletSummary(user.id);
 
-    // Get wallet and summary
-    const walletService = new WalletService(supabase);
-    const wallet = await walletService.getOrCreateWallet(user.id);
-    const summary = await walletService.getWalletSummary(user.id);
-
-    return NextResponse.json({
-      success: true,
-      wallet,
-      summary,
-    });
-  } catch (error: unknown) {
-    const errorMessage = getErrorMessage(
-      error,
-      "Failed to fetch wallet balance"
-    );
-    return NextResponse.json(
-      {
-        success: false,
-        error: errorMessage,
-      },
-      { status: 500 }
-    );
-  }
-}
+  return successResponse({
+    wallet,
+    summary,
+  });
+});

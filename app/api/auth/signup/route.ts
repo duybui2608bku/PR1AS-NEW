@@ -1,26 +1,31 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
-import { UserRole } from "@/lib/auth/api-client";
+import { UserRole } from "@/lib/utils/enums";
+import { successResponse } from "@/lib/http/response";
+import { withErrorHandling, ApiError, ErrorCode } from "@/lib/http/errors";
+import { ERROR_MESSAGES, getErrorMessage } from "@/lib/constants/errors";
+import { HttpStatus } from "@/lib/utils/enums";
 
-export async function POST(request: NextRequest) {
-  try {
-    const { email, password, role, fullName } = await request.json();
+export const POST = withErrorHandling(async (request: NextRequest) => {
+  const { email, password, role, fullName } = await request.json();
 
-    // Validate input
-    if (!email || !password || !role) {
-      return NextResponse.json(
-        { error: "Email, password, and role are required" },
-        { status: 400 }
-      );
-    }
+  // Validate input
+  if (!email || !password || !role) {
+    throw new ApiError(
+      "Email, password, and role are required",
+      HttpStatus.BAD_REQUEST,
+      ErrorCode.MISSING_REQUIRED_FIELDS
+    );
+  }
 
-    // Validate role
-    if (!["client", "worker"].includes(role)) {
-      return NextResponse.json(
-        { error: "Invalid role. Must be 'client' or 'worker'" },
-        { status: 400 }
-      );
-    }
+  // Validate role
+  if (![UserRole.CLIENT, UserRole.WORKER].includes(role as UserRole)) {
+    throw new ApiError(
+      getErrorMessage(ERROR_MESSAGES.INVALID_ROLE),
+      HttpStatus.BAD_REQUEST,
+      ErrorCode.INVALID_ROLE
+    );
+  }
 
     const supabase = createAdminClient();
 
@@ -31,45 +36,32 @@ export async function POST(request: NextRequest) {
       .eq("email", email)
       .single();
 
-    if (existingProfile) {
-      // Check if account is banned
-      if (existingProfile.status === "banned") {
-        return NextResponse.json(
-          {
-            error: "ACCOUNT_BANNED",
-            message: "Tài khoản này đã bị khóa",
-          },
-          { status: 403 }
-        );
-      }
-
-      // Check if trying to register with different role
-      if (existingProfile.role !== role) {
-        const roleNames: Record<UserRole, string> = {
-          client: "KHÁCH HÀNG",
-          worker: "THỢ",
-          admin: "ADMIN",
-        };
-
-        return NextResponse.json(
-          {
-            error: "EMAIL_ALREADY_REGISTERED_WITH_DIFFERENT_ROLE",
-            message: `Email này đã được đăng ký với vai trò ${roleNames[existingProfile.role as UserRole]}. Vui lòng đăng nhập hoặc sử dụng email khác.`,
-            existingRole: existingProfile.role,
-          },
-          { status: 409 }
-        );
-      }
-
-      // Email already registered with same role
-      return NextResponse.json(
-        {
-          error: "Email already registered",
-          message: "Email này đã được đăng ký. Vui lòng đăng nhập.",
-        },
-        { status: 409 }
+  if (existingProfile) {
+    // Check if account is banned
+    if (existingProfile.status === "banned") {
+      throw new ApiError(
+        getErrorMessage(ERROR_MESSAGES.ACCOUNT_BANNED),
+        HttpStatus.FORBIDDEN,
+        ErrorCode.ACCOUNT_BANNED
       );
     }
+
+    // Check if trying to register with different role
+    if (existingProfile.role !== role) {
+      throw new ApiError(
+        getErrorMessage(ERROR_MESSAGES.EMAIL_ALREADY_REGISTERED_WITH_DIFFERENT_ROLE),
+        HttpStatus.BAD_REQUEST,
+        ErrorCode.EMAIL_ALREADY_REGISTERED_WITH_DIFFERENT_ROLE
+      );
+    }
+
+    // Email already registered with same role
+    throw new ApiError(
+      getErrorMessage(ERROR_MESSAGES.EMAIL_ALREADY_REGISTERED),
+      HttpStatus.BAD_REQUEST,
+      ErrorCode.EMAIL_ALREADY_REGISTERED
+    );
+  }
 
     // Create auth user
     const { data: authData, error: authError } = await supabase.auth.admin.createUser({
@@ -78,102 +70,83 @@ export async function POST(request: NextRequest) {
       email_confirm: true, // Auto-confirm for demo
     });
 
-    if (authError) {
+  if (authError) {
+    throw authError;
+  }
 
-      return NextResponse.json(
-        { error: authError.message },
-        { status: 400 }
-      );
-    }
+  if (!authData.user) {
+    throw new ApiError(
+      "Failed to create user",
+      HttpStatus.INTERNAL_SERVER_ERROR,
+      ErrorCode.OPERATION_FAILED
+    );
+  }
 
-    if (!authData.user) {
-      return NextResponse.json(
-        { error: "Failed to create user" },
-        { status: 500 }
-      );
-    }
+  // Create user profile
+  const { error: profileError } = await supabase
+    .from("user_profiles")
+    .insert({
+      id: authData.user.id,
+      email: authData.user.email,
+      full_name: fullName || null,
+      role,
+      status: "active",
+    });
 
-    // Create user profile
-    const { error: profileError } = await supabase
-      .from("user_profiles")
-      .insert({
-        id: authData.user.id,
-        email: authData.user.email,
-        full_name: fullName || null,
-        role,
-        status: "active",
-      });
+  if (profileError) {
+    // Cleanup: delete auth user if profile creation fails
+    await supabase.auth.admin.deleteUser(authData.user.id);
+    throw profileError;
+  }
 
-    if (profileError) {
+  // Auto-login after signup by creating a session
+  const { data: sessionData, error: sessionError } = 
+    await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
-      // Cleanup: delete auth user if profile creation fails
-      await supabase.auth.admin.deleteUser(authData.user.id);
-      
-      return NextResponse.json(
-        { error: "Failed to create profile" },
-        { status: 500 }
-      );
-    }
-
-    // Auto-login after signup by creating a session
-    const { data: sessionData, error: sessionError } = 
-      await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-    if (sessionError || !sessionData.session) {
-
-      // User created but auto-login failed - they can login manually
-      return NextResponse.json({
-        success: true,
-        user: {
-          id: authData.user.id,
-          email: authData.user.email,
-          role,
-        },
-        message: "Account created. Please login.",
-      });
-    }
-
-    // Create response with cookies
-    const response = NextResponse.json({
-      success: true,
+  if (sessionError || !sessionData.session) {
+    // User created but auto-login failed - they can login manually
+    return successResponse({
       user: {
         id: authData.user.id,
         email: authData.user.email,
         role,
       },
-      session: {
-        access_token: sessionData.session.access_token,
-        refresh_token: sessionData.session.refresh_token,
-      },
-    });
-
-    // Set authentication cookies
-    response.cookies.set("sb-access-token", sessionData.session.access_token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 60 * 60 * 24 * 7, // 7 days
-      path: "/",
-    });
-
-    response.cookies.set("sb-refresh-token", sessionData.session.refresh_token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 60 * 60 * 24 * 30, // 30 days
-      path: "/",
-    });
-
-    return response;
-  } catch (error) {
-
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    }, "Account created. Please login.");
   }
-}
+
+  // Create response with cookies
+  const response = successResponse({
+    user: {
+      id: authData.user.id,
+      email: authData.user.email,
+      role,
+    },
+    session: {
+      access_token: sessionData.session.access_token,
+      refresh_token: sessionData.session.refresh_token,
+    },
+  });
+
+  // Set authentication cookies
+  response.cookies.set("sb-access-token", sessionData.session.access_token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: 60 * 60 * 24 * 7, // 7 days
+    path: "/",
+  });
+
+  response.cookies.set("sb-refresh-token", sessionData.session.refresh_token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: 60 * 60 * 24 * 30, // 30 days
+    path: "/",
+  });
+
+  return response;
+});
 

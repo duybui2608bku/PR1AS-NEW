@@ -3,71 +3,38 @@
  * POST /api/wallet/escrow/complaint - File a complaint for an escrow
  */
 
-import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { NextRequest } from 'next/server';
 import { WalletService } from '@/lib/wallet/service';
 import { ComplaintRequest } from '@/lib/wallet/types';
+import { requireAuth } from '@/lib/auth/middleware';
+import { successResponse } from '@/lib/http/response';
+import { withErrorHandling, ApiError, ErrorCode } from '@/lib/http/errors';
+import { ERROR_MESSAGES, getErrorMessage } from '@/lib/constants/errors';
+import { HttpStatus } from '@/lib/utils/enums';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+export const POST = withErrorHandling(async (request: NextRequest) => {
+  // Authenticate user
+  const { user, supabase } = await requireAuth(request);
 
-export async function POST(request: NextRequest) {
-  try {
-    // Get user from session
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
+  // Parse request body
+  const body: ComplaintRequest = await request.json();
+  const { escrow_id, description } = body;
 
-    const token = authHeader.replace('Bearer ', '');
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
-    // Verify token and get user
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Invalid token' },
-        { status: 401 }
-      );
-    }
-
-    // Parse request body
-    const body: ComplaintRequest = await request.json();
-    const { escrow_id, description } = body;
-
-    if (!escrow_id || !description) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Escrow ID and description are required',
-        },
-        { status: 400 }
-      );
-    }
-
-    // File complaint
-    const walletService = new WalletService(supabase);
-    const escrow = await walletService.fileComplaint(body, user.id);
-
-    return NextResponse.json({
-      success: true,
-      message: 'Complaint filed successfully. Payment is now held pending admin review.',
-      escrow,
-    });
-  } catch (error: any) {
-
-    return NextResponse.json(
-      {
-        success: false,
-        error: error.message || 'Failed to file complaint',
-        code: error.code,
-      },
-      { status: error.statusCode || 500 }
+  if (!escrow_id || !description) {
+    throw new ApiError(
+      'Escrow ID and description are required',
+      HttpStatus.BAD_REQUEST,
+      ErrorCode.MISSING_REQUIRED_FIELDS
     );
   }
-}
+
+  // File complaint
+  const walletService = new WalletService(supabase);
+  const escrow = await walletService.fileComplaint(body, user.id);
+
+  return successResponse(
+    { escrow },
+    'Complaint filed successfully. Payment is now held pending admin review.'
+  );
+});
 

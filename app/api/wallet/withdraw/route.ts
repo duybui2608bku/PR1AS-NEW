@@ -3,23 +3,19 @@
  * POST /api/wallet/withdraw - Request withdrawal to PayPal or bank
  */
 
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { WalletService } from '@/lib/wallet/service';
 import { createPayPalService } from '@/lib/wallet/payment-gateways';
 import { WithdrawalRequest, WalletErrorCodes } from '@/lib/wallet/types';
-import { getAuthenticatedUser } from '@/lib/wallet/auth-helper';
+import { requireAuth } from '@/lib/auth/middleware';
+import { successResponse } from '@/lib/http/response';
+import { withErrorHandling, ApiError, ErrorCode } from '@/lib/http/errors';
+import { ERROR_MESSAGES, getErrorMessage } from '@/lib/constants/errors';
+import { HttpStatus } from '@/lib/utils/enums';
 
-export async function POST(request: NextRequest) {
-  try {
-    // Authenticate user
-    const { user, supabase, error: authError } = await getAuthenticatedUser(request);
-    
-    if (authError || !user.id) {
-      return NextResponse.json(
-        { error: authError || 'Unauthorized' },
-        { status: 401 }
-      );
-    }
+export const POST = withErrorHandling(async (request: NextRequest) => {
+  // Authenticate user
+  const { user, supabase } = await requireAuth(request);
 
     // Parse request body
     const body: WithdrawalRequest = await request.json();
@@ -29,29 +25,24 @@ export async function POST(request: NextRequest) {
     const walletService = new WalletService(supabase);
     const settings = await walletService.getPlatformSettings();
 
-    // Validate amount
-    if (amount_usd < settings.minimum_withdrawal_usd) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: `Minimum withdrawal amount is $${settings.minimum_withdrawal_usd}`,
-        },
-        { status: 400 }
-      );
-    }
+  // Validate amount
+  if (amount_usd < settings.minimum_withdrawal_usd) {
+    throw new ApiError(
+      `Minimum withdrawal amount is $${settings.minimum_withdrawal_usd}`,
+      HttpStatus.BAD_REQUEST,
+      ErrorCode.VALIDATION_ERROR
+    );
+  }
 
-    // Check balance
-    const hasBalance = await walletService.checkBalance(user.id, amount_usd);
-    if (!hasBalance) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Insufficient balance',
-          code: WalletErrorCodes.INSUFFICIENT_BALANCE,
-        },
-        { status: 400 }
-      );
-    }
+  // Check balance
+  const hasBalance = await walletService.checkBalance(user.id, amount_usd);
+  if (!hasBalance) {
+    throw new ApiError(
+      getErrorMessage(ERROR_MESSAGES.INSUFFICIENT_BALANCE),
+      HttpStatus.BAD_REQUEST,
+      ErrorCode.INSUFFICIENT_BALANCE
+    );
+  }
 
     // Get user profile for additional info
     const { data: profile } = await supabase
@@ -60,17 +51,15 @@ export async function POST(request: NextRequest) {
       .eq('id', user.id)
       .single();
 
-    // Handle PayPal withdrawal
-    if (payment_method === 'paypal') {
-      if (!destination.paypal_email) {
-        return NextResponse.json(
-          {
-            success: false,
-            error: 'PayPal email is required',
-          },
-          { status: 400 }
-        );
-      }
+  // Handle PayPal withdrawal
+  if (payment_method === 'paypal') {
+    if (!destination.paypal_email) {
+      throw new ApiError(
+        'PayPal email is required',
+        HttpStatus.BAD_REQUEST,
+        ErrorCode.MISSING_REQUIRED_FIELDS
+      );
+    }
 
       // Create withdrawal transaction (pending)
       const transaction = await walletService.createTransaction({
@@ -129,16 +118,17 @@ export async function POST(request: NextRequest) {
           })
           .eq('id', transaction.id);
 
-        return NextResponse.json({
-          success: true,
-          message: 'Withdrawal processed successfully',
-          transaction: {
-            id: transaction.id,
-            amount_usd,
-            status: 'completed',
-            payout_id: payout.payoutItemId,
+        return successResponse(
+          {
+            transaction: {
+              id: transaction.id,
+              amount_usd,
+              status: 'completed',
+              payout_id: payout.payoutItemId,
+            },
           },
-        });
+          'Withdrawal processed successfully'
+        );
       } catch (error: any) {
         // Mark transaction as failed
         await walletService.updateTransactionStatus(
@@ -151,17 +141,15 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Handle bank transfer withdrawal
-    if (payment_method === 'bank_transfer') {
-      if (!destination.bank_account || !destination.bank_name || !destination.account_holder) {
-        return NextResponse.json(
-          {
-            success: false,
-            error: 'Bank account details are required (bank_account, bank_name, account_holder)',
-          },
-          { status: 400 }
-        );
-      }
+  // Handle bank transfer withdrawal
+  if (payment_method === 'bank_transfer') {
+    if (!destination.bank_account || !destination.bank_name || !destination.account_holder) {
+      throw new ApiError(
+        'Bank account details are required (bank_account, bank_name, account_holder)',
+        HttpStatus.BAD_REQUEST,
+        ErrorCode.MISSING_REQUIRED_FIELDS
+      );
+    }
 
       // Create withdrawal transaction (manual processing required)
       const transaction = await walletService.createTransaction({
@@ -195,33 +183,22 @@ export async function POST(request: NextRequest) {
           .eq('user_id', user.id);
       }
 
-      return NextResponse.json({
-        success: true,
-        message: 'Withdrawal request submitted. Manual processing required (1-3 business days).',
+    return successResponse(
+      {
         transaction: {
           id: transaction.id,
           amount_usd,
           status: 'pending',
         },
-      });
-    }
-
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Invalid payment method',
       },
-      { status: 400 }
-    );
-  } catch (error: any) {
-
-    return NextResponse.json(
-      {
-        success: false,
-        error: error.message || 'Failed to process withdrawal',
-      },
-      { status: 500 }
+      'Withdrawal request submitted. Manual processing required (1-3 business days).'
     );
   }
-}
+
+  throw new ApiError(
+    getErrorMessage(ERROR_MESSAGES.INVALID_PAYMENT_METHOD),
+    HttpStatus.BAD_REQUEST,
+    ErrorCode.INVALID_PAYMENT_METHOD
+  );
+});
 

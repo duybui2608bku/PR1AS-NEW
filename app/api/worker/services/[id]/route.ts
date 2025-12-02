@@ -1,58 +1,42 @@
 /**
  * Worker Service Management API
  * DELETE /api/worker/services/[id] - Remove service from worker profile
- * PATCH  /api/worker/services/[id]/price - Update service pricing
  */
 
-import { NextRequest, NextResponse } from 'next/server';
-import { getAuthenticatedUser } from '@/lib/wallet/auth-helper';
+import { NextRequest } from 'next/server';
+import { requireWorker } from '@/lib/auth/middleware';
 import { WorkerProfileService } from '@/lib/worker/service';
-import { getErrorMessage } from '@/lib/utils/common';
+import { successResponse } from '@/lib/http/response';
+import { withErrorHandling, ApiError, ErrorCode } from '@/lib/http/errors';
+import { ERROR_MESSAGES, getErrorMessage } from '@/lib/constants/errors';
+import { HttpStatus } from '@/lib/utils/enums';
 
 /**
  * DELETE /api/worker/services/[id]
  * Remove service from worker profile
  */
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
+export const DELETE = withErrorHandling(
+  async (
+    request: NextRequest,
+    { params }: { params: Promise<{ id: string }> }
+  ) => {
     const { id } = await params;
-    const { user, supabase, error: authError } = await getAuthenticatedUser(request);
-
-    if (authError || !user.id) {
-      return NextResponse.json(
-        { success: false, error: authError || 'Unauthorized' },
-        { status: 401 }
-      );
-    }
+    const { user, supabase } = await requireWorker(request);
 
     const service = new WorkerProfileService(supabase);
 
     // Get worker profile to pass profileId
     const profile = await service.getWorkerProfile(user.id);
     if (!profile) {
-      return NextResponse.json(
-        { success: false, error: 'Worker profile not found' },
-        { status: 404 }
+      throw new ApiError(
+        getErrorMessage(ERROR_MESSAGES.WORKER_PROFILE_NOT_FOUND),
+        HttpStatus.NOT_FOUND,
+        ErrorCode.WORKER_PROFILE_NOT_FOUND
       );
     }
 
     await service.removeWorkerService(id, profile.id);
 
-    return NextResponse.json({
-      success: true,
-      message: 'Service removed successfully',
-    });
-  } catch (error: unknown) {
-
-    return NextResponse.json(
-      {
-        success: false,
-        error: getErrorMessage(error, 'Failed to remove service'),
-      },
-      { status: 500 }
-    );
+    return successResponse(null, 'Service removed successfully');
   }
-}
+);

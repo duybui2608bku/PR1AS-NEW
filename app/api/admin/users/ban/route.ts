@@ -1,69 +1,47 @@
-import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
-
-// Admin Supabase client with service role key
-const getAdminSupabase = () => {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false,
-      },
-    }
-  );
-};
+import { NextRequest } from "next/server";
+import { requireAdmin } from "@/lib/auth/middleware";
+import { successResponse } from "@/lib/http/response";
+import { withErrorHandling, ApiError, ErrorCode } from "@/lib/http/errors";
+import { ERROR_MESSAGES, getErrorMessage } from "@/lib/constants/errors";
+import { HttpStatus } from "@/lib/utils/enums";
 
 // POST /api/admin/users/ban
-export async function POST(request: NextRequest) {
-  try {
-    const { userId, duration } = await request.json();
+export const POST = withErrorHandling(async (request: NextRequest) => {
+  // Require admin authentication
+  const { supabase } = await requireAdmin(request);
 
-    if (!userId) {
-      return NextResponse.json(
-        { error: "User ID is required" },
-        { status: 400 }
-      );
-    }
+  const { userId, duration } = await request.json();
 
-    const supabase = getAdminSupabase();
-
-    // Calculate ban duration (default 1 year if not specified)
-    const banDuration = duration || "8760h"; // 1 year in hours
-
-    const { data, error } = await supabase.auth.admin.updateUserById(userId, {
-      ban_duration: banDuration,
-    });
-
-    if (error) {
-
-      return NextResponse.json(
-        { error: "Failed to ban user" },
-        { status: 500 }
-      );
-    }
-
-    // Log admin action
-    const { error: logError } = await supabase.from("admin_logs").insert({
-      action: "ban_user",
-      target_user_id: userId,
-      details: { duration: banDuration },
-    });
-
-    if (logError) {
-
-    }
-
-    return NextResponse.json({
-      message: "User banned successfully",
-      user: data.user,
-    });
-  } catch (error) {
-
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
+  if (!userId) {
+    throw new ApiError(
+      "User ID is required",
+      HttpStatus.BAD_REQUEST,
+      ErrorCode.MISSING_REQUIRED_FIELDS
     );
   }
-}
+
+  // Calculate ban duration (default 1 year if not specified)
+  const banDuration = duration || "8760h"; // 1 year in hours
+
+  const { data, error } = await supabase.auth.admin.updateUserById(userId, {
+    ban_duration: banDuration,
+  });
+
+  if (error) {
+    throw error;
+  }
+
+  // Log admin action (non-blocking)
+  await supabase.from("admin_logs").insert({
+    action: "ban_user",
+    target_user_id: userId,
+    details: { duration: banDuration },
+  }).catch(() => {
+    // Ignore logging errors
+  });
+
+  return successResponse(
+    { user: data.user },
+    "User banned successfully"
+  );
+});

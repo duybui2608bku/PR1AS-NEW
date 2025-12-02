@@ -3,84 +3,33 @@
  * POST /api/admin/wallet/escrow/release - Manually release an escrow
  */
 
-import { NextRequest, NextResponse } from 'next/server';
-import { createAdminClient } from '@/lib/supabase/server';
-import { WalletService } from '@/lib/wallet/service';
+import { NextRequest } from "next/server";
+import { WalletService } from "@/lib/wallet/service";
+import { requireAdmin } from "@/lib/auth/middleware";
+import { successResponse } from "@/lib/http/response";
+import { withErrorHandling, ApiError, ErrorCode } from "@/lib/http/errors";
+import { ERROR_MESSAGES, getErrorMessage } from "@/lib/constants/errors";
+import { HttpStatus } from "@/lib/utils/enums";
 
-export async function POST(request: NextRequest) {
-  try {
-    // Get user from session
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
+export const POST = withErrorHandling(async (request: NextRequest) => {
+  // Require admin authentication
+  const { user, supabase } = await requireAdmin(request);
 
-    const token = authHeader.replace('Bearer ', '');
-    const supabase = createAdminClient();
+  // Parse request body
+  const body = await request.json();
+  const { escrow_id } = body;
 
-    // Verify token and get user
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Invalid token' },
-        { status: 401 }
-      );
-    }
-
-    // Verify user is admin
-    const { data: profile } = await supabase
-      .from('user_profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single();
-
-    if (!profile || profile.role !== 'admin') {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Admin access required',
-        },
-        { status: 403 }
-      );
-    }
-
-    // Parse request body
-    const body = await request.json();
-    const { escrow_id } = body;
-
-    if (!escrow_id) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Escrow ID is required',
-        },
-        { status: 400 }
-      );
-    }
-
-    // Release escrow
-    const walletService = new WalletService(supabase);
-    const transaction = await walletService.releaseEscrow(escrow_id, user.id);
-
-    return NextResponse.json({
-      success: true,
-      message: 'Escrow released successfully',
-      transaction,
-    });
-  } catch (error: any) {
-
-    return NextResponse.json(
-      {
-        success: false,
-        error: error.message || 'Failed to release escrow',
-        code: error.code,
-      },
-      { status: error.statusCode || 500 }
+  if (!escrow_id) {
+    throw new ApiError(
+      getErrorMessage(ERROR_MESSAGES.ESCROW_ID_REQUIRED),
+      HttpStatus.BAD_REQUEST,
+      ErrorCode.ESCROW_ID_REQUIRED
     );
   }
-}
 
+  // Release escrow
+  const walletService = new WalletService(supabase);
+  const transaction = await walletService.releaseEscrow(escrow_id, user.id);
+
+  return successResponse({ transaction }, "Escrow released successfully");
+});

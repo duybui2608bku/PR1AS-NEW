@@ -3,31 +3,15 @@
  * GET /api/notifications/list - Get user notifications
  */
 
-import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { NextRequest } from "next/server";
 import { NotificationFilters, NotificationType } from "@/lib/booking/types";
+import { requireAuth } from "@/lib/auth/middleware";
+import { successResponse } from "@/lib/http/response";
+import { withErrorHandling } from "@/lib/http/errors";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-
-export async function GET(request: NextRequest) {
-  try {
-    const authHeader = request.headers.get("authorization");
-    if (!authHeader) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const token = authHeader.replace("Bearer ", "");
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser(token);
-
-    if (authError || !user) {
-      return NextResponse.json({ error: "Invalid token" }, { status: 401 });
-    }
+export const GET = withErrorHandling(async (request: NextRequest) => {
+  // Authenticate user
+  const { user, supabase } = await requireAuth(request);
 
     const { searchParams } = new URL(request.url);
     const filters: NotificationFilters = {
@@ -91,22 +75,12 @@ export async function GET(request: NextRequest) {
       .select("*", { count: "exact", head: true })
       .eq("user_id", user.id);
 
-    return NextResponse.json({
-      success: true,
-      notifications: notifications || [],
-      unread_count: unreadCount || 0,
-      total: totalCount || 0,
-      page,
-      limit,
-    });
-  } catch (error: any) {
-    return NextResponse.json(
-      {
-        success: false,
-        error: error.message || "Internal server error",
-      },
-      { status: 500 }
-    );
-  }
-}
+  return successResponse({
+    notifications: notifications || [],
+    unread_count: unreadCount || 0,
+    total: totalCount || 0,
+    page,
+    limit,
+  });
+});
 

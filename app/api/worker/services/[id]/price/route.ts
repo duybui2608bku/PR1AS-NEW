@@ -3,34 +3,31 @@
  * Update service pricing
  */
 
-import { NextRequest, NextResponse } from 'next/server';
-import { getAuthenticatedUser } from '@/lib/wallet/auth-helper';
+import { NextRequest } from 'next/server';
+import { requireWorker } from '@/lib/auth/middleware';
 import { WorkerProfileService } from '@/lib/worker/service';
-import { getErrorMessage } from '@/lib/utils/common';
 import { UpdateServicePriceRequest } from '@/lib/worker/types';
+import { successResponse } from '@/lib/http/response';
+import { withErrorHandling, ApiError, ErrorCode } from '@/lib/http/errors';
+import { ERROR_MESSAGES, getErrorMessage } from '@/lib/constants/errors';
+import { HttpStatus } from '@/lib/utils/enums';
 
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
+export const PATCH = withErrorHandling(
+  async (
+    request: NextRequest,
+    { params }: { params: Promise<{ id: string }> }
+  ) => {
     const { id } = await params;
-    const { user, supabase, error: authError } = await getAuthenticatedUser(request);
-
-    if (authError || !user.id) {
-      return NextResponse.json(
-        { success: false, error: authError || 'Unauthorized' },
-        { status: 401 }
-      );
-    }
+    const { user, supabase } = await requireWorker(request);
 
     const body: UpdateServicePriceRequest = await request.json();
 
     // Validation
     if (!body.hourly_rate || body.hourly_rate <= 0) {
-      return NextResponse.json(
-        { success: false, error: 'Valid hourly rate is required' },
-        { status: 400 }
+      throw new ApiError(
+        'Valid hourly rate is required',
+        HttpStatus.BAD_REQUEST,
+        ErrorCode.VALIDATION_ERROR
       );
     }
 
@@ -39,27 +36,15 @@ export async function PATCH(
     // Get worker profile to pass profileId
     const profile = await service.getWorkerProfile(user.id);
     if (!profile) {
-      return NextResponse.json(
-        { success: false, error: 'Worker profile not found' },
-        { status: 404 }
+      throw new ApiError(
+        getErrorMessage(ERROR_MESSAGES.WORKER_PROFILE_NOT_FOUND),
+        HttpStatus.NOT_FOUND,
+        ErrorCode.WORKER_PROFILE_NOT_FOUND
       );
     }
 
     const updatedPrice = await service.updateWorkerServicePrice(id, profile.id, body);
 
-    return NextResponse.json({
-      success: true,
-      data: updatedPrice,
-      message: 'Pricing updated successfully',
-    });
-  } catch (error: unknown) {
-
-    return NextResponse.json(
-      {
-        success: false,
-        error: getErrorMessage(error, 'Failed to update pricing'),
-      },
-      { status: 500 }
-    );
+    return successResponse(updatedPrice, 'Pricing updated successfully');
   }
-}
+);

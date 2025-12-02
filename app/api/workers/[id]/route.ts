@@ -3,16 +3,19 @@
  * Get public worker profile by ID
  */
 
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { WorkerProfileService } from "@/lib/worker/service";
 import { createAdminClient } from "@/lib/supabase/server";
-import { getErrorMessage } from "@/lib/utils/common";
+import { successResponse } from "@/lib/http/response";
+import { withErrorHandling, ApiError, ErrorCode } from "@/lib/http/errors";
+import { ERROR_MESSAGES, getErrorMessage } from "@/lib/constants/errors";
+import { HttpStatus } from "@/lib/utils/enums";
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
+export const GET = withErrorHandling(
+  async (
+    request: NextRequest,
+    { params }: { params: Promise<{ id: string }> }
+  ) => {
     const { id } = await params;
     // Use admin client so RLS does not block public read of published profiles
     const supabase = createAdminClient();
@@ -21,23 +24,13 @@ export async function GET(
     const profile = await service.getWorkerProfileById(id);
 
     if (!profile) {
-      return NextResponse.json(
-        { success: false, error: "Worker profile not found or not published" },
-        { status: 404 }
+      throw new ApiError(
+        "Worker profile not found or not published",
+        HttpStatus.NOT_FOUND,
+        ErrorCode.WORKER_PROFILE_NOT_FOUND
       );
     }
 
-    return NextResponse.json({
-      success: true,
-      data: profile,
-    });
-  } catch (error: unknown) {
-    return NextResponse.json(
-      {
-        success: false,
-        error: getErrorMessage(error, "Failed to fetch worker profile"),
-      },
-      { status: 500 }
-    );
+    return successResponse(profile);
   }
-}
+);

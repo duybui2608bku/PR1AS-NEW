@@ -3,40 +3,17 @@
  * Publish worker profile (after admin approval)
  */
 
-import { NextRequest, NextResponse } from "next/server";
-import { getAuthenticatedUser } from "@/lib/wallet/auth-helper";
+import { NextRequest } from "next/server";
+import { requireWorker } from "@/lib/auth/middleware";
 import { WorkerProfileService } from "@/lib/worker/service";
-import { getErrorMessage } from "@/lib/utils/common";
+import { successResponse } from "@/lib/http/response";
+import { withErrorHandling } from "@/lib/http/errors";
 
-export async function PATCH(request: NextRequest) {
-  try {
-    const {
-      user,
-      supabase,
-      error: authError,
-    } = await getAuthenticatedUser(request);
+export const PATCH = withErrorHandling(async (request: NextRequest) => {
+  const { user, supabase } = await requireWorker(request);
 
-    if (authError || !user.id) {
-      return NextResponse.json(
-        { success: false, error: authError || "Unauthorized" },
-        { status: 401 }
-      );
-    }
+  const service = new WorkerProfileService(supabase);
+  await service.publishProfile(user.id);
 
-    const service = new WorkerProfileService(supabase);
-    await service.publishProfile(user.id);
-
-    return NextResponse.json({
-      success: true,
-      message: "Profile published successfully",
-    });
-  } catch (error: unknown) {
-    return NextResponse.json(
-      {
-        success: false,
-        error: getErrorMessage(error, "Failed to publish profile"),
-      },
-      { status: 500 }
-    );
-  }
-}
+  return successResponse(null, "Profile published successfully");
+});

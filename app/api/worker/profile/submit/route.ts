@@ -3,47 +3,18 @@
  * Submit worker profile for admin review
  */
 
-import { NextRequest, NextResponse } from "next/server";
-import { getAuthenticatedUser } from "@/lib/wallet/auth-helper";
+import { NextRequest } from "next/server";
+import { requireWorker } from "@/lib/auth/middleware";
 import { WorkerProfileService } from "@/lib/worker/service";
-import { getErrorMessage } from "@/lib/utils/common";
+import { successResponse } from "@/lib/http/response";
+import { withErrorHandling, ApiError, ErrorCode } from "@/lib/http/errors";
+import { HttpStatus } from "@/lib/utils/enums";
 
-export async function PATCH(request: NextRequest) {
-  try {
-    const {
-      user,
-      supabase,
-      error: authError,
-    } = await getAuthenticatedUser(request);
+export const PATCH = withErrorHandling(async (request: NextRequest) => {
+  const { user, supabase } = await requireWorker(request);
 
-    if (authError || !user.id) {
-      return NextResponse.json(
-        { success: false, error: authError || "Unauthorized" },
-        { status: 401 }
-      );
-    }
+  const service = new WorkerProfileService(supabase);
+  await service.submitProfileForReview(user.id);
 
-    const service = new WorkerProfileService(supabase);
-    await service.submitProfileForReview(user.id);
-
-    return NextResponse.json({
-      success: true,
-      message: "Profile submitted for review",
-    });
-  } catch (error: unknown) {
-    const errorMessage = getErrorMessage(error, "Failed to submit profile");
-
-    // Check for validation errors
-    if (errorMessage.includes("avatar") || errorMessage.includes("service")) {
-      return NextResponse.json(
-        { success: false, error: errorMessage },
-        { status: 400 }
-      );
-    }
-
-    return NextResponse.json(
-      { success: false, error: errorMessage },
-      { status: 500 }
-    );
-  }
-}
+  return successResponse(null, "Profile submitted for review");
+});

@@ -3,29 +3,16 @@
  * Get all service categories
  */
 
-import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
 import { WorkerProfileService } from "@/lib/worker/service";
-import { getErrorMessage } from "@/lib/utils/common";
+import { successResponse } from "@/lib/http/response";
+import { withErrorHandling } from "@/lib/http/errors";
 
-export async function GET() {
-  try {
-    const supabase = createAdminClient();
-    const service = new WorkerProfileService(supabase);
+export const GET = withErrorHandling(async () => {
+  const supabase = createAdminClient();
+  const service = new WorkerProfileService(supabase);
 
-    const categories = await service.getServiceCategories();
+  const categories = await service.getServiceCategories();
 
-    return NextResponse.json({
-      success: true,
-      data: categories,
-    });
-  } catch (error: unknown) {
-    return NextResponse.json(
-      {
-        success: false,
-        error: getErrorMessage(error, "Failed to fetch service categories"),
-      },
-      { status: 500 }
-    );
-  }
-}
+  return successResponse(categories);
+});

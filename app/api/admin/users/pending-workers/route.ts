@@ -1,24 +1,12 @@
-import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
-
-// Admin Supabase client with service role key
-const getAdminSupabase = () => {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false,
-      },
-    }
-  );
-};
+import { NextRequest } from "next/server";
+import { requireAdmin } from "@/lib/auth/middleware";
+import { successResponse } from "@/lib/http/response";
+import { withErrorHandling } from "@/lib/http/errors";
 
 // GET /api/admin/users/pending-workers
-export async function GET() {
-  try {
-    const supabase = getAdminSupabase();
+export const GET = withErrorHandling(async (request: NextRequest) => {
+  // Require admin authentication
+  const { supabase } = await requireAdmin(request);
 
     // Get worker profiles that are pending approval
     const { data: pendingWorkers, error } = await supabase
@@ -27,14 +15,11 @@ export async function GET() {
       .eq("profile_status", "pending");
 
     if (error) {
-      return NextResponse.json(
-        { error: "Failed to fetch pending workers", details: error.message },
-        { status: 500 }
-      );
+      throw error;
     }
 
     if (!pendingWorkers || pendingWorkers.length === 0) {
-      return NextResponse.json({
+      return successResponse({
         workers: [],
         total: 0,
       });
@@ -155,18 +140,8 @@ export async function GET() {
       })
     );
 
-    return NextResponse.json({
+    return successResponse({
       workers: workersWithDetails,
       total: workersWithDetails.length,
     });
-  } catch (error) {
-    return NextResponse.json(
-      {
-        error: "Internal server error",
-        details: error instanceof Error ? error.message : "Unknown error",
-        stack: error instanceof Error ? error.stack : undefined,
-      },
-      { status: 500 }
-    );
-  }
-}
+});
