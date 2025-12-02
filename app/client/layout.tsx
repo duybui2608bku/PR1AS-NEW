@@ -9,6 +9,7 @@ import {
   WalletOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
+  CalendarOutlined,
 } from "@ant-design/icons";
 import { usePathname, useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
@@ -54,6 +55,11 @@ export default function ClientLayout({
       <DashboardOutlined />
     ),
     getItem("My Wallet", "/client/wallet", <WalletOutlined />),
+    getItem(
+      t("booking.title") || "My Bookings",
+      "/client/bookings",
+      <CalendarOutlined />
+    ),
     getItem("Post Job", "/client/post-job", <PlusOutlined />),
     getItem("My Jobs", "/client/my-jobs", <UnorderedListOutlined />),
     getItem(t("nav.profile") || "Profile", "/client/profile", <UserOutlined />),

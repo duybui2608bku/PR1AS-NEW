@@ -13,6 +13,7 @@ import {
   MenuUnfoldOutlined,
   GlobalOutlined,
   TagsOutlined,
+  DollarOutlined,
 } from "@ant-design/icons";
 import { useRouter, usePathname } from "next/navigation";
 import { useTranslation } from "react-i18next";
@@ -85,6 +86,16 @@ export default function AdminLayout({
       t("admin.sidebar.users") || "User Management",
       "/admin/users",
       <TeamOutlined />
+    ),
+    getItem(
+      t("admin.sidebar.transactions") || "Transactions",
+      "/admin/transactions",
+      <DollarOutlined />
+    ),
+    getItem(
+      t("admin.sidebar.escrows") || "Escrow Holds",
+      "/admin/escrows",
+      <DollarOutlined />
     ),
     getItem(
       t("admin.sidebar.settings") || "Settings",

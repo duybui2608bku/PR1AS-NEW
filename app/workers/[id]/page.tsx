@@ -55,6 +55,8 @@ import {
 } from "@/lib/utils/enums";
 import PublicServiceCard from "@/components/worker/PublicServiceCard";
 import MainLayout from "@/components/layout/MainLayout";
+import { BookingModal } from "@/components/booking";
+import { authAPI } from "@/lib/auth/api-client";
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -84,6 +86,8 @@ export default function WorkerPublicProfilePage() {
   const [selectedRatingFilter, setSelectedRatingFilter] = useState<
     number | "all"
   >("all");
+  const [bookingModalOpen, setBookingModalOpen] = useState(false);
+  const [userRole, setUserRole] = useState<string | null>(null);
 
   const reviews = [
     {
@@ -137,6 +141,21 @@ export default function WorkerPublicProfilePage() {
     // whenever the language changes; error messages are non-critical.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.id]);
+
+  // Fetch user role to determine if booking button should be enabled
+  useEffect(() => {
+    const fetchUserRole = async () => {
+      try {
+        const profile = await authAPI.getProfile();
+        setUserRole(profile.role);
+      } catch (error) {
+        // User not authenticated or profile not found
+        setUserRole(null);
+      }
+    };
+
+    fetchUserRole();
+  }, []);
 
   const servicesWithPricing = useMemo(() => {
     if (!profile?.services) return [];
@@ -710,20 +729,68 @@ export default function WorkerPublicProfilePage() {
 
                 {servicesWithPricing && servicesWithPricing.length > 1 && (
                   <div>
-                    <Text strong>{t("worker.public.otherServicesTitle")}</Text>
-                    <Carousel dots className="mt-2">
-                      {servicesWithPricing.map((svc: any) => (
-                        <div key={svc.worker_service.id}>
-                          <PublicServiceCard service={svc} />
-                        </div>
+                    <Title level={4} style={{ marginBottom: 16 }}>
+                      {t("worker.public.otherServicesTitle")}
+                    </Title>
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 16,
+                      }}
+                    >
+                      {servicesWithPricing.slice(1).map((svc: any) => (
+                        <PublicServiceCard
+                          key={svc.worker_service.id}
+                          service={svc}
+                          displayCurrency={displayCurrency}
+                        />
                       ))}
-                    </Carousel>
+                    </div>
                   </div>
                 )}
 
-                <Button type="primary" size="large" block>
-                  {t("worker.public.bookServiceButton")}
-                </Button>
+                {userRole === "client" && mainService && (
+                  <>
+                    <Button
+                      type="primary"
+                      size="large"
+                      block
+                      onClick={() => setBookingModalOpen(true)}
+                    >
+                      {t("worker.public.bookServiceButton")}
+                    </Button>
+                    <BookingModal
+                      open={bookingModalOpen}
+                      onClose={() => setBookingModalOpen(false)}
+                      onSuccess={() => {
+                        setBookingModalOpen(false);
+                        // Refresh page or show success message
+                      }}
+                      workerId={params.id as string}
+                      workerServiceId={mainService.worker_service.id}
+                      workerName={profile?.full_name}
+                      serviceName={
+                        mainService.name_key
+                          ? t(`services.${mainService.name_key}`)
+                          : undefined
+                      }
+                      availableServices={
+                        servicesWithPricing?.map((svc: any) => ({
+                          id: svc.worker_service.id,
+                          name: svc.name_key
+                            ? t(`services.${svc.name_key}`)
+                            : t("worker.public.unknownService"),
+                        })) || []
+                      }
+                    />
+                  </>
+                )}
+                {userRole !== "client" && (
+                  <Button type="primary" size="large" block disabled>
+                    {t("worker.public.bookServiceButton")}
+                  </Button>
+                )}
 
                 <Card
                   title={
@@ -1054,6 +1121,15 @@ function convertAmount(
 }
 
 function formatCurrencyClient(amount: number, currency: string) {
+  // Special handling for VND: show millions with "M" suffix
+  if (currency === Currency.VND && amount >= 1000000) {
+    const millions = amount / 1000000;
+    // Format to 1 decimal place if needed, otherwise show as integer
+    const formatted =
+      millions % 1 === 0 ? millions.toFixed(0) : millions.toFixed(1);
+    return `${formatted}M`;
+  }
+
   const formatter = new Intl.NumberFormat("en-US", {
     style: "currency",
     currency,

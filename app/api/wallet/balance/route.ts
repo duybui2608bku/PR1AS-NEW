@@ -35,7 +35,10 @@ export async function GET(request: NextRequest) {
       summary,
     });
   } catch (error: unknown) {
-    const errorMessage = getErrorMessage(error, "Failed to fetch wallet balance");
+    const errorMessage = getErrorMessage(
+      error,
+      "Failed to fetch wallet balance"
+    );
     return NextResponse.json(
       {
         success: false,

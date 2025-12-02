@@ -6,11 +6,11 @@
  * PATCH  /api/worker/profile/publish - Publish profile
  */
 
-import { NextRequest, NextResponse } from 'next/server';
-import { getAuthenticatedUser } from '@/lib/wallet/auth-helper';
-import { WorkerProfileService } from '@/lib/worker/service';
-import { getErrorMessage } from '@/lib/utils/common';
-import { WorkerProfileStep1Request } from '@/lib/worker/types';
+import { NextRequest, NextResponse } from "next/server";
+import { getAuthenticatedUser } from "@/lib/wallet/auth-helper";
+import { WorkerProfileService } from "@/lib/worker/service";
+import { getErrorMessage } from "@/lib/utils/common";
+import { WorkerProfileStep1Request } from "@/lib/worker/types";
 
 /**
  * GET /api/worker/profile
@@ -18,11 +18,15 @@ import { WorkerProfileStep1Request } from '@/lib/worker/types';
  */
 export async function GET(request: NextRequest) {
   try {
-    const { user, supabase, error: authError } = await getAuthenticatedUser(request);
+    const {
+      user,
+      supabase,
+      error: authError,
+    } = await getAuthenticatedUser(request);
 
     if (authError || !user.id) {
       return NextResponse.json(
-        { success: false, error: authError || 'Unauthorized' },
+        { success: false, error: authError || "Unauthorized" },
         { status: 401 }
       );
     }
@@ -32,7 +36,7 @@ export async function GET(request: NextRequest) {
 
     if (!profile) {
       return NextResponse.json(
-        { success: false, error: 'Profile not found' },
+        { success: false, error: "Profile not found" },
         { status: 404 }
       );
     }
@@ -42,11 +46,10 @@ export async function GET(request: NextRequest) {
       data: profile,
     });
   } catch (error: unknown) {
-
     return NextResponse.json(
       {
         success: false,
-        error: getErrorMessage(error, 'Failed to fetch profile'),
+        error: getErrorMessage(error, "Failed to fetch profile"),
       },
       { status: 500 }
     );
@@ -59,11 +62,15 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
-    const { user, supabase, error: authError } = await getAuthenticatedUser(request);
+    const {
+      user,
+      supabase,
+      error: authError,
+    } = await getAuthenticatedUser(request);
 
     if (authError || !user.id) {
       return NextResponse.json(
-        { success: false, error: authError || 'Unauthorized' },
+        { success: false, error: authError || "Unauthorized" },
         { status: 401 }
       );
     }
@@ -73,14 +80,14 @@ export async function POST(request: NextRequest) {
     // Validation
     if (!body.full_name || !body.age) {
       return NextResponse.json(
-        { success: false, error: 'Full name and age are required' },
+        { success: false, error: "Full name and age are required" },
         { status: 400 }
       );
     }
 
     if (body.age < 18 || body.age > 100) {
       return NextResponse.json(
-        { success: false, error: 'Age must be between 18 and 100' },
+        { success: false, error: "Age must be between 18 and 100" },
         { status: 400 }
       );
     }
@@ -91,14 +98,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       data: profile,
-      message: 'Profile saved successfully',
+      message: "Profile saved successfully",
     });
   } catch (error: unknown) {
-
     return NextResponse.json(
       {
         success: false,
-        error: getErrorMessage(error, 'Failed to save profile'),
+        error: getErrorMessage(error, "Failed to save profile"),
       },
       { status: 500 }
     );

@@ -15,7 +15,6 @@
 }
 
 @keyframes pulse {
-
   0%,
   100% {
     opacity: 1;
@@ -48,7 +47,7 @@
 
 :root {
   /* Fonts */
-  --font-family-base: "JetBrains Mono", monospace !important;
+  --font-family-base: "Roboto", monospace !important;
   --font-family-inter: "Inter", sans-serif;
 
   /* Background Colors */
@@ -57,12 +56,12 @@
   --background-secondary: #f7f7f7;
 
   /* Brand Colors */
-  --color-primary: #FF385C;
+  --color-primary: #ff385c;
   --color-primary-hover: #e61e4d;
   --color-primary-light: #fff5f7;
   --color-primary-text: #ffffff;
   --color-secondary: #ffffff;
-  --color-secondary-text: #FF385C;
+  --color-secondary-text: #ff385c;
 
   /* Text Colors */
   --text-primary: #222222;
@@ -120,11 +119,11 @@
 
   /* Font Families */
   --font-primary: var(--font-family-base);
-  --font-mono: "JetBrains Mono", monospace;
+  --font-mono: "Roboto", monospace;
 
   /* Gradients */
-  --gradient-primary: linear-gradient(90deg, #FF385C 0%, #e61e4d 100%);
-  --gradient-hero: linear-gradient(135deg, #FF385C 0%, #e61e4d 100%);
+  --gradient-primary: linear-gradient(90deg, #ff385c 0%, #e61e4d 100%);
+  --gradient-hero: linear-gradient(135deg, #ff385c 0%, #e61e4d 100%);
 }
 
 @theme inline {
@@ -193,7 +192,7 @@ body {
 }
 
 /* Testimonial Carousel Styles */
-.testimonial-carousel .slick-slide>div {
+.testimonial-carousel .slick-slide > div {
   padding: 0 12px;
 }
 
@@ -230,7 +229,6 @@ body {
 
 /* Mobile-specific responsive utilities */
 @media (max-width: 640px) {
-
   /* Reduce padding on mobile */
   .section-mobile-padding {
     padding-left: 1rem;
@@ -255,7 +253,7 @@ body {
     bottom: 15px;
   }
 
-  .testimonial-carousel .slick-slide>div {
+  .testimonial-carousel .slick-slide > div {
     padding: 0 8px;
   }
 
@@ -284,7 +282,6 @@ body {
 
 /* Improve touch targets on mobile */
 @media (hover: none) and (pointer: coarse) {
-
   a,
   button,
   .clickable {
@@ -295,7 +292,8 @@ body {
 
 /* Prevent text size adjustment on iOS */
 @supports (-webkit-touch-callout: none) {
-  body {}
+  body {
+  }
 }
 
 /* Safe area insets for notched devices */

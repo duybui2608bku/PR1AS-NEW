@@ -165,7 +165,6 @@ export async function GET(request: NextRequest) {
     const { data, error, count } = await query;
 
     if (error) {
-
       return NextResponse.json(
         { error: "Failed to fetch workers" },
         { status: 500 }
@@ -216,9 +215,11 @@ export async function GET(request: NextRequest) {
         services: worker.services?.map((s: any) => {
           // Get active pricing (first active pricing or first pricing if no is_active field)
           const pricing = Array.isArray(s.pricing)
-            ? s.pricing.find((p: any) => p.is_active !== false) || s.pricing[0] || null
+            ? s.pricing.find((p: any) => p.is_active !== false) ||
+              s.pricing[0] ||
+              null
             : s.pricing || null;
-          
+
           return {
             id: s.id,
             service_id: s.service_id,
@@ -258,7 +259,6 @@ export async function GET(request: NextRequest) {
       filters,
     });
   } catch (error) {
-
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

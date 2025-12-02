@@ -5,7 +5,7 @@
 
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { Row, Col, Typography, Space } from "antd";
 import { useTranslation } from "react-i18next";
 import WalletBalance from "@/components/wallet/WalletBalance";

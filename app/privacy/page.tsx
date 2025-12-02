@@ -203,8 +203,8 @@ export default function PrivacyPolicyPage() {
             <Paragraph className="!text-base !leading-relaxed">
               Chúng tôi có thể cập nhật chính sách bảo mật này theo thời gian.
               Chúng tôi sẽ thông báo cho bạn về bất kỳ thay đổi quan trọng nào
-              bằng cách đăng chính sách mới trên trang này và cập nhật ngày "Cập
-              nhật lần cuối".
+              bằng cách đăng chính sách mới trên trang này và cập nhật ngày
+              &quot;Cập nhật lần cuối&quot;.
             </Paragraph>
 
             {/* Section 11 */}

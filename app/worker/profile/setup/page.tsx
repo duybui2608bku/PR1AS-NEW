@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Card, Steps, Button, Typography, Space, Spin, Result } from "antd";
+import { Card, Steps, Button, Typography, Space, Spin, Alert } from "antd";
 import {
   UserOutlined,
   ShoppingOutlined,
@@ -39,6 +39,7 @@ export default function WorkerProfileSetupPage() {
       setProfile(profileData);
 
       // Determine current step based on profile_completed_steps
+      // Allow editing regardless of status
       if (profileData.profile_completed_steps === 0) {
         setCurrentStep(0);
       } else if (
@@ -48,8 +49,13 @@ export default function WorkerProfileSetupPage() {
         setCurrentStep(1);
       } else if (profileData.profile_completed_steps === 3) {
         // Both steps completed
+        // If status is DRAFT, show submit page
+        // Otherwise, allow editing from step 0 or 1
         if (profileData.profile_status === WorkerProfileStatus.DRAFT) {
           setCurrentStep(2); // Show submit page
+        } else {
+          // Profile is pending/approved/published/rejected - allow editing from step 0
+          setCurrentStep(0);
         }
       }
     } catch (error) {
@@ -99,78 +105,14 @@ export default function WorkerProfileSetupPage() {
     );
   }
 
-  // If profile is already submitted or published
-  if (
-    profile &&
-    [
-      WorkerProfileStatus.PENDING,
-      WorkerProfileStatus.APPROVED,
-      WorkerProfileStatus.PUBLISHED,
-    ].includes(profile.profile_status)
-  ) {
-    return (
-      <div style={{ maxWidth: 800, margin: "40px auto", padding: "0 20px" }}>
-        <Card>
-          <Result
-            status={
-              profile.profile_status === WorkerProfileStatus.PUBLISHED
-                ? "success"
-                : "info"
-            }
-            title={
-              profile.profile_status === WorkerProfileStatus.PUBLISHED
-                ? t("worker.profile.published")
-                : profile.profile_status === WorkerProfileStatus.PENDING
-                ? t("worker.profile.underReview")
-                : t("worker.profile.approved")
-            }
-            subTitle={
-              profile.profile_status === WorkerProfileStatus.PUBLISHED
-                ? t("worker.profile.publishedDesc")
-                : profile.profile_status === WorkerProfileStatus.PENDING
-                ? t("worker.profile.underReviewDesc")
-                : t("worker.profile.approvedDesc")
-            }
-            extra={[
-              <Button
-                key="dashboard"
-                type="primary"
-                onClick={() => router.push("/worker/dashboard")}
-              >
-                {t("common.backToDashboard")}
-              </Button>,
-            ]}
-          />
-        </Card>
-      </div>
-    );
-  }
+  // Determine if profile needs re-review after editing
+  const needsReReview = profile && [
+    WorkerProfileStatus.APPROVED,
+    WorkerProfileStatus.PUBLISHED,
+  ].includes(profile.profile_status);
 
-  // If profile is rejected
-  if (profile && profile.profile_status === WorkerProfileStatus.REJECTED) {
-    return (
-      <div style={{ maxWidth: 800, margin: "40px auto", padding: "0 20px" }}>
-        <Card>
-          <Result
-            status="error"
-            title={t("worker.profile.rejected")}
-            subTitle={
-              profile.rejection_reason || t("worker.profile.rejectedDesc")
-            }
-            extra={[
-              <Button
-                key="edit"
-                type="primary"
-                onClick={() => setCurrentStep(0)}
-              >
-                {t("worker.profile.editProfile")}
-              </Button>,
-            ]}
-          />
-        </Card>
-      </div>
-    );
-  }
+  // Show status info if profile is not in draft
+  const showStatusInfo = profile && profile.profile_status !== WorkerProfileStatus.DRAFT;
 
   return (
     <div style={{ margin: "40px auto", padding: "0 20px" }}>
@@ -178,6 +120,50 @@ export default function WorkerProfileSetupPage() {
         <Title level={2} style={{ textAlign: "center", marginBottom: 40 }}>
           {t("worker.profile.setupTitle")}
         </Title>
+
+        {showStatusInfo && (
+          <Alert
+            message={
+              profile.profile_status === WorkerProfileStatus.PENDING
+                ? t("worker.profile.underReview")
+                : profile.profile_status === WorkerProfileStatus.APPROVED
+                ? t("worker.profile.approved")
+                : profile.profile_status === WorkerProfileStatus.PUBLISHED
+                ? t("worker.profile.published")
+                : profile.profile_status === WorkerProfileStatus.REJECTED
+                ? t("worker.profile.rejected")
+                : ""
+            }
+            description={
+              profile.profile_status === WorkerProfileStatus.REJECTED
+                ? profile.rejection_reason || t("worker.profile.rejectedDesc")
+                : needsReReview
+                ? t("worker.profile.editWillRequireReview")
+                : profile.profile_status === WorkerProfileStatus.PENDING
+                ? t("worker.profile.underReviewDesc")
+                : ""
+            }
+            type={
+              profile.profile_status === WorkerProfileStatus.REJECTED
+                ? "error"
+                : profile.profile_status === WorkerProfileStatus.PUBLISHED
+                ? "success"
+                : "info"
+            }
+            showIcon
+            style={{ marginBottom: 24 }}
+          />
+        )}
+
+        {needsReReview && (
+          <Alert
+            message={t("worker.profile.editWarning")}
+            description={t("worker.profile.editWarningDesc")}
+            type="warning"
+            showIcon
+            style={{ marginBottom: 24 }}
+          />
+        )}
 
         <Steps
           current={currentStep}

@@ -16,38 +16,10 @@ import { useTranslation } from "react-i18next";
 import ImageUpload from "@/components/common/ImageUpload";
 import { getErrorMessage } from "@/lib/utils/common";
 import Loading from "@/components/common/Loading";
+import { adminSEOAPI, type SEOSettings } from "@/lib/admin/seo-api";
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
-
-interface SEOSettings {
-  // General SEO
-  siteName: string;
-  siteTitle: string;
-  siteDescription: string;
-  siteKeywords: string;
-  ogImage: string;
-
-  // Header Settings
-  headerLogo: string;
-  headerTagline: string;
-  headerContactPhone: string;
-  headerContactEmail: string;
-
-  // Footer Settings
-  footerCompanyName: string;
-  footerAddress: string;
-  footerPhone: string;
-  footerEmail: string;
-  footerCopyright: string;
-  footerAbout: string;
-
-  // Social Media
-  facebookUrl: string;
-  twitterUrl: string;
-  instagramUrl: string;
-  linkedinUrl: string;
-}
 
 export default function SEOSettingsPage() {
   const [form] = Form.useForm();
@@ -57,11 +29,9 @@ export default function SEOSettingsPage() {
 
   const fetchSettings = useCallback(async () => {
     try {
-      const response = await fetch("/api/admin/settings/seo");
-      const result = await response.json();
-
-      if (response.ok && result.data) {
-        form.setFieldsValue(result.data);
+      const data = await adminSEOAPI.getSettings();
+      if (data) {
+        form.setFieldsValue(data);
       }
     } catch {
       message.warning("Could not load existing settings. Using defaults.");
@@ -77,20 +47,7 @@ export default function SEOSettingsPage() {
   const handleSave = async (values: SEOSettings) => {
     setLoading(true);
     try {
-      const response = await fetch("/api/admin/settings/seo", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ settings: values }),
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || "Failed to save settings");
-      }
-
+      await adminSEOAPI.saveSettings(values);
       message.success(t("admin.seo.saveSuccess"));
     } catch (error: unknown) {
       const errorMessage = getErrorMessage(error, "Unknown error");
