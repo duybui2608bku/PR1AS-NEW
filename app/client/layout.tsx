@@ -10,6 +10,7 @@ import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
   CalendarOutlined,
+  MessageOutlined,
 } from "@ant-design/icons";
 import { usePathname, useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
@@ -60,6 +61,7 @@ export default function ClientLayout({
       "/client/bookings",
       <CalendarOutlined />
     ),
+    getItem("Messages", "/client/chat", <MessageOutlined />),
     getItem("Post Job", "/client/post-job", <PlusOutlined />),
     getItem("My Jobs", "/client/my-jobs", <UnorderedListOutlined />),
     getItem(t("nav.profile") || "Profile", "/client/profile", <UserOutlined />),

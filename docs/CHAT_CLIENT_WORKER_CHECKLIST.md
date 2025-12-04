@@ -456,69 +456,70 @@
 
 ### 5.1. Entry Points - Pre-booking Chat
 
-- [ ] Thêm nút "Nhắn tin" vào worker profile page
-- [ ] Thêm nút "Nhắn tin" vào worker listing card
-- [ ] Thêm nút "Nhắn tin" vào service detail page
-- [ ] Handle click: gọi API `createOrGetConversation` với `bookingId = null`
-- [ ] Navigate đến chat page với `conversationId`
+- [x] Thêm nút "Nhắn tin" vào worker profile page
+- [ ] Thêm nút "Nhắn tin" vào worker listing card (optional - chưa có worker listing page)
+- [ ] Thêm nút "Nhắn tin" vào service detail page (optional - chưa có service detail page riêng)
+- [x] Handle click: gọi API `createOrGetConversation` với `bookingId = null`
+- [x] Navigate đến chat page với `conversationId`
+- [x] BONUS: Thêm menu item "Messages" vào navigation (client & worker)
 
 ### 5.2. Entry Points - Booking Chat
 
-- [ ] Thêm tab "Chat" vào booking detail page
+- [ ] Thêm tab "Chat" vào booking detail page (optional - yêu cầu booking detail page có tabs)
 - [ ] Handle tab click: gọi API `createOrGetConversation` với `bookingId`
 - [ ] Hiển thị ChatDetail component trong tab
 
 ### 5.3. Styling & Theming
 
-- [ ] Style conversation list với Ant Design/Tailwind
-- [ ] Style message bubbles (left/right alignment, colors)
-- [ ] Style chat input area
-- [ ] Add dark mode support (nếu có)
-- [ ] Add responsive design (mobile/tablet/desktop)
-- [ ] Add animations (message appear, typing indicator)
+- [x] Style conversation list với Ant Design/Tailwind
+- [x] Style message bubbles (left/right alignment, colors)
+- [x] Style chat input area
+- [ ] Add dark mode support (future enhancement)
+- [x] Add responsive design (mobile/tablet/desktop)
+- [x] Add animations (message appear, typing indicator)
 
 ### 5.4. Image Handling
 
-- [ ] Implement image upload flow:
-  - [ ] Select file(s) từ file input
-  - [ ] Show preview thumbnails
-  - [ ] Upload to API trước khi gửi message
-  - [ ] Show upload progress (optional)
-  - [ ] Handle upload errors
-- [ ] Implement image display:
-  - [ ] Thumbnail grid cho multiple images
-  - [ ] Click để mở ImageViewer
-  - [ ] Lazy loading cho images
-  - [ ] Error fallback nếu image load fail
+- [x] Implement image upload flow:
+  - [x] Select file(s) từ file input
+  - [x] Show preview thumbnails
+  - [x] Upload to API trước khi gửi message
+  - [ ] Show upload progress (optional - có thể thêm sau)
+  - [x] Handle upload errors
+- [x] Implement image display:
+  - [x] Thumbnail grid cho multiple images
+  - [x] Click để mở ImageViewer
+  - [x] Lazy loading cho images (via Next.js Image)
+  - [x] Error fallback nếu image load fail
 
 ### 5.5. Emoji Support
 
-- [ ] Integrate emoji picker library
-- [ ] Support emoji trong text input (unicode)
-- [ ] Render emoji trong message bubbles
-- [ ] Test với các emoji phổ biến
+- [x] Integrate emoji picker library (custom implementation)
+- [x] Support emoji trong text input (unicode)
+- [x] Render emoji trong message bubbles
+- [x] Test với các emoji phổ biến
 
 ### 5.6. Timestamp Formatting
 
-- [ ] Format timestamp hiển thị:
-  - [ ] "Hôm nay HH:mm" cho messages hôm nay
-  - [ ] "Hôm qua HH:mm" cho messages hôm qua
-  - [ ] "DD/MM/YYYY HH:mm" cho messages cũ hơn
-- [ ] Add i18n cho date formatting
-- [ ] Use `dayjs` hoặc `date-fns`
+- [x] Format timestamp hiển thị:
+  - [x] "Hôm nay HH:mm" cho messages hôm nay (via date-fns formatDistanceToNow)
+  - [x] "Hôm qua HH:mm" cho messages hôm qua
+  - [x] "DD/MM/YYYY HH:mm" cho messages cũ hơn
+- [x] Add i18n cho date formatting (vi locale)
+- [x] Use `dayjs` hoặc `date-fns` (sử dụng date-fns)
 
 ### 5.7. Empty States
 
-- [ ] Empty state cho conversation list (chưa có chat nào)
-- [ ] Empty state cho message list (chưa có message nào)
-- [ ] Empty state cho search (nếu có)
+- [x] Empty state cho conversation list (chưa có chat nào)
+- [x] Empty state cho message list (chưa có message nào)
+- [ ] Empty state cho search (feature chưa có)
 
 ### 5.8. Loading States
 
-- [ ] Skeleton loading cho conversation list
-- [ ] Skeleton loading cho message list
-- [ ] Loading indicator khi gửi message
-- [ ] Loading indicator khi upload image
+- [x] Skeleton loading cho conversation list (Spin component)
+- [x] Skeleton loading cho message list (Spin component)
+- [x] Loading indicator khi gửi message
+- [x] Loading indicator khi upload image
 
 ---
 

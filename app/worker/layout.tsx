@@ -10,6 +10,7 @@ import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
   CalendarOutlined,
+  MessageOutlined,
 } from "@ant-design/icons";
 import { usePathname, useRouter } from "next/navigation";
 import { useMobileSidebar } from "@/hooks/useMobileSidebar";
@@ -62,6 +63,7 @@ export default function WorkerLayout({
       "/worker/bookings",
       <CalendarOutlined />
     ),
+    getItem("Messages", "/worker/chat", <MessageOutlined />),
     getItem("My Jobs", "/worker/my-jobs", <UnorderedListOutlined />),
     getItem(t("nav.profile") || "Profile", "/worker/profile", <UserOutlined />),
   ];
