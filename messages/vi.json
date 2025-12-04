@@ -23,7 +23,12 @@
     "close": "Đóng",
     "refresh": "Làm mới",
     "homeButton": "Về trang chủ",
-    "backToDashboard": "Về trang tổng quan"
+    "backToDashboard": "Về trang tổng quan",
+    "total": "Tổng",
+    "hours": "giờ",
+    "days": "ngày",
+    "weeks": "tuần",
+    "months": "tháng"
   },
   "nav": {
     "home": "Trang chủ",
@@ -384,6 +389,7 @@
       "interestsAndHobbies": "Sở thích & đam mê",
       "addTagPlaceholder": "Thêm thẻ",
       "basicInfoSubmit": "Lưu thông tin cơ bản",
+      "worker": "Worker",
       "servicesAndPricingTitle": "Dịch vụ & giá",
       "servicesAndPricingDesc": "Thêm dịch vụ bạn cung cấp và đặt giá",
       "imagesSection": "Hình ảnh hồ sơ",
@@ -437,6 +443,9 @@
       "rejected": "Hồ sơ bị từ chối",
       "rejectedDesc": "Hồ sơ bị từ chối. Vui lòng xem phản hồi và chỉnh sửa.",
       "editProfile": "Chỉnh sửa hồ sơ",
+      "editWillRequireReview": "Khi bạn chỉnh sửa hồ sơ đã được duyệt/xuất bản, hồ sơ sẽ cần được xét duyệt lại.",
+      "editWarning": "Lưu ý khi chỉnh sửa",
+      "editWarningDesc": "Nếu bạn chỉnh sửa hồ sơ đã được duyệt hoặc xuất bản, hồ sơ sẽ tự động chuyển sang trạng thái chờ xét duyệt và cần được admin kiểm tra lại trước khi hiển thị với khách hàng.",
       "step1SaveSuccess": "Đã lưu thông tin cơ bản"
     },
     "public": {
@@ -523,6 +532,27 @@
       "inProgress": "Đang thực hiện",
       "completed": "Hoàn thành",
       "totalSpent": "Tổng chi tiêu"
+    },
+    "profile": {
+      "title": "Thiết lập thông tin cơ bản",
+      "description": "Cập nhật thông tin hồ sơ để trải nghiệm đặt dịch vụ tốt hơn.",
+      "avatar": "Ảnh đại diện",
+      "fullName": "Họ và tên",
+      "fullNameRequired": "Vui lòng nhập họ và tên",
+      "fullNamePlaceholder": "Nhập họ và tên",
+      "gender": "Giới tính",
+      "genderPlaceholder": "Chọn giới tính",
+      "genderMale": "Nam",
+      "genderFemale": "Nữ",
+      "genderOther": "Khác",
+      "dateOfBirth": "Ngày sinh",
+      "dateOfBirthPlaceholder": "Chọn ngày sinh",
+      "country": "Quốc gia",
+      "countryPlaceholder": "Chọn quốc gia cư trú",
+      "language": "Ngôn ngữ ưu tiên",
+      "languagePlaceholder": "Chọn ngôn ngữ ưu tiên",
+      "address": "Địa chỉ",
+      "addressPlaceholder": "Nhập địa chỉ liên hệ (quận/huyện, thành phố...)"
     }
   },
   "wallet": {
@@ -653,6 +683,8 @@
       "pages": "Trang",
       "categories": "Danh mục",
       "users": "Quản lý người dùng",
+      "transactions": "Quản lý giao dịch",
+      "escrows": "Tiền tạm giữ (Escrow)",
       "settings": "Cài đặt"
     },
     "dashboard": {
@@ -661,6 +693,12 @@
       "activeWorkers": "Worker hoạt động",
       "totalJobs": "Tổng công việc",
       "revenue": "Doanh thu"
+    },
+    "transactions": {
+      "title": "Quản lý giao dịch"
+    },
+    "escrows": {
+      "title": "Quản lý tiền tạm giữ (Escrow)"
     },
     "seo": {
       "title": "Cài đặt SEO & Website",
@@ -798,6 +836,49 @@
       "title": "Có lỗi xảy ra",
       "subtitle": "Xin lỗi, đã có lỗi xảy ra. Vui lòng thử lại.",
       "button": "Thử lại"
+    },
+    "api": {
+      "unauthorized": "Không được phép truy cập",
+      "invalidToken": "Token không hợp lệ hoặc đã hết hạn",
+      "tokenExpired": "Token đã hết hạn",
+      "forbidden": "Không có quyền truy cập",
+      "adminRequired": "Yêu cầu quyền quản trị viên",
+      "roleRequired": "Yêu cầu quyền truy cập",
+      "userNotFound": "Không tìm thấy người dùng",
+      "profileNotFound": "Không tìm thấy hồ sơ",
+      "noProfile": "Không tìm thấy hồ sơ",
+      "noProfileNoRole": "Không tìm thấy hồ sơ. Vui lòng chọn vai trò.",
+      "profileAlreadyExists": "Hồ sơ đã tồn tại",
+      "accountBanned": "Tài khoản đã bị cấm",
+      "emailAlreadyRegistered": "Email đã được đăng ký",
+      "emailAlreadyRegisteredWithDifferentRole": "Email đã được đăng ký với vai trò khác",
+      "validationError": "Lỗi xác thực",
+      "missingRequiredFields": "Thiếu các trường bắt buộc",
+      "invalidRole": "Vai trò không hợp lệ",
+      "invalidInput": "Dữ liệu đầu vào không hợp lệ",
+      "insufficientBalance": "Số dư không đủ",
+      "invalidPaymentMethod": "Phương thức thanh toán không hợp lệ",
+      "transactionFailed": "Giao dịch thất bại",
+      "escrowNotFound": "Không tìm thấy escrow",
+      "escrowIdRequired": "Yêu cầu ID escrow",
+      "bookingNotFound": "Không tìm thấy đặt chỗ",
+      "bookingAlreadyConfirmed": "Đặt chỗ đã được xác nhận",
+      "bookingAlreadyDeclined": "Đặt chỗ đã bị từ chối",
+      "onlyClientsCanCreate": "Chỉ khách hàng mới có thể tạo đặt chỗ",
+      "onlyWorkersCanConfirm": "Chỉ worker mới có thể xác nhận đặt chỗ",
+      "onlyWorkersCanDecline": "Chỉ worker mới có thể từ chối đặt chỗ",
+      "onlyClientsCanComplete": "Chỉ khách hàng mới có thể xác nhận hoàn thành",
+      "onlyWorkersCanComplete": "Chỉ worker mới có thể hoàn thành đặt chỗ",
+      "workerProfileNotFound": "Không tìm thấy hồ sơ worker",
+      "workerProfileNotPublished": "Không tìm thấy hồ sơ worker hoặc chưa được xuất bản",
+      "noFileProvided": "Không có file được cung cấp",
+      "fileTooLarge": "Kích thước file vượt quá giới hạn 5MB",
+      "invalidFileType": "Loại file không hợp lệ",
+      "uploadFailed": "Tải file lên thất bại",
+      "deleteFailed": "Xóa file thất bại",
+      "internalError": "Lỗi máy chủ nội bộ",
+      "operationFailed": "Thao tác thất bại",
+      "notFound": "Không tìm thấy"
     }
   },
   "market": {
@@ -826,6 +907,159 @@
     "more": "thêm",
     "viewProfile": "Xem hồ sơ",
     "pagination": "Hiển thị {start} - {end} trên tổng {total} worker"
+  },
+  "booking": {
+    "title": "Đặt dịch vụ",
+    "service": "Dịch vụ",
+    "create": "Tạo đặt chỗ",
+    "calculate": "Tính toán giá",
+    "confirm": "Xác nhận",
+    "decline": "Từ chối",
+    "complete": "Hoàn thành",
+    "cancel": "Hủy",
+    "status": {
+      "pending_worker_confirmation": "Chờ worker xác nhận",
+      "worker_confirmed": "Worker đã xác nhận",
+      "worker_declined": "Worker đã từ chối",
+      "in_progress": "Đang thực hiện",
+      "worker_completed": "Worker đã hoàn thành",
+      "client_completed": "Đã hoàn thành",
+      "cancelled": "Đã hủy",
+      "disputed": "Có tranh chấp"
+    },
+    "types": {
+      "title": "Loại đặt chỗ",
+      "hourly": "Theo giờ",
+      "daily": "Theo ngày",
+      "weekly": "Theo tuần",
+      "monthly": "Theo tháng"
+    },
+    "insufficientBalance": "Số dư không đủ",
+    "requiredAmount": "Số tiền cần thiết",
+    "availableBalance": "Số dư hiện có",
+    "createSuccess": "Đặt chỗ đã được tạo thành công",
+    "confirmSuccess": "Đặt chỗ đã được xác nhận",
+    "declineSuccess": "Đặt chỗ đã bị từ chối",
+    "completeSuccess": "Đặt chỗ đã hoàn thành",
+    "workerCompleteSuccess": "Đã đánh dấu hoàn thành",
+    "durationHours": "Số giờ",
+    "durationDays": "Số ngày",
+    "durationWeeks": "Số tuần",
+    "durationMonths": "Số tháng",
+    "durationRequired": "Vui lòng nhập thời lượng",
+    "durationMin": "Tối thiểu 1",
+    "durationPlaceholder": "Nhập thời lượng",
+    "startDate": "Ngày bắt đầu",
+    "startDateRequired": "Vui lòng chọn ngày bắt đầu",
+    "startDatePlaceholder": "Chọn ngày và giờ bắt đầu",
+    "endDate": "Ngày kết thúc",
+    "endDatePlaceholder": "Chọn ngày và giờ kết thúc",
+    "location": "Địa điểm",
+    "locationPlaceholder": "Nhập địa điểm (nếu có)",
+    "specialInstructions": "Yêu cầu đặc biệt",
+    "specialInstructionsPlaceholder": "Nhập yêu cầu đặc biệt (nếu có)",
+    "hourlyRate": "Giá theo giờ",
+    "discount": "Giảm giá",
+    "totalAmount": "Tổng tiền",
+    "sufficientBalance": "Số dư đủ",
+    "client": "Khách hàng",
+    "bookingType": "Loại đặt chỗ",
+    "duration": "Thời lượng",
+    "createdAt": "Tạo lúc",
+    "filterByStatus": "Lọc theo trạng thái",
+    "noBookings": "Không có đặt chỗ nào",
+    "all": "Tất cả",
+    "active": "Đang hoạt động",
+    "completed": "Đã hoàn thành",
+    "cancelled": "Đã hủy",
+    "confirmCompletion": "Xác nhận hoàn thành",
+    "declineConfirm": "Bạn có chắc muốn từ chối đặt chỗ này?",
+    "complain": "Khiếu nại",
+    "complaintTitle": "Khiếu nại đơn đặt chỗ",
+    "complaintDescription": "Vui lòng mô tả lý do khiếu nại (ví dụ: worker trễ giờ, không hoàn thành công việc, chất lượng kém...).",
+    "complaintPlaceholder": "Nhập nội dung khiếu nại của bạn...",
+    "defaultComplaintReason": "Dịch vụ bị trễ, worker chưa hoàn thành công việc",
+    "complaintSuccess": "Đã gửi khiếu nại. Thanh toán sẽ được giữ lại để admin xem xét.",
+    "complaintError": "Không thể gửi khiếu nại. Vui lòng thử lại."
+  },
+  "transactions": {
+    "title": "Giao dịch",
+    "table": {
+      "id": "ID",
+      "user": "Người dùng",
+      "type": "Loại",
+      "amount": "Số tiền",
+      "status": "Trạng thái",
+      "paymentMethod": "Phương thức thanh toán",
+      "description": "Mô tả",
+      "createdAt": "Ngày tạo",
+      "records": "bản ghi"
+    },
+    "types": {
+      "deposit": "Nạp tiền",
+      "withdrawal": "Rút tiền",
+      "payment": "Thanh toán",
+      "earning": "Thu nhập",
+      "platformFee": "Phí nền tảng",
+      "insuranceFee": "Phí bảo hiểm",
+      "refund": "Hoàn tiền",
+      "escrowHold": "Giữ tiền",
+      "escrowRelease": "Giải phóng tiền"
+    },
+    "status": {
+      "pending": "Đang chờ",
+      "processing": "Đang xử lý",
+      "completed": "Hoàn thành",
+      "failed": "Thất bại",
+      "cancelled": "Đã hủy"
+    },
+    "filters": {
+      "type": "Loại giao dịch",
+      "status": "Trạng thái",
+      "dateFrom": "Từ ngày",
+      "dateTo": "Đến ngày"
+    },
+    "stats": {
+      "totalTransactions": "Tổng giao dịch",
+      "totalAmount": "Tổng số tiền",
+      "totalDeposits": "Tổng nạp tiền",
+      "totalWithdrawals": "Tổng rút tiền"
+    }
+  },
+  "escrow": {
+    "table": {
+      "id": "ID",
+      "jobId": "Booking / Công việc",
+      "employer": "Client (Người thuê)",
+      "worker": "Worker",
+      "amount": "Tổng số tiền",
+      "workerAmount": "Worker nhận",
+      "status": "Trạng thái",
+      "hasComplaint": "Khiếu nại",
+      "holdUntil": "Giữ đến",
+      "createdAt": "Ngày tạo",
+      "records": "bản ghi"
+    },
+    "status": {
+      "held": "Đang tạm giữ",
+      "released": "Đã giải ngân",
+      "refunded": "Đã hoàn tiền",
+      "disputed": "Đang tranh chấp",
+      "cancelled": "Đã hủy"
+    },
+    "filters": {
+      "status": "Trạng thái escrow",
+      "complaint": "Khiếu nại"
+    },
+    "stats": {
+      "totalHeld": "Tổng tiền đang giữ",
+      "totalReleased": "Tổng tiền đã giải ngân",
+      "totalDisputed": "Tổng tiền đang tranh chấp",
+      "totalCount": "Tổng số escrow"
+    },
+    "complaint": "Có khiếu nại",
+    "complaintYes": "Có khiếu nại",
+    "complaintNo": "Không khiếu nại"
   },
   "mockdata": {
     "workers": {

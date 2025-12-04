@@ -13,6 +13,7 @@ import {
   Row,
   Col,
   notification,
+  Avatar,
 } from "antd";
 import {
   ReloadOutlined,
@@ -107,26 +108,92 @@ export default function AdminEscrowsPage() {
       render: (id: string) => <Text code>{id.slice(0, 8)}...</Text>,
     },
     {
-      title: t("escrow.table.jobId") || "Booking / Job",
-      dataIndex: "job_id",
+      title: t("escrow.table.jobId") || "Booking / Công việc",
+      dataIndex: "booking",
       key: "job_id",
-      width: 140,
-      render: (jobId?: string) =>
-        jobId ? <Text code>{jobId.slice(0, 8)}...</Text> : "-",
+      width: 200,
+      render: (booking: EscrowHold["booking"], record: EscrowHold) => {
+        if (booking) {
+          return (
+            <Space direction="vertical" size={0}>
+              <Text strong>{booking.id.slice(0, 8)}...</Text>
+              {booking.booking_type && (
+                <Text type="secondary" style={{ fontSize: 12 }}>
+                  {t(`booking.types.${booking.booking_type}`) ||
+                    booking.booking_type}
+                </Text>
+              )}
+              {booking.service?.name_key && (
+                <Text type="secondary" style={{ fontSize: 12 }}>
+                  {t(`services.${booking.service.name_key}`) ||
+                    booking.service.name_key}
+                </Text>
+              )}
+            </Space>
+          );
+        }
+        return record.job_id ? (
+          <Text code>{record.job_id.slice(0, 8)}...</Text>
+        ) : (
+          "-"
+        );
+      },
     },
     {
-      title: t("escrow.table.employer") || "Client (Employer)",
-      dataIndex: "employer_id",
+      title: t("escrow.table.employer") || "Client (Người thuê)",
+      dataIndex: "employer",
       key: "employer_id",
-      width: 140,
-      render: (id: string) => <Text code>{id.slice(0, 8)}...</Text>,
+      width: 200,
+      render: (employer: EscrowHold["employer"], record: EscrowHold) => {
+        if (employer) {
+          return (
+            <Space>
+              {employer.avatar_url && (
+                <Avatar size="small" src={employer.avatar_url} />
+              )}
+              <Space direction="vertical" size={0}>
+                <Text strong>
+                  {employer.full_name || employer.email || "N/A"}
+                </Text>
+                {employer.email && employer.full_name && (
+                  <Text type="secondary" style={{ fontSize: 12 }}>
+                    {employer.email}
+                  </Text>
+                )}
+              </Space>
+            </Space>
+          );
+        }
+        return <Text code>{record.employer_id.slice(0, 8)}...</Text>;
+      },
     },
     {
       title: t("escrow.table.worker") || "Worker",
-      dataIndex: "worker_id",
+      dataIndex: "worker",
       key: "worker_id",
-      width: 140,
-      render: (id: string) => <Text code>{id.slice(0, 8)}...</Text>,
+      width: 200,
+      render: (worker: EscrowHold["worker"], record: EscrowHold) => {
+        if (worker) {
+          return (
+            <Space>
+              {worker.avatar_url && (
+                <Avatar size="small" src={worker.avatar_url} />
+              )}
+              <Space direction="vertical" size={0}>
+                <Text strong>
+                  {worker.full_name || worker.email || "N/A"}
+                </Text>
+                {worker.email && worker.full_name && (
+                  <Text type="secondary" style={{ fontSize: 12 }}>
+                    {worker.email}
+                  </Text>
+                )}
+              </Space>
+            </Space>
+          );
+        }
+        return <Text code>{record.worker_id.slice(0, 8)}...</Text>;
+      },
     },
     {
       title: t("escrow.table.amount") || "Total Amount",

@@ -35,17 +35,27 @@ function LoginForm() {
     setLoading(true);
     try {
       const result = await authAPI.login(values.email, values.password);
-      
+
+      // Hỗ trợ cả 2 dạng response:
+      // 1) { success, user, session }
+      // 2) { success, data: { user, session } }
+      const user = (result as any).user ?? (result as any).data?.user;
+
+      if (!user || !user.role) {
+        showMessage.error("Dữ liệu đăng nhập không hợp lệ. Vui lòng thử lại.");
+        return;
+      }
+
       showMessage.success(t("auth.login.loginSuccess"));
-      
+
       // Check if there's a redirect parameter in the URL
       const redirectParam = searchParams.get("redirect");
-      const redirectUrl = redirectParam || redirectByRole(result.user.role);
-      
+      const redirectUrl = redirectParam || redirectByRole(user.role);
+
       router.push(redirectUrl);
     } catch (error) {
       const errorMessage = getErrorMessage(error, "Login failed");
-      
+
       if (errorMessage.includes("ACCOUNT_BANNED")) {
         showMessage.error("Tài khoản của bạn đã bị khóa");
         router.push("/banned");

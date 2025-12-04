@@ -88,6 +88,28 @@ export interface EscrowHold {
   created_at: string;
   released_at?: string;
   updated_at: string;
+  // Lookup fields (populated via joins)
+  booking?: {
+    id: string;
+    booking_type?: string;
+    start_date?: string;
+    status?: string;
+    service?: {
+      name_key?: string;
+    };
+  };
+  employer?: {
+    id: string;
+    full_name?: string;
+    email?: string;
+    avatar_url?: string;
+  };
+  worker?: {
+    id: string;
+    full_name?: string;
+    email?: string;
+    avatar_url?: string;
+  };
 }
 
 // =============================================================================
@@ -350,5 +372,6 @@ export const WalletErrorCodes = {
   PAYMENT_GATEWAY_ERROR: 'PAYMENT_GATEWAY_ERROR',
   UNAUTHORIZED: 'UNAUTHORIZED',
   INVALID_PAYMENT_METHOD: 'INVALID_PAYMENT_METHOD',
+  COMPLAINT_WINDOW_EXPIRED: 'COMPLAINT_WINDOW_EXPIRED',
 } as const;
 

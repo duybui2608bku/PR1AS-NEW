@@ -3,7 +3,8 @@
  * Client-side helpers to call wallet API routes
  */
 
-import { getSupabaseClient } from '@/lib/supabase/client';
+import { getSupabaseClient } from "@/lib/supabase/client";
+import { axiosClient } from "@/lib/http/axios-client";
 import {
   Wallet,
   Transaction,
@@ -14,36 +15,31 @@ import {
   DepositRequest,
   WithdrawalRequest,
   PaymentRequest,
-  ComplaintRequest,
   ComplaintResolution,
   TransactionFilters,
   EscrowFilters,
-  WalletResponse,
-  TransactionResponse,
   TransactionsListResponse,
-  EscrowResponse,
   PaymentResponse,
   DepositResponse,
   WithdrawalResponse,
-  SettingsResponse,
   FeeCalculationResponse,
   AdminWalletStats,
-} from './types';
+} from "./types";
 
 /**
- * Get authorization header with current user's token
+ * Get current access token from Supabase (for routes that require Bearer)
  */
-async function getAuthHeader(): Promise<string> {
+async function getAccessToken(): Promise<string> {
   const supabase = getSupabaseClient();
   const {
     data: { session },
   } = await supabase.auth.getSession();
 
   if (!session?.access_token) {
-    throw new Error('Not authenticated');
+    throw new Error("Not authenticated");
   }
 
-  return `Bearer ${session.access_token}`;
+  return session.access_token;
 }
 
 /**
@@ -58,16 +54,12 @@ export const walletAPI = {
    * Get user's wallet balance and summary
    */
   async getBalance(): Promise<{ wallet: Wallet; summary: WalletSummary }> {
-    const response = await fetch('/api/wallet/balance', {
-      credentials: 'include', // Send httpOnly cookies
-    });
+    const { data } = await axiosClient.get<{
+      wallet: Wallet;
+      summary: WalletSummary;
+    }>("/wallet/balance");
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Failed to fetch balance');
-    }
-
-    return response.json();
+    return data;
   },
 
   // ===========================================================================
@@ -78,33 +70,27 @@ export const walletAPI = {
    * Initiate deposit (bank transfer or PayPal)
    */
   async deposit(request: DepositRequest): Promise<DepositResponse> {
-    const response = await fetch('/api/wallet/deposit', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include', // Send httpOnly cookies
-      body: JSON.stringify(request),
-    });
+    const { data } = await axiosClient.post<DepositResponse>(
+      "/wallet/deposit",
+      request
+    );
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Failed to initiate deposit');
-    }
-
-    return response.json();
+    return data;
   },
 
   /**
    * Create bank transfer deposit (get QR code)
    */
-  async depositBankTransfer(amountUsd: number, amountVnd?: number): Promise<{
+  async depositBankTransfer(
+    amountUsd: number,
+    amountVnd?: number
+  ): Promise<{
     deposit: BankDeposit;
     qr_code_url: string;
   }> {
     const result = await this.deposit({
       amount_usd: amountUsd,
-      payment_method: 'bank_transfer',
+      payment_method: "bank_transfer",
       metadata: { amount_vnd: amountVnd },
     });
 
@@ -124,13 +110,13 @@ export const walletAPI = {
   }> {
     const result = await this.deposit({
       amount_usd: amountUsd,
-      payment_method: 'paypal',
+      payment_method: "paypal",
     });
 
     return {
-      order_id: result.deposit?.id || '',
-      approval_url: result.qr_code_url || '', // Reuse field for approval URL
-      transaction_id: result.transaction?.id || '',
+      order_id: result.deposit?.id || "",
+      approval_url: result.qr_code_url || "", // Reuse field for approval URL
+      transaction_id: result.transaction?.id || "",
     };
   },
 
@@ -142,18 +128,18 @@ export const walletAPI = {
    * Request withdrawal
    */
   async withdraw(request: WithdrawalRequest): Promise<WithdrawalResponse> {
-    const response = await fetch('/api/wallet/withdraw', {
-      method: 'POST',
+    const response = await fetch("/api/wallet/withdraw", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
-      credentials: 'include', // Send httpOnly cookies
+      credentials: "include", // Send httpOnly cookies
       body: JSON.stringify(request),
     });
 
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.error || 'Failed to request withdrawal');
+      throw new Error(error.error || "Failed to request withdrawal");
     }
 
     return response.json();
@@ -162,10 +148,13 @@ export const walletAPI = {
   /**
    * Withdraw to PayPal
    */
-  async withdrawPayPal(amountUsd: number, paypalEmail: string): Promise<Transaction> {
+  async withdrawPayPal(
+    amountUsd: number,
+    paypalEmail: string
+  ): Promise<Transaction> {
     const result = await this.withdraw({
       amount_usd: amountUsd,
-      payment_method: 'paypal',
+      payment_method: "paypal",
       destination: {
         paypal_email: paypalEmail,
       },
@@ -185,7 +174,7 @@ export const walletAPI = {
   ): Promise<Transaction> {
     const result = await this.withdraw({
       amount_usd: amountUsd,
-      payment_method: 'bank_transfer',
+      payment_method: "bank_transfer",
       destination: {
         bank_account: bankAccount,
         bank_name: bankName,
@@ -203,31 +192,31 @@ export const walletAPI = {
   /**
    * Get transaction history with filters
    */
-  async getTransactions(filters?: TransactionFilters): Promise<TransactionsListResponse> {
+  async getTransactions(
+    filters?: TransactionFilters
+  ): Promise<TransactionsListResponse> {
     const params = new URLSearchParams();
 
     if (filters) {
-      if (filters.type) params.set('type', filters.type.join(','));
-      if (filters.status) params.set('status', filters.status.join(','));
-      if (filters.payment_method) params.set('payment_method', filters.payment_method.join(','));
-      if (filters.date_from) params.set('date_from', filters.date_from);
-      if (filters.date_to) params.set('date_to', filters.date_to);
-      if (filters.min_amount) params.set('min_amount', filters.min_amount.toString());
-      if (filters.max_amount) params.set('max_amount', filters.max_amount.toString());
-      if (filters.page) params.set('page', filters.page.toString());
-      if (filters.limit) params.set('limit', filters.limit.toString());
+      if (filters.type) params.set("type", filters.type.join(","));
+      if (filters.status) params.set("status", filters.status.join(","));
+      if (filters.payment_method)
+        params.set("payment_method", filters.payment_method.join(","));
+      if (filters.date_from) params.set("date_from", filters.date_from);
+      if (filters.date_to) params.set("date_to", filters.date_to);
+      if (filters.min_amount)
+        params.set("min_amount", filters.min_amount.toString());
+      if (filters.max_amount)
+        params.set("max_amount", filters.max_amount.toString());
+      if (filters.page) params.set("page", filters.page.toString());
+      if (filters.limit) params.set("limit", filters.limit.toString());
     }
 
-    const response = await fetch(`/api/wallet/transactions?${params.toString()}`, {
-      credentials: 'include', // Send httpOnly cookies
-    });
+    const { data } = await axiosClient.get<TransactionsListResponse>(
+      `/wallet/transactions?${params.toString()}`
+    );
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Failed to fetch transactions');
-    }
-
-    return response.json();
+    return data;
   },
 
   // ===========================================================================
@@ -238,22 +227,15 @@ export const walletAPI = {
    * Make payment to worker (employer only)
    */
   async makePayment(payment: PaymentRequest): Promise<PaymentResponse> {
-    const authHeader = await getAuthHeader();
-    const response = await fetch('/api/wallet/payment', {
-      method: 'POST',
-      headers: {
-        Authorization: authHeader,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payment),
-    });
+    const accessToken = await getAccessToken();
+    const config = { accessToken } as any;
+    const { data } = await axiosClient.post<PaymentResponse>(
+      "/wallet/payment",
+      payment,
+      config
+    );
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Failed to process payment');
-    }
-
-    return response.json();
+    return data;
   },
 
   /**
@@ -263,51 +245,44 @@ export const walletAPI = {
     escrows: EscrowHold[];
     pagination: Record<string, unknown>;
   }> {
-    const authHeader = await getAuthHeader();
+    const accessToken = await getAccessToken();
     const params = new URLSearchParams();
 
     if (filters) {
-      if (filters.status) params.set('status', filters.status.join(','));
-      if (filters.has_complaint !== undefined) params.set('has_complaint', filters.has_complaint.toString());
-      if (filters.page) params.set('page', filters.page.toString());
-      if (filters.limit) params.set('limit', filters.limit.toString());
+      if (filters.status) params.set("status", filters.status.join(","));
+      if (filters.has_complaint !== undefined)
+        params.set("has_complaint", filters.has_complaint.toString());
+      if (filters.page) params.set("page", filters.page.toString());
+      if (filters.limit) params.set("limit", filters.limit.toString());
     }
 
-    const response = await fetch(`/api/wallet/escrow?${params.toString()}`, {
-      headers: {
-        Authorization: authHeader,
-      },
-    });
+    const config = { accessToken } as any;
+    const { data } = await axiosClient.get<{
+      escrows: EscrowHold[];
+      pagination: Record<string, unknown>;
+    }>(`/wallet/escrow?${params.toString()}`, config);
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Failed to fetch escrows');
-    }
-
-    return response.json();
+    return data;
   },
 
   /**
    * File complaint for escrow
    */
-  async fileComplaint(escrowId: string, description: string): Promise<EscrowHold> {
-    const authHeader = await getAuthHeader();
-    const response = await fetch('/api/wallet/escrow/complaint', {
-      method: 'POST',
-      headers: {
-        Authorization: authHeader,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ escrow_id: escrowId, description }),
-    });
+  async fileComplaint(
+    escrowId: string,
+    description: string
+  ): Promise<EscrowHold> {
+    const accessToken = await getAccessToken();
+    const config = { accessToken } as any;
+    const { data } = await axiosClient.post<{
+      escrow: EscrowHold;
+    }>(
+      "/wallet/escrow/complaint",
+      { escrow_id: escrowId, description },
+      config
+    );
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Failed to file complaint');
-    }
-
-    const result = await response.json();
-    return result.escrow;
+    return data.escrow;
   },
 
   // ===========================================================================
@@ -318,14 +293,11 @@ export const walletAPI = {
    * Calculate fees for a given amount
    */
   async calculateFees(amount: number): Promise<FeeCalculationResponse> {
-    const response = await fetch(`/api/wallet/fees?amount=${amount}`);
+    const { data } = await axiosClient.get<FeeCalculationResponse>(
+      `/wallet/fees?amount=${amount}`
+    );
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Failed to calculate fees');
-    }
-
-    return response.json();
+    return data;
   },
 };
 
@@ -337,109 +309,73 @@ export const adminWalletAPI = {
    * Get platform wallet statistics
    */
   async getStats(): Promise<AdminWalletStats> {
-    const authHeader = await getAuthHeader();
-    const response = await fetch('/api/admin/wallet/stats', {
-      headers: {
-        Authorization: authHeader,
-      },
-    });
+    const accessToken = await getAccessToken();
+    const config = { accessToken } as any;
+    const { data } = await axiosClient.get<{ stats: AdminWalletStats }>(
+      "/admin/wallet/stats",
+      config
+    );
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Failed to fetch statistics');
-    }
-
-    const result = await response.json();
-    return result.stats;
+    return data.stats;
   },
 
   /**
    * Get platform settings
    */
   async getSettings(): Promise<PlatformSettings> {
-    const authHeader = await getAuthHeader();
-    const response = await fetch('/api/admin/wallet/settings', {
-      headers: {
-        Authorization: authHeader,
-      },
-    });
+    const accessToken = await getAccessToken();
+    const config = { accessToken } as any;
+    const { data } = await axiosClient.get<{ settings: PlatformSettings }>(
+      "/admin/wallet/settings",
+      config
+    );
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Failed to fetch settings');
-    }
-
-    const result = await response.json();
-    return result.settings;
+    return data.settings;
   },
 
   /**
    * Update platform setting
    */
   async updateSetting(key: string, value: unknown): Promise<PlatformSettings> {
-    const authHeader = await getAuthHeader();
-    const response = await fetch('/api/admin/wallet/settings', {
-      method: 'PUT',
-      headers: {
-        Authorization: authHeader,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ key, value }),
-    });
+    const accessToken = await getAccessToken();
+    const config = { accessToken } as any;
+    const { data } = await axiosClient.put<{ settings: PlatformSettings }>(
+      "/admin/wallet/settings",
+      { key, value },
+      config
+    );
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Failed to update setting');
-    }
-
-    const result = await response.json();
-    return result.settings;
+    return data.settings;
   },
 
   /**
    * Manually release escrow
    */
   async releaseEscrow(escrowId: string): Promise<Transaction> {
-    const authHeader = await getAuthHeader();
-    const response = await fetch('/api/admin/wallet/escrow/release', {
-      method: 'POST',
-      headers: {
-        Authorization: authHeader,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ escrow_id: escrowId }),
-    });
+    const accessToken = await getAccessToken();
+    const config = { accessToken } as any;
+    const { data } = await axiosClient.post<{ transaction: Transaction }>(
+      "/admin/wallet/escrow/release",
+      { escrow_id: escrowId },
+      config
+    );
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Failed to release escrow');
-    }
-
-    const result = await response.json();
-    return result.transaction;
+    return data.transaction;
   },
 
   /**
    * Resolve complaint
    */
   async resolveComplaint(resolution: ComplaintResolution): Promise<EscrowHold> {
-    const authHeader = await getAuthHeader();
-    const response = await fetch('/api/admin/wallet/escrow/resolve', {
-      method: 'POST',
-      headers: {
-        Authorization: authHeader,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(resolution),
-    });
+    const accessToken = await getAccessToken();
+    const config = { accessToken } as any;
+    const { data } = await axiosClient.post<{ escrow: EscrowHold }>(
+      "/admin/wallet/escrow/resolve",
+      resolution,
+      config
+    );
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Failed to resolve complaint');
-    }
-
-    const result = await response.json();
-    return result.escrow;
+    return data.escrow;
   },
 };
 
@@ -451,9 +387,9 @@ export const walletHelpers = {
    * Format USD amount
    */
   formatUSD(amount: number): string {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
     }).format(amount);
   },
 
@@ -461,9 +397,9 @@ export const walletHelpers = {
    * Format VND amount
    */
   formatVND(amount: number): string {
-    return new Intl.NumberFormat('vi-VN', {
-      style: 'currency',
-      currency: 'VND',
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
     }).format(amount);
   },
 
@@ -472,15 +408,15 @@ export const walletHelpers = {
    */
   getTransactionTypeLabel(type: string): string {
     const labels: Record<string, string> = {
-      deposit: 'Deposit',
-      withdrawal: 'Withdrawal',
-      payment: 'Payment',
-      earning: 'Earning',
-      platform_fee: 'Platform Fee',
-      insurance_fee: 'Insurance Fee',
-      refund: 'Refund',
-      escrow_hold: 'Escrow Hold',
-      escrow_release: 'Escrow Release',
+      deposit: "Deposit",
+      withdrawal: "Withdrawal",
+      payment: "Payment",
+      earning: "Earning",
+      platform_fee: "Platform Fee",
+      insurance_fee: "Insurance Fee",
+      refund: "Refund",
+      escrow_hold: "Escrow Hold",
+      escrow_release: "Escrow Release",
     };
 
     return labels[type] || type;
@@ -491,14 +427,14 @@ export const walletHelpers = {
    */
   getTransactionStatusColor(status: string): string {
     const colors: Record<string, string> = {
-      pending: 'orange',
-      processing: 'blue',
-      completed: 'green',
-      failed: 'red',
-      cancelled: 'gray',
+      pending: "orange",
+      processing: "blue",
+      completed: "green",
+      failed: "red",
+      cancelled: "gray",
     };
 
-    return colors[status] || 'default';
+    return colors[status] || "default";
   },
 
   /**
@@ -506,14 +442,13 @@ export const walletHelpers = {
    */
   getEscrowStatusColor(status: string): string {
     const colors: Record<string, string> = {
-      held: 'blue',
-      released: 'green',
-      refunded: 'orange',
-      disputed: 'red',
-      cancelled: 'gray',
+      held: "blue",
+      released: "green",
+      refunded: "orange",
+      disputed: "red",
+      cancelled: "gray",
     };
 
-    return colors[status] || 'default';
+    return colors[status] || "default";
   },
 };
-

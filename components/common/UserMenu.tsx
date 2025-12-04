@@ -23,6 +23,7 @@ interface UserProfile {
   id: string;
   email: string;
   full_name?: string;
+  avatar_url?: string | null;
   role: "client" | "worker" | "admin";
   status: string;
 }
@@ -78,8 +79,11 @@ export default function UserMenu() {
           <Space>
             <Avatar
               size={48}
-              icon={<UserOutlined />}
-              style={{ backgroundColor: "#690f0f" }}
+              src={user.avatar_url || undefined}
+              icon={!user.avatar_url && <UserOutlined />}
+              style={{
+                backgroundColor: user.avatar_url ? undefined : "#690f0f",
+              }}
             />
             <div>
               <Text strong style={{ display: "block", fontSize: 16 }}>
@@ -198,8 +202,11 @@ export default function UserMenu() {
       >
         <Space>
           <Avatar
-            icon={<UserOutlined />}
-            style={{ backgroundColor: "#690f0f" }}
+            src={user.avatar_url || undefined}
+            icon={!user.avatar_url && <UserOutlined />}
+            style={{
+              backgroundColor: user.avatar_url ? undefined : "#690f0f",
+            }}
           />
           <Text
             style={{

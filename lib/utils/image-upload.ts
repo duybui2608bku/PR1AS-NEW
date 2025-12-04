@@ -22,28 +22,48 @@ export interface UploadResponse {
  */
 export async function uploadImage(
   file: File,
+  // `folder` kept for backward‑compat, not used by third‑party API
+  // so existing calls don't break.
   folder: string = "general"
 ): Promise<UploadResponse> {
   try {
     const formData = new FormData();
-    formData.append("file", file);
-    formData.append("folder", folder);
+    // Third‑party API expects `images[]` and a `server` name
+    formData.append("images[]", file);
+    formData.append("server", "server_1");
 
-    const response = await fetch("/api/upload/image", {
+    const response = await fetch("https://cfig.ibytecdn.org/upload", {
       method: "POST",
       body: formData,
     });
 
     const result = await response.json();
 
-    if (!response.ok) {
+    if (!response.ok || !result?.success || !Array.isArray(result.results)) {
       return {
         success: false,
-        error: result.error || "Upload failed",
+        error: result?.error || "Upload failed",
       };
     }
 
-    return result;
+    const first = result.results[0];
+
+    if (!first?.success || !first?.url) {
+      return {
+        success: false,
+        error: "Upload failed",
+      };
+    }
+
+    // Map third‑party response về format cũ cho FE
+    return {
+      success: true,
+      data: {
+        path: first.url, // không có khái niệm path, dùng luôn URL
+        publicUrl: first.url,
+        fileName: first.filename || "",
+      },
+    };
   } catch (error) {
     return {
       success: false,

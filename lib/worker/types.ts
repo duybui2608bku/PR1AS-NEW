@@ -255,6 +255,11 @@ export interface WorkerProfileComplete extends WorkerProfile {
   services: WorkerService[];
   avatar?: WorkerImage;
   gallery_images?: WorkerImage[];
+  /**
+   * Ngày đã được worker xác nhận booking (dùng cho lịch public).
+   * Format: 'YYYY-MM-DD'.
+   */
+  booked_dates?: string[];
 }
 
 // =============================================================================

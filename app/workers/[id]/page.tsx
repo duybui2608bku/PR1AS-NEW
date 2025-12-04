@@ -227,7 +227,7 @@ export default function WorkerPublicProfilePage() {
     );
   }
 
-  const bookedDates: string[] = [];
+  const bookedDates: string[] = profile.booked_dates || [];
 
   return (
     <MainLayout>

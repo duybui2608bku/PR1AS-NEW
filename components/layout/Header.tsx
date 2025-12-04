@@ -12,6 +12,7 @@ import { useTranslation } from "react-i18next";
 import { authAPI } from "@/lib/auth/api-client";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import SearchBar from "@/components/common/SearchBar";
+import { showNotification } from "@/lib/utils/toast";
 
 const { Header: AntHeader } = Layout;
 
@@ -312,7 +313,10 @@ export default function Header() {
                     setMobileMenuOpen(false);
                     router.push("/");
                   } catch (error) {
-                    console.error(error);
+                    showNotification.error(
+                      "Đăng xuất thất bại",
+                      "Vui lòng thử lại sau."
+                    );
                   }
                 }}
               >

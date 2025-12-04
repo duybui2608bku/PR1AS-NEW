@@ -4,6 +4,7 @@
  */
 
 import { WorkerFilters, WorkersResponse } from "./types";
+import { ApiResponse } from "@/lib/http/response";
 
 /**
  * Build query string from filters
@@ -45,6 +46,10 @@ function buildQueryString(filters: WorkerFilters): string {
 export const marketAPI = {
   /**
    * Fetch workers with filters
+   *
+   * NOTE: After refactor, API responses are wrapped in ApiResponse<T>.
+   * This client un-wraps the `data` field so callers still receive
+   * a plain `WorkersResponse` object.
    */
   async getWorkers(filters: WorkerFilters = {}): Promise<WorkersResponse> {
     const queryString = buildQueryString(filters);
@@ -58,11 +63,18 @@ export const marketAPI = {
       credentials: "include",
     });
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || "Failed to fetch workers");
+    const json: ApiResponse<WorkersResponse> = await response.json();
+
+    if (!response.ok || !json.success) {
+      throw new Error(
+        json.error || json.message || "Failed to fetch workers"
+      );
     }
 
-    return response.json();
+    if (!json.data) {
+      throw new Error("No data returned from workers API");
+    }
+
+    return json.data;
   },
 };

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { Layout, Menu, Button, Avatar, Dropdown, Space } from "antd";
+import { Layout, Menu, Button, Avatar, Dropdown, Space, ConfigProvider, theme } from "antd";
 import {
   DashboardOutlined,
   SettingOutlined,
@@ -22,6 +22,8 @@ import { useMobileSidebar } from "@/hooks/useMobileSidebar";
 import type { MenuProps } from "antd";
 import Loading from "@/components/common/Loading";
 import LanguageSwitcher from "@/components/common/LanguageSwitcher";
+import ThemeToggle from "@/components/common/ThemeToggle";
+import { ThemeProvider, useTheme } from "@/components/providers/ThemeProvider";
 import "../globals-layout.css";
 import "./styles.css";
 
@@ -45,10 +47,12 @@ function getItem(
 
 // menu items will be created inside the component so we can use `t()` for labels
 
-export default function AdminLayout({
+function AdminLayoutContent({
   children,
+  currentTheme,
 }: {
   children: React.ReactNode;
+  currentTheme: "light" | "dark";
 }) {
   const [user, setUser] = useState<{
     email?: string;
@@ -193,10 +197,10 @@ export default function AdminLayout({
         className={`
           ${isMobile ? "mobile-sidebar-overlay" : "desktop-sidebar"}
           ${isMobile && mobileOpen ? "mobile-sidebar-open" : ""}
+          admin-sidebar
         `}
+        theme={currentTheme === "dark" ? "dark" : "light"}
         style={{
-          background: "#fff",
-          borderRight: "1px solid #f0f0f0",
           overflow: "auto",
           height: "100vh",
           position: "fixed",
@@ -248,6 +252,7 @@ export default function AdminLayout({
             className="mobile-menu-button"
           />
           <Space size="middle">
+            <ThemeToggle />
             <LanguageSwitcher />
             <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
               <Space style={{ cursor: "pointer" }}>
@@ -258,11 +263,11 @@ export default function AdminLayout({
           </Space>
         </Header>
         <Content
+          className="admin-content"
           style={{
             margin: "24px 16px",
             padding: 24,
             minHeight: 280,
-            background: "#fff",
             borderRadius: 8,
           }}
         >
@@ -270,5 +275,49 @@ export default function AdminLayout({
         </Content>
       </Layout>
     </Layout>
+  );
+}
+
+function AdminLayoutWithConfig({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const { theme: currentTheme } = useTheme();
+  const { defaultAlgorithm, darkAlgorithm } = theme;
+
+  return (
+    <ConfigProvider
+      theme={{
+        algorithm: currentTheme === "dark" ? darkAlgorithm : defaultAlgorithm,
+        token: {
+          fontFamily: "var(--font-family-base)",
+          fontSize: 14,
+          colorPrimary: "#FF385C",
+          borderRadius: 8,
+        },
+        components: {
+          Rate: {
+            colorFillContent: "#FF385C",
+          },
+        },
+      }}
+    >
+      <AdminLayoutContent currentTheme={currentTheme}>
+        {children}
+      </AdminLayoutContent>
+    </ConfigProvider>
+  );
+}
+
+export default function AdminLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <ThemeProvider>
+      <AdminLayoutWithConfig>{children}</AdminLayoutWithConfig>
+    </ThemeProvider>
   );
 }

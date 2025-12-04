@@ -379,6 +379,52 @@ export class WorkerProfileService {
     // Filter active services only
     profile.services = profile.services?.filter((svc) => svc.is_active) || [];
 
+    // -------------------------------------------------------------------------
+    // TÍNH TOÁN CÁC NGÀY ĐÃ ĐƯỢC BOOK (ĐÃ XÁC NHẬN) CHO WORKER
+    // -------------------------------------------------------------------------
+    // bookings.worker_id = user_profiles.id (user id), trong khi profile.id là worker_profiles.id
+    // nên ở đây dùng profile.user_id để truy vấn.
+    const { data: bookings } = await this.supabase
+      .from("bookings")
+      .select("start_date, end_date, status")
+      .eq("worker_id", profile.user_id)
+      .in("status", [
+        "worker_confirmed",
+        "in_progress",
+        "worker_completed",
+        "client_completed",
+      ]);
+
+    if (bookings && bookings.length > 0) {
+      const bookedDatesSet = new Set<string>();
+
+      for (const booking of bookings as {
+        start_date: string;
+        end_date?: string | null;
+      }[]) {
+        const start = new Date(booking.start_date);
+        const end = booking.end_date ? new Date(booking.end_date) : start;
+
+        // Chuẩn hóa: bỏ phần time, chỉ giữ ngày
+        start.setHours(0, 0, 0, 0);
+        end.setHours(0, 0, 0, 0);
+
+        // Lặp từng ngày từ start -> end (bao gồm cả end)
+        for (
+          let d = new Date(start.getTime());
+          d.getTime() <= end.getTime();
+          d.setDate(d.getDate() + 1)
+        ) {
+          const year = d.getFullYear();
+          const month = (d.getMonth() + 1).toString().padStart(2, "0");
+          const day = d.getDate().toString().padStart(2, "0");
+          bookedDatesSet.add(`${year}-${month}-${day}`);
+        }
+      }
+
+      profile.booked_dates = Array.from(bookedDatesSet);
+    }
+
     return profile;
   }
 
@@ -724,7 +770,10 @@ export class WorkerProfileService {
   /**
    * Remove service from worker profile
    */
-  async removeWorkerService(workerServiceId: string, profileId: string): Promise<void> {
+  async removeWorkerService(
+    workerServiceId: string,
+    profileId: string
+  ): Promise<void> {
     const { error } = await this.supabase
       .from("worker_services")
       .delete()

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Upload, Avatar, Button, message, Spin } from "antd";
 import {
   UploadOutlined,
@@ -83,7 +83,12 @@ export default function ImageUpload({
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | undefined>(value);
-  const [filePath, setFilePath] = useState<string | undefined>();
+  const [filePath, setFilePath] = useState<string | undefined>(value);
+
+  // Đồng bộ lại state nội bộ khi prop value thay đổi (ví dụ: load từ API)
+  useEffect(() => {
+    setImageUrl(value);
+  }, [value]);
 
   const handleUpload = async (file: File) => {
     // Validate file with i18n messages

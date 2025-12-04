@@ -40,7 +40,7 @@ export default function ListingGrid({ selectedCategory }: ListingGridProps) {
 
   // Transform API data to WorkerProfile format
   const transformedWorkers: WorkerProfile[] = useMemo(() => {
-    return workers.map((worker) => {
+    return workers?.map((worker) => {
       // Get the first service for role display
       const firstService = worker.services?.[0];
       const serviceName = firstService?.service?.name_key
@@ -115,11 +115,11 @@ export default function ListingGrid({ selectedCategory }: ListingGridProps) {
   return (
     <div className="max-w-[2520px] mx-auto xl:px-20 md:px-10 sm:px-2 px-4 py-8">
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-8">
-        {filteredWorkers.map((worker) => (
+        {filteredWorkers?.map((worker) => (
           <ListingCard key={worker.id} data={worker} />
         ))}
       </div>
-      {filteredWorkers.length === 0 && (
+      {filteredWorkers?.length === 0 && (
         <div className="flex justify-center items-center py-20 text-neutral-500">
           {t("mockdata.noWorkersInCategory")}
         </div>

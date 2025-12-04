@@ -11,3 +11,41 @@
   margin: 4px 8px;
   border-radius: 4px;
 }
+
+/* Dark mode styles */
+:root.dark .admin-content {
+  background: #141414 !important;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+:root.dark .layout-header {
+  background: #1f1f1f !important;
+  border-bottom-color: #303030 !important;
+}
+
+:root.dark .sidebar-brand {
+  border-bottom-color: #303030 !important;
+}
+
+:root.dark .brand-title {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+/* Light mode styles (default) */
+.admin-content {
+  background: #fff !important;
+  color: rgba(0, 0, 0, 0.85);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.layout-header {
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.sidebar-brand {
+  transition: border-color 0.3s ease;
+}
+
+.brand-title {
+  transition: color 0.3s ease;
+}

@@ -2,8 +2,33 @@
  * Server-side auth helpers
  */
 
+import { NextRequest } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
-import { UserRole } from "./api-client";
+import { UserRole } from "@/lib/utils/enums";
+
+/**
+ * Get authentication token from request
+ * Checks both Authorization header (Bearer token) and httpOnly cookies
+ * @param request - Next.js request object
+ * @returns Token string or null if not found
+ */
+export function getTokenFromRequest(request: NextRequest): string | null {
+  // Try to get token from httpOnly cookie first
+  let token = request.cookies.get("sb-access-token")?.value || null;
+
+  // Fallback: try Authorization header (Bearer token)
+  if (!token) {
+    const authHeader =
+      request.headers.get("authorization") ||
+      request.headers.get("Authorization");
+
+    if (authHeader?.startsWith("Bearer ")) {
+      token = authHeader.replace("Bearer ", "");
+    }
+  }
+
+  return token || null;
+}
 
 export interface UserProfile {
   id: string;

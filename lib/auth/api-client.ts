@@ -4,6 +4,7 @@
  */
 
 import { getSupabaseClient } from "@/lib/supabase/client";
+import type { ApiResponse } from "@/lib/http/response";
 
 export type UserRole = "client" | "worker" | "admin";
 
@@ -11,6 +12,7 @@ export interface UserProfile {
   id: string;
   email: string;
   full_name?: string;
+  avatar_url?: string | null;
   role: UserRole;
   status: "active" | "banned";
   created_at?: string;
@@ -55,17 +57,19 @@ export const authAPI = {
       body: JSON.stringify({ email, password, role, fullName }),
     });
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || error.error || "Sign up failed");
-    }
+    const json: ApiResponse<{
+      user: { id: string; email: string; role: UserRole };
+      session?: { access_token?: string; refresh_token?: string };
+    }> = await response.json();
 
-    const data = await response.json();
+    if (!response.ok || !json.success) {
+      throw new Error(json.message || json.error || "Sign up failed");
+    }
 
     // Small delay to ensure cookies are properly set before redirect
     await new Promise((resolve) => setTimeout(resolve, 100));
 
-    return data;
+    return json;
   },
 
   /**
@@ -81,12 +85,13 @@ export const authAPI = {
       body: JSON.stringify({ role, provider }),
     });
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || error.error || "OAuth signup failed");
+    const json: ApiResponse<{ callbackUrl: string }> = await response.json();
+
+    if (!response.ok || !json.success) {
+      throw new Error(json.message || json.error || "OAuth signup failed");
     }
 
-    return response.json();
+    return json.data!;
   },
 
   /**
@@ -125,17 +130,19 @@ export const authAPI = {
       body: JSON.stringify({ email, password }),
     });
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || error.error || "Login failed");
-    }
+    const json: ApiResponse<{
+      user: { id: string; email: string; role: UserRole; status: string };
+      session?: { access_token?: string; refresh_token?: string };
+    }> = await response.json();
 
-    const data = await response.json();
+    if (!response.ok || !json.success) {
+      throw new Error(json.message || json.error || "Login failed");
+    }
 
     // Small delay to ensure cookies are properly set before redirect
     await new Promise((resolve) => setTimeout(resolve, 100));
 
-    return data;
+    return json;
   },
 
   /**
@@ -167,17 +174,19 @@ export const authAPI = {
       credentials: "include", // Important: Send cookies with request
     });
 
-    if (!response.ok) {
-      const error = await response.json();
-      if (error.error === "ACCOUNT_BANNED") {
+    const json: ApiResponse<{ profile: UserProfile }> = await response.json();
+
+    if (!response.ok || !json.success) {
+      if (json.code === "ACCOUNT_BANNED" || json.error === "ACCOUNT_BANNED") {
         // Redirect to banned page
         window.location.href = "/banned";
       }
-      throw new Error(error.message || error.error || "Failed to get profile");
+      throw new Error(
+        json.message || json.error || "Failed to get profile"
+      );
     }
 
-    const result = await response.json();
-    return result.profile;
+    return json.data!.profile;
   },
 
   /**
@@ -194,14 +203,15 @@ export const authAPI = {
       body: JSON.stringify({ role }),
     });
 
-    if (!response.ok) {
-      const error = await response.json();
+    const json: ApiResponse<unknown> = await response.json();
+
+    if (!response.ok || !json.success) {
       throw new Error(
-        error.message || error.error || "Failed to create profile"
+        json.message || json.error || "Failed to create profile"
       );
     }
 
-    return response.json();
+    return json;
   },
 
   /**
@@ -216,12 +226,13 @@ export const authAPI = {
       body: JSON.stringify({ userId, email, role }),
     });
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || error.error || "Callback failed");
+    const json: ApiResponse<unknown> = await response.json();
+
+    if (!response.ok || !json.success) {
+      throw new Error(json.message || json.error || "Callback failed");
     }
 
-    return response.json();
+    return json;
   },
 
   /**

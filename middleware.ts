@@ -16,7 +16,13 @@ export async function middleware(request: NextRequest) {
 
   // Public routes that don't require authentication
   const publicRoutes = ["/", "/auth/login", "/auth/signup", "/banned"];
-  const isPublicRoute = publicRoutes.some((route) => pathname === route);
+  const publicRoutePatterns = [
+    /^\/workers\/.*/, // Worker public profiles
+    /^\/market/, // Market/listing pages
+  ];
+  const isPublicRoute = 
+    publicRoutes.some((route) => pathname === route) ||
+    publicRoutePatterns.some((pattern) => pattern.test(pathname));
 
   // Auth routes (login, signup) - redirect if already authenticated
   const authRoutes = ["/auth/login", "/auth/signup"];

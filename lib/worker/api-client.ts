@@ -12,12 +12,12 @@ import {
   AddWorkerServiceRequest,
   UpdateServicePriceRequest,
   UploadImageRequest,
-  ApiResponse,
   ServiceWithPrice,
   WorkerImage,
   WorkerService,
   WorkerServicePrice,
-} from './types';
+} from "./types";
+import { axiosClient } from "@/lib/http/axios-client";
 
 // =============================================================================
 // SERVICES API (PUBLIC)
@@ -28,16 +28,9 @@ export const servicesAPI = {
    * Get all service categories
    */
   async getCategories(): Promise<ServiceCategory[]> {
-    const response = await fetch('/api/services/categories', {
-      credentials: 'include',
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Failed to fetch categories');
-    }
-
-    const data = await response.json();
+    const { data } = await axiosClient.get<{ data: ServiceCategory[] }>(
+      "/services/categories"
+    );
     return data.data;
   },
 
@@ -46,19 +39,10 @@ export const servicesAPI = {
    */
   async getServices(categoryId?: string): Promise<Service[]> {
     const url = categoryId
-      ? `/api/services?category_id=${categoryId}`
-      : '/api/services';
+      ? `/services?category_id=${categoryId}`
+      : "/services";
 
-    const response = await fetch(url, {
-      credentials: 'include',
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Failed to fetch services');
-    }
-
-    const data = await response.json();
+    const { data } = await axiosClient.get<{ data: Service[] }>(url);
     return data.data;
   },
 
@@ -66,16 +50,9 @@ export const servicesAPI = {
    * Get service by ID
    */
   async getServiceById(serviceId: string): Promise<Service> {
-    const response = await fetch(`/api/services/${serviceId}`, {
-      credentials: 'include',
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Failed to fetch service');
-    }
-
-    const data = await response.json();
+    const { data } = await axiosClient.get<{ data: Service }>(
+      `/services/${serviceId}`
+    );
     return data.data;
   },
 };
@@ -89,38 +66,22 @@ export const workerProfileAPI = {
    * Get worker's own profile
    */
   async getProfile(): Promise<WorkerProfileComplete> {
-    const response = await fetch('/api/worker/profile', {
-      credentials: 'include',
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Failed to fetch profile');
-    }
-
-    const data = await response.json();
+    const { data } = await axiosClient.get<{ data: WorkerProfileComplete }>(
+      "/worker/profile"
+    );
     return data.data;
   },
 
   /**
    * Create or update worker profile (Step 1)
    */
-  async saveProfile(profileData: WorkerProfileStep1Request): Promise<WorkerProfile> {
-    const response = await fetch('/api/worker/profile', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-      body: JSON.stringify(profileData),
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Failed to save profile');
-    }
-
-    const data = await response.json();
+  async saveProfile(
+    profileData: WorkerProfileStep1Request
+  ): Promise<WorkerProfile> {
+    const { data } = await axiosClient.post<{ data: WorkerProfile }>(
+      "/worker/profile",
+      profileData
+    );
     return data.data;
   },
 
@@ -128,30 +89,14 @@ export const workerProfileAPI = {
    * Submit profile for review
    */
   async submitForReview(): Promise<void> {
-    const response = await fetch('/api/worker/profile/submit', {
-      method: 'PATCH',
-      credentials: 'include',
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Failed to submit profile');
-    }
+    await axiosClient.patch("/worker/profile/submit");
   },
 
   /**
    * Publish profile
    */
   async publish(): Promise<void> {
-    const response = await fetch('/api/worker/profile/publish', {
-      method: 'PATCH',
-      credentials: 'include',
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Failed to publish profile');
-    }
+    await axiosClient.patch("/worker/profile/publish");
   },
 };
 
@@ -164,16 +109,9 @@ export const workerServicesAPI = {
    * Get worker's services with pricing
    */
   async getServices(): Promise<ServiceWithPrice[]> {
-    const response = await fetch('/api/worker/services', {
-      credentials: 'include',
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Failed to fetch services');
-    }
-
-    const data = await response.json();
+    const { data } = await axiosClient.get<{ data: ServiceWithPrice[] }>(
+      "/worker/services"
+    );
     return data.data;
   },
 
@@ -183,21 +121,9 @@ export const workerServicesAPI = {
   async addService(
     serviceData: AddWorkerServiceRequest
   ): Promise<{ service: WorkerService; pricing: WorkerServicePrice }> {
-    const response = await fetch('/api/worker/services', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-      body: JSON.stringify(serviceData),
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Failed to add service');
-    }
-
-    const data = await response.json();
+    const { data } = await axiosClient.post<{
+      data: { service: WorkerService; pricing: WorkerServicePrice };
+    }>("/worker/services", serviceData);
     return data.data;
   },
 
@@ -208,21 +134,10 @@ export const workerServicesAPI = {
     workerServiceId: string,
     priceData: UpdateServicePriceRequest
   ): Promise<WorkerServicePrice> {
-    const response = await fetch(`/api/worker/services/${workerServiceId}/price`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-      body: JSON.stringify(priceData),
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Failed to update price');
-    }
-
-    const data = await response.json();
+    const { data } = await axiosClient.patch<{ data: WorkerServicePrice }>(
+      `/worker/services/${workerServiceId}/price`,
+      priceData
+    );
     return data.data;
   },
 
@@ -230,15 +145,7 @@ export const workerServicesAPI = {
    * Remove service from worker profile
    */
   async removeService(workerServiceId: string): Promise<void> {
-    const response = await fetch(`/api/worker/services/${workerServiceId}`, {
-      method: 'DELETE',
-      credentials: 'include',
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Failed to remove service');
-    }
+    await axiosClient.delete(`/worker/services/${workerServiceId}`);
   },
 };
 
@@ -251,21 +158,10 @@ export const workerImagesAPI = {
    * Add image to worker profile
    */
   async addImage(imageData: UploadImageRequest): Promise<WorkerImage> {
-    const response = await fetch('/api/worker/images', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-      body: JSON.stringify(imageData),
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Failed to add image');
-    }
-
-    const data = await response.json();
+    const { data } = await axiosClient.post<{ data: WorkerImage }>(
+      "/worker/images",
+      imageData
+    );
     return data.data;
   },
 
@@ -273,15 +169,7 @@ export const workerImagesAPI = {
    * Delete image
    */
   async deleteImage(imageId: string): Promise<void> {
-    const response = await fetch(`/api/worker/images/${imageId}`, {
-      method: 'DELETE',
-      credentials: 'include',
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Failed to delete image');
-    }
+    await axiosClient.delete(`/worker/images/${imageId}`);
   },
 };
 
@@ -315,11 +203,11 @@ export function calculatePriceTiers(
  */
 export function formatCurrency(amount: number, currency: string): string {
   const formatters: Record<string, Intl.NumberFormat> = {
-    USD: new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }),
-    VND: new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }),
-    JPY: new Intl.NumberFormat('ja-JP', { style: 'currency', currency: 'JPY' }),
-    KRW: new Intl.NumberFormat('ko-KR', { style: 'currency', currency: 'KRW' }),
-    CNY: new Intl.NumberFormat('zh-CN', { style: 'currency', currency: 'CNY' }),
+    USD: new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }),
+    VND: new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }),
+    JPY: new Intl.NumberFormat("ja-JP", { style: "currency", currency: "JPY" }),
+    KRW: new Intl.NumberFormat("ko-KR", { style: "currency", currency: "KRW" }),
+    CNY: new Intl.NumberFormat("zh-CN", { style: "currency", currency: "CNY" }),
   };
 
   return formatters[currency]?.format(amount) || `${amount} ${currency}`;
