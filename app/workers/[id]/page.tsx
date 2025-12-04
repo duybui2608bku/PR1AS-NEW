@@ -57,11 +57,15 @@ import PublicServiceCard from "@/components/worker/PublicServiceCard";
 import MainLayout from "@/components/layout/MainLayout";
 import { BookingModal } from "@/components/booking";
 import { authAPI } from "@/lib/auth/api-client";
+import { chatAPI } from "@/lib/chat/api";
+import { useRouter } from "next/navigation";
+import { message } from "antd";
 
 const { Title, Text, Paragraph } = Typography;
 
 export default function WorkerPublicProfilePage() {
   const params = useParams();
+  const router = useRouter();
   const { t } = useTranslation();
   const screens = Grid.useBreakpoint();
   const isMobile = !screens.md;
@@ -72,6 +76,7 @@ export default function WorkerPublicProfilePage() {
   const [displayCurrency, setDisplayCurrency] = useState<Currency>(
     Currency.USD
   );
+  const [chatLoading, setChatLoading] = useState(false);
   const carouselRef = useRef<CarouselRef | null>(null);
 
   const totalRating = 4.8;
@@ -156,6 +161,25 @@ export default function WorkerPublicProfilePage() {
 
     fetchUserRole();
   }, []);
+
+  // Handle chat button click
+  const handleChatClick = async () => {
+    if (!params.id || userRole !== "client") return;
+
+    try {
+      setChatLoading(true);
+      const { conversation } = await chatAPI.createOrGetConversation(
+        params.id as string,
+        null
+      );
+      router.push(`/client/chat?conversationId=${conversation.id}`);
+    } catch (error) {
+      console.error("Failed to create conversation:", error);
+      message.error("Không thể tạo cuộc trò chuyện. Vui lòng thử lại!");
+    } finally {
+      setChatLoading(false);
+    }
+  };
 
   const servicesWithPricing = useMemo(() => {
     if (!profile?.services) return [];
@@ -760,6 +784,15 @@ export default function WorkerPublicProfilePage() {
                     >
                       {t("worker.public.bookServiceButton")}
                     </Button>
+                    <Button
+                      size="large"
+                      block
+                      icon={<MessageOutlined />}
+                      onClick={handleChatClick}
+                      loading={chatLoading}
+                    >
+                      Nhắn tin
+                    </Button>
                     <BookingModal
                       open={bookingModalOpen}
                       onClose={() => setBookingModalOpen(false)}
@@ -787,9 +820,14 @@ export default function WorkerPublicProfilePage() {
                   </>
                 )}
                 {userRole !== "client" && (
-                  <Button type="primary" size="large" block disabled>
-                    {t("worker.public.bookServiceButton")}
-                  </Button>
+                  <>
+                    <Button type="primary" size="large" block disabled>
+                      {t("worker.public.bookServiceButton")}
+                    </Button>
+                    <Button size="large" block icon={<MessageOutlined />} disabled>
+                      Nhắn tin
+                    </Button>
+                  </>
                 )}
 
                 <Card

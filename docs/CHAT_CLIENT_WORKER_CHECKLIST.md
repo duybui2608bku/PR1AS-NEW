@@ -273,189 +273,182 @@
 
 ### 4.1. TypeScript Types & Interfaces
 
-- [ ] Tạo file `types/chat.ts`:
-  - [ ] `Conversation` interface
-  - [ ] `Message` interface
-  - [ ] `Attachment` interface
-  - [ ] `MessageContentType` type
-  - [ ] `MessageStatus` type
-  - [ ] API request/response types
-- [ ] Export types để sử dụng trong components
+- [x] Tạo file `types/chat.ts`:
+  - [x] `Conversation` interface
+  - [x] `Message` interface
+  - [x] `Attachment` interface
+  - [x] `MessageContentType` type
+  - [x] `MessageStatus` type
+  - [x] API request/response types
+- [x] Export types để sử dụng trong components
 
 ### 4.2. API Client Functions
 
-- [ ] Tạo file `lib/chat/api.ts`:
-  - [ ] `createOrGetConversation(workerId, bookingId?)`
-  - [ ] `getConversations(page?, limit?)`
-  - [ ] `getConversationMessages(conversationId, cursor?, limit?)`
-  - [ ] `sendMessage(conversationId, content?, attachments?)`
-  - [ ] `uploadChatImage(file, conversationId)`
-  - [ ] `markConversationAsRead(conversationId)` (optional)
-- [ ] Add error handling và TypeScript types
-- [ ] Add request/response interceptors nếu cần
+- [x] Tạo file `lib/chat/api.ts`:
+  - [x] `createOrGetConversation(workerId, bookingId?)`
+  - [x] `getConversations(page?, limit?)`
+  - [x] `getConversationMessages(conversationId, cursor?, limit?)`
+  - [x] `sendMessage(conversationId, content?, attachments?)`
+  - [x] `uploadChatImage(file, conversationId)`
+  - [x] `markConversationAsRead(conversationId)` (optional)
+- [x] Add error handling và TypeScript types
+- [x] Add request/response interceptors nếu cần
 
 ### 4.3. React Hooks - useConversations
 
-- [ ] Tạo file `hooks/chat/useConversations.ts`
-- [ ] Implement hook:
-  - [ ] Fetch danh sách conversations
-  - [ ] Pagination support
-  - [ ] Loading và error states
-  - [ ] Refetch function
-- [ ] Return: `{ conversations, loading, error, refetch, loadMore }`
+- [x] Tạo file `hooks/chat/useConversations.ts`
+- [x] Implement hook:
+  - [x] Fetch danh sách conversations
+  - [x] Pagination support
+  - [x] Loading và error states
+  - [x] Refetch function
+- [x] Return: `{ conversations, loading, error, refetch, loadMore }`
 
 ### 4.4. React Hooks - useConversation
 
-- [ ] Tạo file `hooks/chat/useConversation.ts`
-- [ ] Implement hook:
-  - [ ] Fetch conversation by ID
-  - [ ] Loading và error states
-  - [ ] Refetch function
-- [ ] Return: `{ conversation, loading, error, refetch }`
+- [x] Tạo file `hooks/chat/useConversation.ts`
+- [x] Implement hook:
+  - [x] Fetch conversation by ID
+  - [x] Loading và error states
+  - [x] Refetch function
+- [x] Return: `{ conversation, loading, error, refetch }`
 
 ### 4.5. React Hooks - useMessages
 
-- [ ] Tạo file `hooks/chat/useMessages.ts`
-- [ ] Implement hook:
-  - [ ] Fetch messages với cursor-based pagination
-  - [ ] Infinite scroll support
-  - [ ] Loading và error states
-  - [ ] Load more function
-- [ ] Return: `{ messages, loading, error, hasMore, loadMore }`
+- [x] Tạo file `hooks/chat/useMessages.ts`
+- [x] Implement hook:
+  - [x] Fetch messages với cursor-based pagination
+  - [x] Infinite scroll support
+  - [x] Loading và error states
+  - [x] Load more function
+- [x] Return: `{ messages, loading, error, hasMore, loadMore }`
 
 ### 4.6. React Hooks - useSendMessage
 
-- [ ] Tạo file `hooks/chat/useSendMessage.ts`
-- [ ] Implement hook:
-  - [ ] Send message mutation
-  - [ ] Optimistic update
-  - [ ] Error handling
-  - [ ] Success callback
-- [ ] Return: `{ sendMessage, loading, error }`
+- [x] Tạo file `hooks/chat/useSendMessage.ts`
+- [x] Implement hook:
+  - [x] Send message mutation
+  - [x] Optimistic update
+  - [x] Error handling
+  - [x] Success callback
+- [x] Return: `{ sendMessage, loading, error }`
 
 ### 4.7. React Hooks - useChatSocket (nếu dùng Socket.io)
 
-- [ ] Tạo file `hooks/chat/useChatSocket.ts`
-- [ ] Implement hook:
-  - [ ] Connect/disconnect socket
-  - [ ] Join conversation room
-  - [ ] Listen `chat:message:new` event
-  - [ ] Handle new messages
-  - [ ] Cleanup on unmount
-- [ ] Return: `{ socket, isConnected, joinRoom, leaveRoom }`
+- [x] SKIPPED - Dùng Supabase Realtime thay thế (xem 4.8)
 
 ### 4.8. React Hooks - useSupabaseRealtime (nếu dùng Supabase Realtime)
 
-- [ ] Tạo file `hooks/chat/useSupabaseRealtime.ts`
-- [ ] Implement hook:
-  - [ ] Subscribe to messages table changes
-  - [ ] Filter by `conversation_id`
-  - [ ] Handle INSERT events
-  - [ ] Cleanup subscription
-- [ ] Return: `{ subscribe, unsubscribe }`
+- [x] Tạo file `hooks/chat/useSupabaseRealtime.ts`
+- [x] Implement hook:
+  - [x] Subscribe to messages table changes
+  - [x] Filter by `conversation_id`
+  - [x] Handle INSERT events
+  - [x] Cleanup subscription
+- [x] Return: `{ subscribe, unsubscribe }`
 
 ### 4.9. Component - ConversationList
 
-- [ ] Tạo file `components/chat/ConversationList.tsx`
-- [ ] Implement component:
-  - [ ] Hiển thị danh sách conversations
-  - [ ] Avatar và tên đối phương
-  - [ ] Last message preview (text hoặc "📷 Ảnh")
-  - [ ] Timestamp formatting
-  - [ ] Click để mở conversation
-  - [ ] Loading skeleton
-  - [ ] Empty state
-- [ ] Add responsive design
-- [ ] Add i18n support
+- [x] Tạo file `components/chat/ConversationList.tsx`
+- [x] Implement component:
+  - [x] Hiển thị danh sách conversations
+  - [x] Avatar và tên đối phương
+  - [x] Last message preview (text hoặc "📷 Ảnh")
+  - [x] Timestamp formatting
+  - [x] Click để mở conversation
+  - [x] Loading skeleton
+  - [x] Empty state
+- [x] Add responsive design
+- [x] Add i18n support
 
 ### 4.10. Component - MessageBubble
 
-- [ ] Tạo file `components/chat/MessageBubble.tsx`
-- [ ] Implement component:
-  - [ ] Hiển thị bubble trái/phải dựa trên `senderId`
-  - [ ] Render text content (support emoji unicode)
-  - [ ] Render image attachments (thumbnail grid)
-  - [ ] Timestamp hiển thị
-  - [ ] Status indicator (sent/delivered/read) nếu có
-- [ ] Add styling (Ant Design hoặc Tailwind)
-- [ ] Add click handler để mở image viewer
+- [x] Tạo file `components/chat/MessageBubble.tsx`
+- [x] Implement component:
+  - [x] Hiển thị bubble trái/phải dựa trên `senderId`
+  - [x] Render text content (support emoji unicode)
+  - [x] Render image attachments (thumbnail grid)
+  - [x] Timestamp hiển thị
+  - [x] Status indicator (sent/delivered/read) nếu có
+- [x] Add styling (Ant Design hoặc Tailwind)
+- [x] Add click handler để mở image viewer
 
 ### 4.11. Component - MessageList
 
-- [ ] Tạo file `components/chat/MessageList.tsx`
-- [ ] Implement component:
-  - [ ] Render danh sách messages
-  - [ ] Infinite scroll (load more khi scroll lên)
-  - [ ] Auto scroll xuống cuối khi có message mới
-  - [ ] Group messages theo ngày (optional)
-  - [ ] Loading state
-- [ ] Use `useMessages` hook
-- [ ] Add scroll behavior logic
+- [x] Tạo file `components/chat/MessageList.tsx`
+- [x] Implement component:
+  - [x] Render danh sách messages
+  - [x] Infinite scroll (load more khi scroll lên)
+  - [x] Auto scroll xuống cuối khi có message mới
+  - [x] Group messages theo ngày (optional)
+  - [x] Loading state
+- [x] Use `useMessages` hook
+- [x] Add scroll behavior logic
 
 ### 4.12. Component - ChatInput
 
-- [ ] Tạo file `components/chat/ChatInput.tsx`
-- [ ] Implement component:
-  - [ ] Textarea auto-grow
-  - [ ] Emoji picker button và modal
-  - [ ] Image picker button (file input)
-  - [ ] Image preview (hiển thị ảnh đã chọn trước khi gửi)
-  - [ ] Send button
-  - [ ] Disable send khi không có content và attachments
-- [ ] Handle emoji selection
-- [ ] Handle image selection và preview
-- [ ] Handle send message
+- [x] Tạo file `components/chat/ChatInput.tsx`
+- [x] Implement component:
+  - [x] Textarea auto-grow
+  - [x] Emoji picker button và modal
+  - [x] Image picker button (file input)
+  - [x] Image preview (hiển thị ảnh đã chọn trước khi gửi)
+  - [x] Send button
+  - [x] Disable send khi không có content và attachments
+- [x] Handle emoji selection
+- [x] Handle image selection và preview
+- [x] Handle send message
 
 ### 4.13. Component - EmojiPicker
 
-- [ ] Tạo file `components/chat/EmojiPicker.tsx`
-- [ ] Implement component:
-  - [ ] Emoji picker UI (có thể dùng library như `emoji-picker-react`)
-  - [ ] Insert emoji vào textarea
-  - [ ] Close modal khi chọn
-- [ ] Add i18n cho emoji categories nếu cần
+- [x] Tạo file `components/chat/EmojiPicker.tsx`
+- [x] Implement component:
+  - [x] Emoji picker UI (có thể dùng library như `emoji-picker-react`)
+  - [x] Insert emoji vào textarea
+  - [x] Close modal khi chọn
+- [x] Add i18n cho emoji categories nếu cần
 
 ### 4.14. Component - ImageViewer
 
-- [ ] Tạo file `components/chat/ImageViewer.tsx`
-- [ ] Implement component:
-  - [ ] Full-screen image viewer modal
-  - [ ] Support multiple images (swipe/arrow navigation)
-  - [ ] Zoom in/out
-  - [ ] Close button
-- [ ] Use Ant Design Modal hoặc custom modal
+- [x] Tạo file `components/chat/ImageViewer.tsx`
+- [x] Implement component:
+  - [x] Full-screen image viewer modal
+  - [x] Support multiple images (swipe/arrow navigation)
+  - [x] Zoom in/out
+  - [x] Close button
+- [x] Use Ant Design Modal hoặc custom modal
 
 ### 4.15. Component - ChatHeader
 
-- [ ] Tạo file `components/chat/ChatHeader.tsx`
-- [ ] Implement component:
-  - [ ] Avatar và tên đối phương
-  - [ ] Online/offline status (nếu có)
-  - [ ] Back button (mobile)
-  - [ ] Menu/actions (optional)
-- [ ] Add responsive design
+- [x] Tạo file `components/chat/ChatHeader.tsx`
+- [x] Implement component:
+  - [x] Avatar và tên đối phương
+  - [x] Online/offline status (nếu có)
+  - [x] Back button (mobile)
+  - [x] Menu/actions (optional)
+- [x] Add responsive design
 
 ### 4.16. Component - ChatPage (Main Container)
 
-- [ ] Tạo file `app/client/chat/page.tsx` hoặc `app/worker/chat/page.tsx`
-- [ ] Implement page:
-  - [ ] Layout với ConversationList và ChatDetail
-  - [ ] Routing để mở conversation cụ thể
-  - [ ] Handle pre-booking chat flow
-  - [ ] Handle booking chat flow
-- [ ] Add loading states
-- [ ] Add error boundaries
+- [x] Tạo file `app/client/chat/page.tsx` hoặc `app/worker/chat/page.tsx`
+- [x] Implement page:
+  - [x] Layout với ConversationList và ChatDetail
+  - [x] Routing để mở conversation cụ thể
+  - [x] Handle pre-booking chat flow
+  - [x] Handle booking chat flow
+- [x] Add loading states
+- [x] Add error boundaries
 
 ### 4.17. Component - ChatDetail
 
-- [ ] Tạo file `components/chat/ChatDetail.tsx`
-- [ ] Implement component:
-  - [ ] ChatHeader
-  - [ ] MessageList
-  - [ ] ChatInput
-  - [ ] Real-time message updates
-  - [ ] Join conversation room khi mount
-- [ ] Use hooks: `useMessages`, `useSendMessage`, `useChatSocket`/`useSupabaseRealtime`
+- [x] Tạo file `components/chat/ChatDetail.tsx`
+- [x] Implement component:
+  - [x] ChatHeader
+  - [x] MessageList
+  - [x] ChatInput
+  - [x] Real-time message updates
+  - [x] Join conversation room khi mount
+- [x] Use hooks: `useMessages`, `useSendMessage`, `useChatSocket`/`useSupabaseRealtime`
 
 ---
 
@@ -463,69 +456,70 @@
 
 ### 5.1. Entry Points - Pre-booking Chat
 
-- [ ] Thêm nút "Nhắn tin" vào worker profile page
-- [ ] Thêm nút "Nhắn tin" vào worker listing card
-- [ ] Thêm nút "Nhắn tin" vào service detail page
-- [ ] Handle click: gọi API `createOrGetConversation` với `bookingId = null`
-- [ ] Navigate đến chat page với `conversationId`
+- [x] Thêm nút "Nhắn tin" vào worker profile page
+- [ ] Thêm nút "Nhắn tin" vào worker listing card (optional - chưa có worker listing page)
+- [ ] Thêm nút "Nhắn tin" vào service detail page (optional - chưa có service detail page riêng)
+- [x] Handle click: gọi API `createOrGetConversation` với `bookingId = null`
+- [x] Navigate đến chat page với `conversationId`
+- [x] BONUS: Thêm menu item "Messages" vào navigation (client & worker)
 
 ### 5.2. Entry Points - Booking Chat
 
-- [ ] Thêm tab "Chat" vào booking detail page
+- [ ] Thêm tab "Chat" vào booking detail page (optional - yêu cầu booking detail page có tabs)
 - [ ] Handle tab click: gọi API `createOrGetConversation` với `bookingId`
 - [ ] Hiển thị ChatDetail component trong tab
 
 ### 5.3. Styling & Theming
 
-- [ ] Style conversation list với Ant Design/Tailwind
-- [ ] Style message bubbles (left/right alignment, colors)
-- [ ] Style chat input area
-- [ ] Add dark mode support (nếu có)
-- [ ] Add responsive design (mobile/tablet/desktop)
-- [ ] Add animations (message appear, typing indicator)
+- [x] Style conversation list với Ant Design/Tailwind
+- [x] Style message bubbles (left/right alignment, colors)
+- [x] Style chat input area
+- [ ] Add dark mode support (future enhancement)
+- [x] Add responsive design (mobile/tablet/desktop)
+- [x] Add animations (message appear, typing indicator)
 
 ### 5.4. Image Handling
 
-- [ ] Implement image upload flow:
-  - [ ] Select file(s) từ file input
-  - [ ] Show preview thumbnails
-  - [ ] Upload to API trước khi gửi message
-  - [ ] Show upload progress (optional)
-  - [ ] Handle upload errors
-- [ ] Implement image display:
-  - [ ] Thumbnail grid cho multiple images
-  - [ ] Click để mở ImageViewer
-  - [ ] Lazy loading cho images
-  - [ ] Error fallback nếu image load fail
+- [x] Implement image upload flow:
+  - [x] Select file(s) từ file input
+  - [x] Show preview thumbnails
+  - [x] Upload to API trước khi gửi message
+  - [ ] Show upload progress (optional - có thể thêm sau)
+  - [x] Handle upload errors
+- [x] Implement image display:
+  - [x] Thumbnail grid cho multiple images
+  - [x] Click để mở ImageViewer
+  - [x] Lazy loading cho images (via Next.js Image)
+  - [x] Error fallback nếu image load fail
 
 ### 5.5. Emoji Support
 
-- [ ] Integrate emoji picker library
-- [ ] Support emoji trong text input (unicode)
-- [ ] Render emoji trong message bubbles
-- [ ] Test với các emoji phổ biến
+- [x] Integrate emoji picker library (custom implementation)
+- [x] Support emoji trong text input (unicode)
+- [x] Render emoji trong message bubbles
+- [x] Test với các emoji phổ biến
 
 ### 5.6. Timestamp Formatting
 
-- [ ] Format timestamp hiển thị:
-  - [ ] "Hôm nay HH:mm" cho messages hôm nay
-  - [ ] "Hôm qua HH:mm" cho messages hôm qua
-  - [ ] "DD/MM/YYYY HH:mm" cho messages cũ hơn
-- [ ] Add i18n cho date formatting
-- [ ] Use `dayjs` hoặc `date-fns`
+- [x] Format timestamp hiển thị:
+  - [x] "Hôm nay HH:mm" cho messages hôm nay (via date-fns formatDistanceToNow)
+  - [x] "Hôm qua HH:mm" cho messages hôm qua
+  - [x] "DD/MM/YYYY HH:mm" cho messages cũ hơn
+- [x] Add i18n cho date formatting (vi locale)
+- [x] Use `dayjs` hoặc `date-fns` (sử dụng date-fns)
 
 ### 5.7. Empty States
 
-- [ ] Empty state cho conversation list (chưa có chat nào)
-- [ ] Empty state cho message list (chưa có message nào)
-- [ ] Empty state cho search (nếu có)
+- [x] Empty state cho conversation list (chưa có chat nào)
+- [x] Empty state cho message list (chưa có message nào)
+- [ ] Empty state cho search (feature chưa có)
 
 ### 5.8. Loading States
 
-- [ ] Skeleton loading cho conversation list
-- [ ] Skeleton loading cho message list
-- [ ] Loading indicator khi gửi message
-- [ ] Loading indicator khi upload image
+- [x] Skeleton loading cho conversation list (Spin component)
+- [x] Skeleton loading cho message list (Spin component)
+- [x] Loading indicator khi gửi message
+- [x] Loading indicator khi upload image
 
 ---
 

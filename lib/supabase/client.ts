@@ -20,3 +20,8 @@ export function getSupabaseClient() {
   }
   return cachedClient;
 }
+
+// Alias for convenience
+export function createClient() {
+  return getSupabaseClient();
+}
