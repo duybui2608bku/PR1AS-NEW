@@ -8,22 +8,39 @@
   - Gửi/nhận **ảnh** (image attachments).
 - **Phạm vi**:
   - Chat **1–1** giữa Client và Worker.
-  - Gắn với **Booking** (một cuộc chat cho mỗi booking) là chính; có thể mở rộng thành chat tự do sau.
+  - Hỗ trợ **nhắn tin trước khi tạo booking** (pre‑booking chat) để hỏi/trao đổi yêu cầu.
+  - Hỗ trợ **nhắn tin sau khi đã có booking** (chat theo booking cụ thể).
+  - Chat gắn booking sẽ có `booking_id`, chat trước booking sẽ có `booking_id = NULL` (free chat nhưng vẫn ràng buộc theo cặp client–worker).
   - Tập trung vào **thiết kế nghiệp vụ + API + dữ liệu**; triển khai UI cụ thể sẽ được mô tả ở tài liệu front-end nếu cần.
 
 ---
 
 ### 2. Luồng nghiệp vụ chính
 
-- **Khởi tạo cuộc trò chuyện**
+- **Khởi tạo cuộc trò chuyện (trước booking)**
+
+  - Entry points gợi ý:
+    - Từ **trang hồ sơ worker / listing worker** (nút “Nhắn tin” / “Chat với worker”).
+    - Từ **trang chi tiết dịch vụ** của worker.
+  - Khi Client bấm **Nhắn tin**:
+    - FE gọi API tạo/lấy `conversation` với `workerId`, **không truyền** `bookingId` (hoặc `bookingId = null`).
+    - BE kiểm tra đã có `conversation` với `(clientId, workerId, booking_id IS NULL)` chưa:
+      - Nếu **chưa có** → tạo mới `conversation` pre‑booking.
+      - Nếu **đã có** → dùng lại cuộc chat cũ.
+    - Tải danh sách tin nhắn gần nhất (phân trang).
+    - Client/Worker join **room** real-time theo `conversationId`.
+
+- **Khởi tạo cuộc trò chuyện (sau khi có booking)**
+
   - Khi Client mở màn hình chi tiết Booking → tab **Chat**:
     - Hệ thống kiểm tra đã có `conversation` giữa `clientId`, `workerId`, `bookingId` chưa.
-    - Nếu **chưa có**: tạo mới `conversation`.
+    - Nếu **chưa có**: tạo mới `conversation` gắn `bookingId`.
     - Nếu **đã có**: sử dụng lại `conversation` hiện có.
   - Tải danh sách tin nhắn gần nhất (phân trang).
   - Client/Worker join **room** real-time tương ứng với `conversationId`.
 
 - **Gửi tin nhắn**
+
   - Người dùng nhập nội dung:
     - Text (có thể kèm emoji).
     - Chọn emoji từ emoji picker (map thành unicode).
@@ -53,6 +70,7 @@
 - **Mục đích**: Đại diện cho một cuộc trò chuyện 1–1 giữa Client và Worker.
 
 Trường gợi ý:
+
 - `id` (PK, UUID).
 - `client_id` (FK → users.id, NOT NULL).
 - `worker_id` (FK → users.id, NOT NULL).
@@ -65,6 +83,7 @@ Trường gợi ý:
 - `last_message_at` (timestamp with time zone, dùng cho sort danh sách).
 
 **Index đề xuất**:
+
 - `(client_id, worker_id, booking_id)` UNIQUE – đảm bảo 1 conversation/booking.
 - `(client_id, last_message_at DESC)` – cho danh sách hội thoại phía client.
 - `(worker_id, last_message_at DESC)` – cho danh sách hội thoại phía worker.
@@ -74,6 +93,7 @@ Trường gợi ý:
 - **Mục đích**: Lưu từng tin nhắn trong một conversation.
 
 Trường gợi ý:
+
 - `id` (PK, UUID).
 - `conversation_id` (FK → conversations.id, NOT NULL).
 - `sender_id` (FK → users.id, NOT NULL).
@@ -87,6 +107,7 @@ Trường gợi ý:
 - `updated_at` (timestamp with time zone).
 
 **Index đề xuất**:
+
 - `(conversation_id, created_at DESC)` – để phân trang lịch sử chat.
 
 #### 3.3. Lưu trữ ảnh
@@ -108,6 +129,7 @@ Trường gợi ý:
 #### 4.1. Conversation APIs
 
 - **`POST /api/chat/conversations`**
+
   - **Mục đích**: Tạo hoặc lấy conversation giữa Client – Worker – Booking.
   - **Body**:
     - `workerId: string` (bắt buộc).
@@ -136,6 +158,7 @@ Trường gợi ý:
 #### 4.2. Message APIs
 
 - **`GET /api/chat/conversations/[conversationId]/messages`**
+
   - **Mục đích**: Lấy lịch sử tin nhắn.
   - **Query**:
     - `cursor?: string` (messageId) hoặc `before?: string` (timestamp).
@@ -184,18 +207,21 @@ Trường gợi ý:
 ### 5. Thiết kế Real-time (WebSocket / Supabase Realtime / Socket.io)
 
 - **Kênh kết nối**
+
   - Dùng một trong các giải pháp:
     - Supabase Realtime (listen trên bảng `messages` theo `conversation_id`).
     - WebSocket/Socket.io riêng (Node server hoặc edge function).
   - Trường hợp chuẩn: dùng Socket.io gateway (hoặc tương đương).
 
 - **Xác thực**
+
   - Khi kết nối socket, FE gửi access token (JWT) hiện tại.
   - Server:
     - Xác thực token → lấy `userId`.
     - Lưu `userId` trong context của socket.
 
 - **Join room**
+
   - Event: `chat:join`.
     - Payload: `{ conversationId }`.
   - Server:
@@ -203,6 +229,7 @@ Trường gợi ý:
     - Nếu có → `socket.join(conversationId)`.
 
 - **Gửi tin nhắn qua socket (tuỳ chọn, nếu không dùng REST)**
+
   - Event: `chat:sendMessage`.
     - Payload giống body của REST `POST /messages`.
   - Server:
@@ -221,6 +248,7 @@ Trường gợi ý:
 ### 6. Thiết kế UI/UX (tóm tắt)
 
 - **Danh sách hội thoại (client & worker)**
+
   - Hiển thị:
     - Avatar & tên đối phương.
     - `lastMessage` (nếu là ảnh → hiển thị text tóm tắt kiểu: "📷 Ảnh").
@@ -251,6 +279,7 @@ Trường gợi ý:
 ### 7. Yêu cầu phi chức năng & bảo mật
 
 - **Bảo mật & RLS**
+
   - Bảng `conversations` và `messages` phải có **RLS policies**:
     - Chỉ cho phép `client_id` hoặc `worker_id` tương ứng đọc/gửi.
   - Ảnh chat:
@@ -258,6 +287,7 @@ Trường gợi ý:
     - Tuỳ độ nhạy cảm, có thể dùng signed URL thay vì public.
 
 - **Giới hạn & kiểm soát**
+
   - Giới hạn dung lượng mỗi ảnh (vd 5MB).
   - Giới hạn số ảnh/tin (vd tối đa 5).
   - Rate limiting gửi tin nhắn để tránh spam.
@@ -278,5 +308,3 @@ Trường gợi ý:
   - Push notification/email khi có tin nhắn mới mà user offline.
 - **Block/Report**:
   - Cho phép report hoặc chặn user, integrate vào admin panel.
-
-
