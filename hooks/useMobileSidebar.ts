@@ -13,23 +13,26 @@ interface UseMobileSidebar {
 export function useMobileSidebar(): UseMobileSidebar {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+  // Initialize isMobile correctly - check window width immediately if available
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window !== "undefined") {
+      return window.innerWidth < 992;
+    }
+    return false;
+  });
 
   useEffect(() => {
     const checkMobile = () => {
       const mobile = window.innerWidth < 992;
       setIsMobile(mobile);
-
-      // If switching to mobile, close sidebar
-      if (mobile && mobileOpen) {
-        setMobileOpen(false);
-      }
+      // Note: We don't auto-close sidebar when switching to mobile
+      // because sidebar is already hidden by default on mobile
     };
 
-    checkMobile();
+    // Only listen to resize events
     window.addEventListener("resize", checkMobile);
     return () => window.removeEventListener("resize", checkMobile);
-  }, [mobileOpen]);
+  }, []); // Empty dependency array - only run on mount/unmount
 
   const toggleSidebar = () => {
     if (isMobile) {

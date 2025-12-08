@@ -1,7 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
-import Image from "next/image";
+import { useMemo, useState } from "react";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import type { Message } from "@/lib/chat/types";
@@ -17,9 +16,34 @@ export function MessageBubble({
   isOwnMessage,
   onImageClick,
 }: MessageBubbleProps) {
-  const imageUrls = useMemo(() => {
-    return message.attachments?.map((att) => att.url) || [];
+  const [imageErrors, setImageErrors] = useState<Set<number>>(new Set());
+
+  // Parse attachments if needed (handle both array and string cases)
+  const parsedAttachments = useMemo(() => {
+    if (!message.attachments) return null;
+
+    // If attachments is a string, try to parse it
+    if (typeof message.attachments === "string") {
+      try {
+        const parsed = JSON.parse(message.attachments);
+        return Array.isArray(parsed) ? parsed : null;
+      } catch (e) {
+        console.error("Failed to parse attachments:", e);
+        return null;
+      }
+    }
+
+    // If it's already an array, return it
+    if (Array.isArray(message.attachments)) {
+      return message.attachments;
+    }
+
+    return null;
   }, [message.attachments]);
+
+  const imageUrls = useMemo(() => {
+    return parsedAttachments?.map((att) => att.url) || [];
+  }, [parsedAttachments]);
 
   const handleImageClick = (imageUrl: string) => {
     if (onImageClick) {
@@ -38,8 +62,8 @@ export function MessageBubble({
       <div
         className={`max-w-[70%] ${
           isOwnMessage
-            ? "bg-blue-500 text-white rounded-2xl rounded-tr-sm"
-            : "bg-gray-100 text-gray-900 rounded-2xl rounded-tl-sm"
+            ? "bg-[#ff385c] text-white rounded-2xl rounded-tr-sm"
+            : "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-2xl rounded-tl-sm"
         } px-4 py-2 shadow-sm`}
       >
         {/* Text content */}
@@ -50,37 +74,49 @@ export function MessageBubble({
         )}
 
         {/* Image attachments */}
-        {message.attachments && message.attachments.length > 0 && (
+        {parsedAttachments && parsedAttachments.length > 0 && (
           <div
             className={`grid gap-2 ${
-              message.attachments.length === 1
-                ? "grid-cols-1"
-                : "grid-cols-2"
+              parsedAttachments.length === 1 ? "grid-cols-1" : "grid-cols-2"
             } ${message.content ? "mt-2" : ""}`}
           >
-            {message.attachments.map((attachment, index) => (
-              <div
-                key={index}
-                className="relative overflow-hidden rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
-                onClick={() => handleImageClick(attachment.url)}
-              >
-                <Image
-                  src={attachment.url}
-                  alt={`Attachment ${index + 1}`}
-                  width={attachment.width || 200}
-                  height={attachment.height || 200}
-                  className="w-full h-auto object-cover"
-                  unoptimized
-                />
-              </div>
-            ))}
+            {parsedAttachments.map((attachment, index) => {
+              const hasError = imageErrors.has(index);
+
+              return (
+                <div
+                  key={index}
+                  className="relative overflow-hidden rounded-lg cursor-pointer hover:opacity-90 transition-opacity group"
+                  onClick={() => !hasError && handleImageClick(attachment.url)}
+                >
+                  {hasError ? (
+                    <div className="w-full h-32 bg-gray-200 dark:bg-gray-800 rounded-lg flex items-center justify-center">
+                      <span className="text-gray-400 dark:text-gray-400 text-sm">
+                        Không thể tải ảnh
+                      </span>
+                    </div>
+                  ) : (
+                    <img
+                      src={attachment.url}
+                      alt={`Attachment ${index + 1}`}
+                      className="w-full h-auto max-h-64 object-cover rounded-lg"
+                      loading="lazy"
+                      onError={() => {
+                        console.error("Failed to load image:", attachment.url);
+                        setImageErrors((prev) => new Set(prev).add(index));
+                      }}
+                    />
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
 
         {/* Timestamp and status */}
         <div
           className={`flex items-center gap-1 mt-1 text-xs ${
-            isOwnMessage ? "text-blue-100" : "text-gray-500"
+            isOwnMessage ? "text-white/80" : "text-gray-500 dark:text-gray-400"
           }`}
         >
           <span>{formattedTime}</span>

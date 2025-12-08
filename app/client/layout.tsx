@@ -1,6 +1,6 @@
 "use client";
 
-import { Layout, Menu, Button, Space } from "antd";
+import { Layout, Menu, Button, Space, ConfigProvider, theme } from "antd";
 import {
   DashboardOutlined,
   PlusOutlined,
@@ -17,6 +17,8 @@ import { useTranslation } from "react-i18next";
 import { useMobileSidebar } from "@/hooks/useMobileSidebar";
 import UserMenu from "@/components/common/UserMenu";
 import LanguageSwitcher from "@/components/common/LanguageSwitcher";
+import ThemeToggle from "@/components/common/ThemeToggle";
+import { ThemeProvider, useTheme } from "@/components/providers/ThemeProvider";
 import type { MenuProps } from "antd";
 import "../globals-layout.css";
 
@@ -38,10 +40,12 @@ function getItem(
   } as MenuItem;
 }
 
-export default function ClientLayout({
+function ClientLayoutContent({
   children,
+  currentTheme,
 }: {
   children: React.ReactNode;
+  currentTheme: "light" | "dark";
 }) {
   const pathname = usePathname();
   const router = useRouter();
@@ -93,9 +97,8 @@ export default function ClientLayout({
           ${isMobile ? "mobile-sidebar-overlay" : "desktop-sidebar"}
           ${isMobile && mobileOpen ? "mobile-sidebar-open" : ""}
         `}
+        theme={currentTheme === "dark" ? "dark" : "light"}
         style={{
-          background: "#fff",
-          borderRight: "1px solid #f0f0f0",
           overflow: "auto",
           height: "100vh",
           position: "fixed",
@@ -148,22 +151,66 @@ export default function ClientLayout({
             className="mobile-menu-button"
           />
           <Space size="middle">
+            <ThemeToggle />
             <LanguageSwitcher />
             <UserMenu />
           </Space>
         </Header>
         <Content
           style={{
-            margin: "24px 16px",
-            padding: 24,
+            margin: isMobile ? 0 : "24px 16px",
+            padding: isMobile ? 0 : 24,
             minHeight: 280,
-            background: "#fff",
-            borderRadius: 8,
+            borderRadius: isMobile ? 0 : 8,
           }}
         >
           {children}
         </Content>
       </Layout>
     </Layout>
+  );
+}
+
+function ClientLayoutWithConfig({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const { theme: currentTheme } = useTheme();
+  const { defaultAlgorithm, darkAlgorithm } = theme;
+
+  return (
+    <ConfigProvider
+      theme={{
+        algorithm: currentTheme === "dark" ? darkAlgorithm : defaultAlgorithm,
+        token: {
+          fontFamily: "var(--font-family-base)",
+          fontSize: 14,
+          colorPrimary: "#FF385C",
+          borderRadius: 8,
+        },
+        components: {
+          Rate: {
+            colorFillContent: "#FF385C",
+          },
+        },
+      }}
+    >
+      <ClientLayoutContent currentTheme={currentTheme}>
+        {children}
+      </ClientLayoutContent>
+    </ConfigProvider>
+  );
+}
+
+export default function ClientLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <ThemeProvider storageKey="client-theme">
+      <ClientLayoutWithConfig>{children}</ClientLayoutWithConfig>
+    </ThemeProvider>
   );
 }

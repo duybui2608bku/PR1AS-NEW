@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslation } from "react-i18next";
-import { Layout, Menu, Button, Space } from "antd";
+import { Layout, Menu, Button, Space, ConfigProvider, theme } from "antd";
 import {
   DashboardOutlined,
   UnorderedListOutlined,
@@ -16,6 +16,8 @@ import { usePathname, useRouter } from "next/navigation";
 import { useMobileSidebar } from "@/hooks/useMobileSidebar";
 import UserMenu from "@/components/common/UserMenu";
 import LanguageSwitcher from "@/components/common/LanguageSwitcher";
+import ThemeToggle from "@/components/common/ThemeToggle";
+import { ThemeProvider, useTheme } from "@/components/providers/ThemeProvider";
 import type { MenuProps } from "antd";
 import "../globals-layout.css";
 
@@ -39,10 +41,12 @@ function getItem(
 
 // menuItems created inside component to allow translations via `t()`
 
-export default function WorkerLayout({
+function WorkerLayoutContent({
   children,
+  currentTheme,
 }: {
   children: React.ReactNode;
+  currentTheme: "light" | "dark";
 }) {
   const pathname = usePathname();
   const router = useRouter();
@@ -94,9 +98,8 @@ export default function WorkerLayout({
           ${isMobile ? "mobile-sidebar-overlay" : "desktop-sidebar"}
           ${isMobile && mobileOpen ? "mobile-sidebar-open" : ""}
         `}
+        theme={currentTheme === "dark" ? "dark" : "light"}
         style={{
-          background: "#fff",
-          borderRight: "1px solid #f0f0f0",
           overflow: "auto",
           height: "100vh",
           position: "fixed",
@@ -149,22 +152,66 @@ export default function WorkerLayout({
             className="mobile-menu-button"
           />
           <Space size="middle">
+            <ThemeToggle />
             <LanguageSwitcher />
             <UserMenu />
           </Space>
         </Header>
         <Content
           style={{
-            margin: "24px 16px",
-            padding: 24,
+            margin: isMobile ? 0 : "24px 16px",
+            padding: isMobile ? 0 : 24,
             minHeight: 280,
-            background: "#fff",
-            borderRadius: 8,
+            borderRadius: isMobile ? 0 : 8,
           }}
         >
           {children}
         </Content>
       </Layout>
     </Layout>
+  );
+}
+
+function WorkerLayoutWithConfig({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const { theme: currentTheme } = useTheme();
+  const { defaultAlgorithm, darkAlgorithm } = theme;
+
+  return (
+    <ConfigProvider
+      theme={{
+        algorithm: currentTheme === "dark" ? darkAlgorithm : defaultAlgorithm,
+        token: {
+          fontFamily: "var(--font-family-base)",
+          fontSize: 14,
+          colorPrimary: "#FF385C",
+          borderRadius: 8,
+        },
+        components: {
+          Rate: {
+            colorFillContent: "#FF385C",
+          },
+        },
+      }}
+    >
+      <WorkerLayoutContent currentTheme={currentTheme}>
+        {children}
+      </WorkerLayoutContent>
+    </ConfigProvider>
+  );
+}
+
+export default function WorkerLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <ThemeProvider storageKey="worker-theme">
+      <WorkerLayoutWithConfig>{children}</WorkerLayoutWithConfig>
+    </ThemeProvider>
   );
 }

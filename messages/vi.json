@@ -982,6 +982,13 @@
     "complaintSuccess": "Đã gửi khiếu nại. Thanh toán sẽ được giữ lại để admin xem xét.",
     "complaintError": "Không thể gửi khiếu nại. Vui lòng thử lại."
   },
+  "chat": {
+    "title": "Tin nhắn",
+    "pleaseLogin": "Vui lòng đăng nhập",
+    "loginToUseChat": "để sử dụng tính năng chat",
+    "selectConversation": "Chọn một cuộc trò chuyện",
+    "startMessaging": "để bắt đầu nhắn tin"
+  },
   "transactions": {
     "title": "Giao dịch",
     "table": {

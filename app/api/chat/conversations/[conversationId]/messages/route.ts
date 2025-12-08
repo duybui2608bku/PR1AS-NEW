@@ -5,106 +5,6 @@
  */
 
 import { NextRequest } from "next/server";
-import { requireAuth } from "@/lib/auth/middleware";
-import { successResponse } from "@/lib/http/response";
-import { withErrorHandling, ApiError, ErrorCode } from "@/lib/http/errors";
-import { ERROR_MESSAGES, getErrorMessage } from "@/lib/constants/errors";
-import { HttpStatus } from "@/lib/utils/enums";
-import { ConversationService } from "@/lib/chat/conversation.service";
-import { MessageService } from "@/lib/chat/message.service";
-import { Attachment } from "@/lib/chat/types";
-
-interface RouteContext {
-  params: {
-    conversationId: string;
-  };
-}
-
-export const GET = withErrorHandling(
-  async (request: NextRequest, context: RouteContext) => {
-    const { user, supabase } = await requireAuth(request);
-    const { conversationId } = context.params;
-
-    if (!conversationId) {
-      throw new ApiError(
-        getErrorMessage(ERROR_MESSAGES.MISSING_REQUIRED_FIELDS),
-        HttpStatus.BAD_REQUEST,
-        ErrorCode.MISSING_REQUIRED_FIELDS
-      );
-    }
-
-    // Ensure user belongs to conversation
-    const conversationService = new ConversationService(supabase);
-    await conversationService.getConversationById(conversationId, user.id);
-
-    const { searchParams } = new URL(request.url);
-    const cursor = searchParams.get("cursor") || undefined;
-    const limitParam = searchParams.get("limit");
-    const limit = limitParam ? parseInt(limitParam, 10) : 30;
-
-    const messageService = new MessageService(supabase);
-    const result = await messageService.getMessages({
-      conversationId,
-      userId: user.id,
-      cursor,
-      limit,
-    });
-
-    return successResponse({
-      messages: result.messages,
-      pagination: {
-        hasMore: result.hasMore,
-        nextCursor: result.nextCursor,
-        limit,
-      },
-    });
-  }
-);
-
-export const POST = withErrorHandling(
-  async (request: NextRequest, context: RouteContext) => {
-    const { user, supabase } = await requireAuth(request);
-    const { conversationId } = context.params;
-
-    if (!conversationId) {
-      throw new ApiError(
-        getErrorMessage(ERROR_MESSAGES.MISSING_REQUIRED_FIELDS),
-        HttpStatus.BAD_REQUEST,
-        ErrorCode.MISSING_REQUIRED_FIELDS
-      );
-    }
-
-    // Ensure user belongs to conversation
-    const conversationService = new ConversationService(supabase);
-    await conversationService.getConversationById(conversationId, user.id);
-
-    const body = await request.json();
-    const content = (body?.content as string | undefined) || undefined;
-    const attachments = (body?.attachments as Attachment[] | undefined) || [];
-
-    if (!content && (!attachments || attachments.length === 0)) {
-      throw new ApiError(
-        getErrorMessage(ERROR_MESSAGES.MISSING_REQUIRED_FIELDS),
-        HttpStatus.BAD_REQUEST,
-        ErrorCode.MISSING_REQUIRED_FIELDS
-      );
-    }
-
-    const messageService = new MessageService(supabase);
-    const message = await messageService.createMessage({
-      conversationId,
-      senderId: user.id,
-      content,
-      attachments,
-    });
-
-    // TODO: emit real-time event (Socket.io or Supabase Realtime) here
-
-    return successResponse({ message });
-  }
-);
-
-import { NextRequest } from "next/server";
 import { withErrorHandling, ApiError, ErrorCode } from "@/lib/http/errors";
 import { requireAuth } from "@/lib/auth/middleware";
 import { successResponse } from "@/lib/http/response";
@@ -155,10 +55,10 @@ async function ensureUserInConversation(
 export const GET = withErrorHandling(
   async (
     request: NextRequest,
-    context: { params: { conversationId: string } }
+    { params }: { params: Promise<{ conversationId: string }> }
   ) => {
     const { user, supabase } = await requireAuth(request);
-    const conversationId = context.params.conversationId;
+    const { conversationId } = await params;
 
     await ensureUserInConversation(supabase, conversationId, user.id);
 
@@ -200,10 +100,32 @@ export const GET = withErrorHandling(
     const nextCursor =
       hasMore && messages.length > 0 ? messages[messages.length - 1].id : null;
 
+    // Parse attachments if they are strings (JSONB from database)
+    const parsedMessages = messages.map((msg: any) => {
+      if (msg.attachments) {
+        // If attachments is a string, parse it
+        if (typeof msg.attachments === "string") {
+          try {
+            msg.attachments = JSON.parse(msg.attachments);
+          } catch (e) {
+            msg.attachments = null;
+          }
+        }
+        // Ensure attachments is an array
+        if (!Array.isArray(msg.attachments)) {
+          msg.attachments = null;
+        }
+      }
+      return msg;
+    });
+
     return successResponse({
-      messages,
-      hasMore,
-      nextCursor,
+      messages: parsedMessages,
+      pagination: {
+        hasMore,
+        nextCursor,
+        limit,
+      },
     });
   }
 );
@@ -211,10 +133,10 @@ export const GET = withErrorHandling(
 export const POST = withErrorHandling(
   async (
     request: NextRequest,
-    context: { params: { conversationId: string } }
+    { params }: { params: Promise<{ conversationId: string }> }
   ) => {
     const { user, supabase } = await requireAuth(request);
-    const conversationId = context.params.conversationId;
+    const { conversationId } = await params;
 
     await ensureUserInConversation(supabase, conversationId, user.id);
 
@@ -232,7 +154,10 @@ export const POST = withErrorHandling(
       );
     }
 
-    if (Array.isArray(attachments) && attachments.length > MAX_ATTACHMENTS_PER_MESSAGE) {
+    if (
+      Array.isArray(attachments) &&
+      attachments.length > MAX_ATTACHMENTS_PER_MESSAGE
+    ) {
       throw new ApiError(
         `Too many attachments. Maximum is ${MAX_ATTACHMENTS_PER_MESSAGE}`,
         HttpStatus.BAD_REQUEST,
@@ -276,6 +201,3 @@ export const POST = withErrorHandling(
     return successResponse({ message: data });
   }
 );
-
-
-

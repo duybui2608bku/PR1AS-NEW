@@ -1,0 +1,24 @@
+-- =============================================================================
+-- NOTE: This is a documentation file, not a SQL migration
+-- =============================================================================
+-- Vấn đề: Supabase client được cache có thể gây vấn đề với Realtime
+-- =============================================================================
+--
+-- File: lib/supabase/client.ts hiện tại cache client:
+-- ```typescript
+-- let cachedClient: ReturnType<typeof createBrowserClient> | null = null;
+-- 
+-- export function getSupabaseClient() {
+--   if (!cachedClient) {
+--     cachedClient = createBrowserClient(supabaseUrl!, supabaseAnonKey!);
+--   }
+--   return cachedClient;
+-- }
+-- ```
+--
+-- Điều này có thể gây vấn đề nếu:
+-- 1. Client được tạo trước khi user authenticate
+-- 2. Realtime subscriptions không được setup đúng với authenticated context
+--
+-- Giải pháp: Đảm bảo client được tạo với authenticated context
+-- =============================================================================

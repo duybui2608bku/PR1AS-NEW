@@ -12,36 +12,47 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-const THEME_STORAGE_KEY = "admin-theme";
+// Default storage key for backward compatibility
+const DEFAULT_THEME_STORAGE_KEY = "admin-theme";
 
-export function ThemeProvider({ children }: { children: React.ReactNode }) {
+interface ThemeProviderProps {
+  children: React.ReactNode;
+  storageKey?: string;
+}
+
+export function ThemeProvider({ 
+  children, 
+  storageKey = DEFAULT_THEME_STORAGE_KEY 
+}: ThemeProviderProps) {
   const [theme, setThemeState] = useState<Theme>("light");
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     // Load theme from localStorage or default to light
-    const savedTheme = localStorage.getItem(THEME_STORAGE_KEY) as Theme | null;
+    const savedTheme = localStorage.getItem(storageKey) as Theme | null;
     const initialTheme = savedTheme || "light";
     setThemeState(initialTheme);
     setMounted(true);
 
-    // Apply theme to document
+    // Apply theme to document immediately
+    const htmlElement = document.documentElement;
     if (initialTheme === "dark") {
-      document.documentElement.classList.add("dark");
+      htmlElement.classList.add("dark");
     } else {
-      document.documentElement.classList.remove("dark");
+      htmlElement.classList.remove("dark");
     }
-  }, []);
+  }, [storageKey]);
 
   const setTheme = (newTheme: Theme) => {
     setThemeState(newTheme);
-    localStorage.setItem(THEME_STORAGE_KEY, newTheme);
+    localStorage.setItem(storageKey, newTheme);
 
-    // Apply theme to document
+    // Apply theme to document immediately
+    const htmlElement = document.documentElement;
     if (newTheme === "dark") {
-      document.documentElement.classList.add("dark");
+      htmlElement.classList.add("dark");
     } else {
-      document.documentElement.classList.remove("dark");
+      htmlElement.classList.remove("dark");
     }
   };
 

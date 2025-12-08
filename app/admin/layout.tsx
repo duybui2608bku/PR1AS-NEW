@@ -265,10 +265,10 @@ function AdminLayoutContent({
         <Content
           className="admin-content"
           style={{
-            margin: "24px 16px",
-            padding: 24,
+            margin: isMobile ? 0 : "24px 16px",
+            padding: isMobile ? 0 : 24,
             minHeight: 280,
-            borderRadius: 8,
+            borderRadius: isMobile ? 0 : 8,
           }}
         >
           {children}

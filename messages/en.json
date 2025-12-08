@@ -729,6 +729,13 @@
     "complaintSuccess": "Complaint submitted. Payment is now held pending admin review.",
     "complaintError": "Unable to submit complaint. Please try again."
   },
+  "chat": {
+    "title": "Messages",
+    "pleaseLogin": "Please login",
+    "loginToUseChat": "to use the chat feature",
+    "selectConversation": "Select a conversation",
+    "startMessaging": "to start messaging"
+  },
   "banned": {
     "title": "Account Suspended",
     "description": "Your account has been suspended due to violation of our",

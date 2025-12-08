@@ -15,7 +15,7 @@ interface UseMessagesResult {
 
 export function useMessages(conversationId: string): UseMessagesResult {
   const [messages, setMessages] = useState<Message[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const [cursor, setCursor] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(true);
@@ -30,10 +30,29 @@ export function useMessages(conversationId: string): UseMessagesResult {
         30
       );
 
+      // Ensure attachments are parsed correctly
+      const parsedMessages = result.messages.map((msg) => {
+        if (msg.attachments) {
+          // If attachments is a string, parse it
+          if (typeof msg.attachments === "string") {
+            try {
+              msg.attachments = JSON.parse(msg.attachments);
+            } catch {
+              msg.attachments = null;
+            }
+          }
+          // Ensure attachments is an array
+          if (!Array.isArray(msg.attachments)) {
+            msg.attachments = null;
+          }
+        }
+        return msg;
+      });
+
       if (!cursorParam) {
-        setMessages(result.messages);
+        setMessages(parsedMessages);
       } else {
-        setMessages((prev) => [...prev, ...result.messages]);
+        setMessages((prev) => [...prev, ...parsedMessages]);
       }
 
       setCursor(result.nextCursor);
@@ -72,5 +91,3 @@ export function useMessages(conversationId: string): UseMessagesResult {
     prependMessage,
   };
 }
-
-

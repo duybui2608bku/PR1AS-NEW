@@ -3,7 +3,7 @@
  * Provides consistent error handling and error code constants
  */
 
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { HttpStatus } from "@/lib/utils/enums";
 import {
   errorResponse,
@@ -141,16 +141,22 @@ export function handleApiError(error: unknown): NextResponse {
 
 /**
  * Wrap async route handlers with error handling
+ * Supports both routes with and without dynamic params
  */
-export function withErrorHandling<T extends any[]>(
-  handler: (...args: T) => Promise<NextResponse>
-) {
-  return async (...args: T): Promise<NextResponse> => {
+export function withErrorHandling<
+  TRequest extends NextRequest = NextRequest,
+  TContext extends { params?: Promise<Record<string, string>> } = object
+>(
+  handler: (request: TRequest, context: TContext) => Promise<NextResponse>
+): (request: TRequest, context: TContext) => Promise<NextResponse> {
+  return async (
+    request: TRequest,
+    context: TContext
+  ): Promise<NextResponse> => {
     try {
-      return await handler(...args);
+      return await handler(request, context);
     } catch (error) {
       return handleApiError(error);
     }
   };
 }
-

@@ -2,7 +2,6 @@ import { NextRequest } from "next/server";
 import { requireAdmin } from "@/lib/auth/middleware";
 import { successResponse } from "@/lib/http/response";
 import { withErrorHandling, ApiError, ErrorCode } from "@/lib/http/errors";
-import { ERROR_MESSAGES, getErrorMessage } from "@/lib/constants/errors";
 import { HttpStatus, UserRole } from "@/lib/utils/enums";
 
 // POST /api/admin/users/update-role
@@ -23,7 +22,7 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
   const validRoles = [UserRole.CLIENT, UserRole.WORKER, UserRole.ADMIN];
   if (!validRoles.includes(role as UserRole)) {
     throw new ApiError(
-      getErrorMessage(ERROR_MESSAGES.INVALID_ROLE),
+      "Invalid role",
       HttpStatus.BAD_REQUEST,
       ErrorCode.INVALID_ROLE
     );
@@ -47,18 +46,21 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
       role: role,
       updated_at: new Date().toISOString(),
     })
-    .catch(() => {
+    .match(() => {
       // Continue even if profile update fails
     });
 
   // Log admin action (non-blocking)
-  await supabase.from("admin_logs").insert({
-    action: "update_user_role",
-    target_user_id: userId,
-    details: { new_role: role },
-  }).catch(() => {
-    // Ignore logging errors
-  });
+  await supabase
+    .from("admin_logs")
+    .insert({
+      action: "update_user_role",
+      target_user_id: userId,
+      details: { new_role: role },
+    })
+    .match(() => {
+      // Ignore logging errors
+    });
 
   return successResponse(
     { user: authData.user },

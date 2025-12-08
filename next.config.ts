@@ -42,6 +42,12 @@ const nextConfig: NextConfig = {
             },
           ]
         : []),
+      // Allow Supabase storage (common pattern)
+      {
+        protocol: "https" as const,
+        hostname: "supabase.co",
+        pathname: "/storage/v1/object/public/**",
+      },
     ],
   },
 };

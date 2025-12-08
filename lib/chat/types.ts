@@ -63,8 +63,16 @@ export interface GetMessagesResult {
   nextCursor: string | null;
 }
 
+export interface OtherUserInfo {
+  id: string;
+  email?: string;
+  full_name?: string;
+  avatar_url?: string;
+}
+
 export interface ConversationWithLastMessage extends Conversation {
   last_message?: Message | null;
+  other_user?: OtherUserInfo;
 }
 
 

@@ -8,12 +8,7 @@ import { createAdminClient } from "@/lib/supabase/server";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { getTokenFromRequest, getUserProfile } from "@/lib/auth/helpers";
 import { UserRole } from "@/lib/utils/enums";
-import {
-  unauthorizedResponse,
-  forbiddenResponse,
-  ApiError,
-  ErrorCode,
-} from "@/lib/http/errors";
+import { ApiError, ErrorCode } from "@/lib/http/errors";
 import { ERROR_MESSAGES, getErrorMessage } from "@/lib/constants/errors";
 import { HttpStatus } from "@/lib/utils/enums";
 
@@ -34,9 +29,7 @@ export interface AuthContext {
  * Get authenticated user from request
  * Throws ApiError if authentication fails
  */
-export async function requireAuth(
-  request: NextRequest
-): Promise<AuthContext> {
+export async function requireAuth(request: NextRequest): Promise<AuthContext> {
   const token = getTokenFromRequest(request);
 
   if (!token) {
@@ -97,9 +90,7 @@ export async function requireAuth(
  * Require admin role
  * Throws ApiError if user is not admin
  */
-export async function requireAdmin(
-  request: NextRequest
-): Promise<AuthContext> {
+export async function requireAdmin(request: NextRequest): Promise<AuthContext> {
   const auth = await requireAuth(request);
 
   if (auth.profile.role !== UserRole.ADMIN) {
@@ -153,4 +144,3 @@ export async function requireWorker(
 ): Promise<AuthContext> {
   return requireRole(request, UserRole.WORKER);
 }
-

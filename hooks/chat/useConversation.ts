@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { chatAPI } from "@/lib/chat/api";
 import type { ConversationWithLastMessage } from "@/lib/chat/types";
 import { axiosClient } from "@/lib/http/axios-client";
 
@@ -46,5 +45,3 @@ export function useConversation(conversationId: string): UseConversationResult {
     refetch: fetchConversation,
   };
 }
-
-

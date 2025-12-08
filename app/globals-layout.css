@@ -40,6 +40,10 @@
     opacity: 1;
     visibility: visible;
   }
+
+  .layout-header {
+    padding: 0 16px !important;
+  }
 }
 
 /* Desktop behavior */
@@ -75,8 +79,8 @@
 
 /* Dark mode header */
 :root.dark .layout-header {
-  background: #1f1f1f !important;
-  border-bottom-color: #303030 !important;
+  background: #000000 !important;
+  border-bottom-color: #111111 !important;
 }
 
 /* Consistent sidebar header */
@@ -91,7 +95,7 @@
 
 /* Dark mode sidebar brand */
 :root.dark .sidebar-brand {
-  border-bottom-color: #303030;
+  border-bottom-color: #111111;
 }
 
 .sidebar-brand.collapsed {
@@ -132,4 +136,52 @@
   font-size: 16px !important;
   width: 48px !important;
   height: 48px !important;
+}
+
+/* Content area dark mode */
+:root.dark .ant-layout-content {
+  background: #000000 !important;
+}
+
+/* Dark mode body background */
+:root.dark body {
+  background: #000000;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+/* Dark mode for chat components - fallback if Tailwind dark: doesn't work */
+.dark .bg-white {
+  background-color: #000000 !important;
+}
+
+.dark .bg-gray-50 {
+  background-color: #000000 !important;
+}
+
+.dark .bg-gray-100 {
+  background-color: #000000 !important;
+}
+
+.dark .text-gray-500 {
+  color: #94a3b8 !important;
+}
+
+.dark .text-gray-600 {
+  color: #cbd5e1 !important;
+}
+
+.dark .text-gray-700 {
+  color: #e2e8f0 !important;
+}
+
+.dark .text-gray-800 {
+  color: #f1f5f9 !important;
+}
+
+.dark .border-gray-200 {
+  border-color: #111111 !important;
+}
+
+.dark .border-gray-100 {
+  border-color: #111111 !important;
 }

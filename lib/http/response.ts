@@ -122,4 +122,3 @@ export function createdResponse<T>(
 ): NextResponse<ApiResponse<T>> {
   return successResponse(data, message, HttpStatus.CREATED);
 }
-

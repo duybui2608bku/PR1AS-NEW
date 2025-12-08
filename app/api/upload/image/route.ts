@@ -1,10 +1,15 @@
 import { NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { requireAuth, getTokenFromRequest } from "@/lib/auth/helpers";
+import { getTokenFromRequest } from "@/lib/auth/helpers";
 import { successResponse } from "@/lib/http/response";
 import { withErrorHandling, ApiError, ErrorCode } from "@/lib/http/errors";
 import { ERROR_MESSAGES, getErrorMessage } from "@/lib/constants/errors";
-import { HttpStatus, IMAGE_MAX_SIZE, VALID_IMAGE_TYPES } from "@/lib/utils/enums";
+import {
+  HttpStatus,
+  IMAGE_MAX_SIZE,
+  VALID_IMAGE_TYPES,
+} from "@/lib/utils/enums";
+import { requireAuth } from "@/lib/auth/middleware";
 
 export const POST = withErrorHandling(async (request: NextRequest) => {
   // Authenticate user
@@ -24,7 +29,7 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
   }
 
   // Validate file type
-  if (!VALID_IMAGE_TYPES.includes(file.type)) {
+  if (!VALID_IMAGE_TYPES.includes(file.type as any)) {
     throw new ApiError(
       getErrorMessage(ERROR_MESSAGES.INVALID_FILE_TYPE),
       HttpStatus.BAD_REQUEST,

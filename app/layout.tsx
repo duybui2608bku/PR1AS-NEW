@@ -85,7 +85,26 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="vi">
+    <html lang="vi" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  const clientTheme = localStorage.getItem('client-theme');
+                  const workerTheme = localStorage.getItem('worker-theme');
+                  const adminTheme = localStorage.getItem('admin-theme');
+                  const theme = clientTheme || workerTheme || adminTheme || 'light';
+                  if (theme === 'dark') {
+                    document.documentElement.classList.add('dark');
+                  }
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
+      </head>
       <body className="antialiased font-sans">
         <AntdRegistry>
           <AntdAppProvider>

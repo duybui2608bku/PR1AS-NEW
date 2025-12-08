@@ -62,7 +62,10 @@ export async function httpRequestJson<TResponse = unknown, TBody = unknown>(
   const isApiStyleResponse =
     errorShape && typeof errorShape.success === "boolean";
 
-  if (!response.ok || (isApiStyleResponse && errorShape && errorShape.success === false)) {
+  if (
+    !response.ok ||
+    (isApiStyleResponse && errorShape && errorShape.success === false)
+  ) {
     const message =
       errorShape?.error ||
       errorShape?.message ||

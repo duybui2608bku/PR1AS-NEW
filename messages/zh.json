@@ -707,6 +707,13 @@
     "complaintSuccess": "投诉已提交，付款将被冻结，等待管理员审核。",
     "complaintError": "无法提交投诉，请稍后重试。"
   },
+  "chat": {
+    "title": "消息",
+    "pleaseLogin": "请登录",
+    "loginToUseChat": "以使用聊天功能",
+    "selectConversation": "选择一个对话",
+    "startMessaging": "开始发消息"
+  },
   "admin": {
     "sidebar": {
       "dashboard": "仪表板",

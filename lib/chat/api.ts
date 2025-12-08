@@ -96,21 +96,32 @@ export const chatAPI = {
   ): Promise<{ attachment: Attachment }> {
     const formData = new FormData();
     formData.append("file", file);
+    formData.append("folder", "chat"); // Sử dụng folder "chat" cho ảnh chat
 
     const { data } = await axiosClient.post<{
-      data: { attachment: Attachment };
-    }>(`/chat/uploads/image?conversationId=${conversationId}`, formData, {
+      data: {
+        path: string;
+        publicUrl: string;
+        fileName: string;
+      };
+    }>("/upload/image", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
-    } as any);
+    });
 
-    return data.data;
+    // Convert response từ API upload/image thành Attachment format
+    const attachment: Attachment = {
+      url: data.data.publicUrl,
+      type: "image",
+      size: file.size,
+      mime_type: file.type,
+    };
+
+    return { attachment };
   },
 
   async markMessageAsRead(messageId: string): Promise<void> {
     await axiosClient.patch(`/chat/messages/${messageId}/read`);
   },
 };
-
-

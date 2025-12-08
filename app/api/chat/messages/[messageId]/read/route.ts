@@ -11,16 +11,13 @@ import { requireAuth } from "@/lib/auth/middleware";
 import { successResponse } from "@/lib/http/response";
 import { MessageService } from "@/lib/chat/message.service";
 
-interface RouteContext {
-  params: {
-    messageId: string;
-  };
-}
-
 export const PATCH = withErrorHandling(
-  async (request: NextRequest, context: RouteContext) => {
+  async (
+    request: NextRequest,
+    { params }: { params: Promise<{ messageId: string }> }
+  ) => {
     const { user, supabase } = await requireAuth(request);
-    const { messageId } = context.params;
+    const { messageId } = await params;
 
     if (!messageId) {
       throw new ApiError(
@@ -37,7 +34,7 @@ export const PATCH = withErrorHandling(
         `
         id,
         conversation_id,
-        conversation:conversations!inner(client_id, worker_id)
+        conversations!inner(client_id, worker_id)
       `
       )
       .eq("id", messageId)
@@ -51,10 +48,15 @@ export const PATCH = withErrorHandling(
       );
     }
 
+    // Supabase returns joined relations as arrays, get the first element
+    const conversation = Array.isArray(message?.conversations)
+      ? message.conversations[0]
+      : message?.conversations;
+
     if (
       !message ||
-      (message.conversation.client_id !== user.id &&
-        message.conversation.worker_id !== user.id)
+      !conversation ||
+      (conversation.client_id !== user.id && conversation.worker_id !== user.id)
     ) {
       throw new ApiError(
         getErrorMessage(ERROR_MESSAGES.FORBIDDEN),
@@ -69,5 +71,3 @@ export const PATCH = withErrorHandling(
     return successResponse(null, "Message marked as read");
   }
 );
-
-

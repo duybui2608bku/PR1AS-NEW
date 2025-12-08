@@ -28,13 +28,16 @@ export const DELETE = withErrorHandling(async (request: NextRequest) => {
   }
 
   // Log admin action (non-blocking)
-  await supabase.from("admin_logs").insert({
-    action: "delete_user",
-    target_user_id: userId,
-    details: {},
-  }).catch(() => {
-    // Ignore logging errors
-  });
+  await supabase
+    .from("admin_logs")
+    .insert({
+      action: "delete_user",
+      target_user_id: userId,
+      details: {},
+    })
+    .match(() => {
+      // Ignore logging errors
+    });
 
   return successResponse(null, "User deleted successfully");
 });

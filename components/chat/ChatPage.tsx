@@ -27,6 +27,20 @@ export function ChatPage({ currentUserId }: ChatPageProps) {
     }
   }, [conversationIdParam, selectedConversation]);
 
+  // Sync selected conversation when conversations list updates (from realtime)
+  const handleConversationsUpdate = (
+    conversations: ConversationWithLastMessage[]
+  ) => {
+    if (selectedConversation) {
+      const updatedConversation = conversations.find(
+        (c) => c.id === selectedConversation.id
+      );
+      if (updatedConversation) {
+        setSelectedConversation(updatedConversation);
+      }
+    }
+  };
+
   const handleConversationSelect = (
     conversation: ConversationWithLastMessage
   ) => {
@@ -44,12 +58,13 @@ export function ChatPage({ currentUserId }: ChatPageProps) {
       <div
         className={`${
           isMobileDetailView ? "hidden" : "flex"
-        } lg:flex w-full lg:w-80 border-r flex-shrink-0`}
+        } lg:flex w-full lg:w-80 border-r border-gray-200 dark:border-gray-800 shrink-0`}
       >
         <ConversationList
           currentUserId={currentUserId}
           onConversationSelect={handleConversationSelect}
           selectedConversationId={selectedConversation?.id}
+          onConversationsUpdate={handleConversationsUpdate}
         />
       </div>
 
@@ -67,8 +82,8 @@ export function ChatPage({ currentUserId }: ChatPageProps) {
             showBackButton={true}
           />
         ) : (
-          <div className="flex items-center justify-center h-full w-full bg-gray-50">
-            <div className="text-center text-gray-500">
+          <div className="flex items-center justify-center h-full w-full bg-gray-50 dark:bg-black">
+            <div className="text-center text-gray-500 dark:text-gray-400">
               <p className="text-lg mb-2">Chọn một cuộc trò chuyện</p>
               <p className="text-sm">để bắt đầu nhắn tin</p>
             </div>

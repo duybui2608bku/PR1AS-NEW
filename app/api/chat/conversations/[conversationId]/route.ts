@@ -11,16 +11,13 @@ import { requireAuth } from "@/lib/auth/middleware";
 import { successResponse } from "@/lib/http/response";
 import { ConversationService } from "@/lib/chat/conversation.service";
 
-interface RouteContext {
-  params: {
-    conversationId: string;
-  };
-}
-
 export const GET = withErrorHandling(
-  async (request: NextRequest, context: RouteContext) => {
+  async (
+    request: NextRequest,
+    { params }: { params: Promise<{ conversationId: string }> }
+  ) => {
     const { user, supabase } = await requireAuth(request);
-    const { conversationId } = context.params;
+    const { conversationId } = await params;
 
     if (!conversationId) {
       throw new ApiError(
@@ -39,5 +36,3 @@ export const GET = withErrorHandling(
     return successResponse({ conversation });
   }
 );
-
-
