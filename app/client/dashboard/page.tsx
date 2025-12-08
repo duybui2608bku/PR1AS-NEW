@@ -13,7 +13,7 @@ const { Title } = Typography;
 
 export default function ClientDashboard() {
   const { t } = useTranslation();
-  
+
   return (
     <div>
       <Title level={2}>{t("client.dashboard.title")}</Title>
@@ -22,7 +22,7 @@ export default function ClientDashboard() {
           <Card>
             <Statistic
               title={t("client.dashboard.activeJobs")}
-              value={12}
+              value={0}
               prefix={<FileTextOutlined />}
               valueStyle={{ color: "#3f8600" }}
             />
@@ -32,7 +32,7 @@ export default function ClientDashboard() {
           <Card>
             <Statistic
               title={t("client.dashboard.inProgress")}
-              value={5}
+              value={0}
               prefix={<ClockCircleOutlined />}
               valueStyle={{ color: "#1890ff" }}
             />
@@ -42,7 +42,7 @@ export default function ClientDashboard() {
           <Card>
             <Statistic
               title={t("client.dashboard.completed")}
-              value={47}
+              value={0}
               prefix={<CheckCircleOutlined />}
               valueStyle={{ color: "#cf1322" }}
             />
@@ -52,7 +52,7 @@ export default function ClientDashboard() {
           <Card>
             <Statistic
               title={t("client.dashboard.totalSpent")}
-              value={12340}
+              value={0}
               prefix={<DollarOutlined />}
               precision={2}
             />
@@ -62,4 +62,3 @@ export default function ClientDashboard() {
     </div>
   );
 }
-
