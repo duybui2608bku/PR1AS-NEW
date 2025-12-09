@@ -4,6 +4,13 @@ import { successResponse } from "@/lib/http/response";
 import { withErrorHandling, ApiError, ErrorCode } from "@/lib/http/errors";
 import { ERROR_MESSAGES, getErrorMessage } from "@/lib/constants/errors";
 import { HttpStatus } from "@/lib/utils/enums";
+import {
+  checkRateLimit,
+  getClientIP,
+  resetRateLimit,
+  RATE_LIMIT_CONFIGS,
+} from "@/lib/auth/rate-limit";
+import { sanitizeEmail } from "@/lib/auth/input-validation";
 
 export const POST = withErrorHandling(async (request: NextRequest) => {
   const { email, password } = await request.json();
@@ -17,16 +24,66 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
     );
   }
 
-    const supabase = createAdminClient();
+  // Sanitize and validate email
+  const sanitizedEmail = sanitizeEmail(email);
+  if (!sanitizedEmail) {
+    throw new ApiError(
+      "Invalid email format",
+      HttpStatus.BAD_REQUEST,
+      ErrorCode.VALIDATION_ERROR
+    );
+  }
 
-    // Authenticate with Supabase
-    const { data: authData, error: authError } =
-      await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+  // Rate limiting: Check by IP and email (use sanitized email)
+  const clientIP = getClientIP(request);
+  const ipRateLimit = checkRateLimit(`login:ip:${clientIP}`, RATE_LIMIT_CONFIGS.LOGIN);
+  const emailRateLimit = checkRateLimit(`login:email:${sanitizedEmail}`, RATE_LIMIT_CONFIGS.LOGIN);
+
+  // Use the stricter limit (whichever is locked first)
+  const rateLimitResult = ipRateLimit.lockedUntil && emailRateLimit.lockedUntil
+    ? (ipRateLimit.lockedUntil < emailRateLimit.lockedUntil ? ipRateLimit : emailRateLimit)
+    : ipRateLimit.lockedUntil
+    ? ipRateLimit
+    : emailRateLimit.lockedUntil
+    ? emailRateLimit
+    : ipRateLimit.count > emailRateLimit.count
+    ? ipRateLimit
+    : emailRateLimit;
+
+  if (!rateLimitResult.allowed) {
+    if (rateLimitResult.lockedUntil) {
+      throw new ApiError(
+        getErrorMessage(ERROR_MESSAGES.ACCOUNT_LOCKED) +
+          (rateLimitResult.retryAfter
+            ? ` Please try again in ${Math.ceil(rateLimitResult.retryAfter / 60)} minutes.`
+            : ""),
+        HttpStatus.TOO_MANY_REQUESTS,
+        ErrorCode.ACCOUNT_LOCKED
+      );
+    }
+    throw new ApiError(
+      getErrorMessage(ERROR_MESSAGES.RATE_LIMIT_EXCEEDED) +
+        (rateLimitResult.retryAfter
+          ? ` Please try again in ${Math.ceil(rateLimitResult.retryAfter / 60)} minutes.`
+          : ""),
+      HttpStatus.TOO_MANY_REQUESTS,
+      ErrorCode.RATE_LIMIT_EXCEEDED
+    );
+  }
+
+  const supabase = createAdminClient();
+
+  // Authenticate with Supabase (use sanitized email)
+  const { data: authData, error: authError } =
+    await supabase.auth.signInWithPassword({
+      email: sanitizedEmail,
+      password,
+    });
 
   if (authError) {
+    // Increment rate limit on failed login
+    // Rate limit is already incremented by checkRateLimit, but we need to track failures
+    // The next call will increment again
     throw new ApiError(
       "Invalid email or password",
       HttpStatus.UNAUTHORIZED,
@@ -64,6 +121,10 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
       ErrorCode.ACCOUNT_BANNED
     );
   }
+
+  // Reset rate limit on successful login (use sanitized email)
+  resetRateLimit(`login:ip:${clientIP}`);
+  resetRateLimit(`login:email:${sanitizedEmail}`);
 
   // Create response with cookies
   const response = successResponse({

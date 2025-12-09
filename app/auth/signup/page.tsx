@@ -58,10 +58,20 @@ export default function SignupPage() {
     try {
       const result = await authAPI.signUp(values.email, values.password, values.role, values.name);
       
+      // Hỗ trợ cả 2 dạng response:
+      // 1) { success, user, session }
+      // 2) { success, data: { user, session } }
+      const user = (result as any).user ?? (result as any).data?.user;
+
+      if (!user || !user.role) {
+        showMessage.error("Dữ liệu đăng ký không hợp lệ. Vui lòng thử lại.");
+        return;
+      }
+
       showMessage.success(t("auth.signup.signupSuccess"));
       
       // Redirect based on user role
-      const redirectUrl = redirectByRole(result.user.role);
+      const redirectUrl = redirectByRole(user.role);
       router.push(redirectUrl);
     } catch (error) {
       const errorMessage = getErrorMessage(error, "Sign up failed");
@@ -357,7 +367,26 @@ export default function SignupPage() {
                       required: true,
                       message: t("auth.signup.passwordRequired"),
                     },
-                    { min: 6, message: t("auth.signup.passwordMinLength") },
+                    { 
+                      min: 8, 
+                      message: "Mật khẩu phải có ít nhất 8 ký tự" 
+                    },
+                    {
+                      pattern: /[A-Z]/,
+                      message: "Mật khẩu phải có ít nhất một chữ hoa",
+                    },
+                    {
+                      pattern: /[a-z]/,
+                      message: "Mật khẩu phải có ít nhất một chữ thường",
+                    },
+                    {
+                      pattern: /[0-9]/,
+                      message: "Mật khẩu phải có ít nhất một số",
+                    },
+                    {
+                      pattern: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/,
+                      message: "Mật khẩu phải có ít nhất một ký tự đặc biệt",
+                    },
                   ]}
                 >
                   <Input.Password

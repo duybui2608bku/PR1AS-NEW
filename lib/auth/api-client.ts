@@ -50,6 +50,11 @@ export const authAPI = {
       // Small delay to ensure cookies are properly set
       await new Promise((resolve) => setTimeout(resolve, 100));
 
+      // Return the nested data object if it exists, otherwise return the whole response
+      // This handles both: { success, data: { user, session } } and { success, user, session }
+      if (data.data) {
+        return data.data;
+      }
       return data;
     } catch (error) {
       if (error instanceof Error) {
@@ -124,6 +129,11 @@ export const authAPI = {
       // Small delay to ensure cookies are properly set
       await new Promise((resolve) => setTimeout(resolve, 100));
 
+      // Return the nested data object if it exists, otherwise return the whole response
+      // This handles both: { success, data: { user, session } } and { success, user, session }
+      if (data.data) {
+        return data.data;
+      }
       return data;
     } catch (error) {
       if (error instanceof Error) {
@@ -270,6 +280,85 @@ export const authAPI = {
     } = await supabase.auth.getUser();
 
     return user;
+  },
+
+  /**
+   * Refresh access token using refresh token
+   * Automatically updates cookies with new tokens
+   */
+  async refreshToken() {
+    try {
+      const { data } = await axiosClient.post<
+        ApiResponse<{
+          user: { id: string; email: string; role: UserRole; status: string };
+          session?: { access_token?: string; refresh_token?: string };
+        }>
+      >("/auth/refresh");
+
+      if (!data.success) {
+        throw new Error(data.message || data.error || "Token refresh failed");
+      }
+
+      // Small delay to ensure cookies are properly set
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      // Return the nested data object if it exists, otherwise return the whole response
+      if (data.data) {
+        return data.data;
+      }
+      return data;
+    } catch (error) {
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error("Token refresh failed");
+    }
+  },
+
+  /**
+   * Request password reset email
+   */
+  async forgotPassword(email: string) {
+    try {
+      const { data } = await axiosClient.post<ApiResponse<{ message: string }>>(
+        "/auth/forgot-password",
+        { email }
+      );
+
+      if (!data.success) {
+        throw new Error(data.message || data.error || "Failed to send reset email");
+      }
+
+      return data.data || { message: data.message || "Password reset email sent" };
+    } catch (error) {
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error("Failed to send reset email");
+    }
+  },
+
+  /**
+   * Reset password with token from email
+   */
+  async resetPassword(password: string, token: string) {
+    try {
+      const { data } = await axiosClient.post<ApiResponse<{ message: string }>>(
+        "/auth/reset-password",
+        { password, token }
+      );
+
+      if (!data.success) {
+        throw new Error(data.message || data.error || "Failed to reset password");
+      }
+
+      return data.data || { message: data.message || "Password reset successfully" };
+    } catch (error) {
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error("Failed to reset password");
+    }
   },
 };
 

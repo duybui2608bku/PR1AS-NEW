@@ -5,6 +5,7 @@
 
 import { NextResponse } from "next/server";
 import { HttpStatus } from "@/lib/utils/enums";
+import { applySecurityHeaders } from "./security-headers";
 
 export interface ApiResponse<T = any> {
   success: boolean;
@@ -23,19 +24,20 @@ export function successResponse<T>(
   message?: string,
   status: HttpStatus = HttpStatus.OK
 ): NextResponse<ApiResponse<T>> {
-  const response: ApiResponse<T> = {
+  const apiResponse: ApiResponse<T> = {
     success: true,
   };
 
   if (data !== undefined) {
-    response.data = data;
+    apiResponse.data = data;
   }
 
   if (message) {
-    response.message = message;
+    apiResponse.message = message;
   }
 
-  return NextResponse.json(response, { status });
+  const nextResponse = NextResponse.json(apiResponse, { status });
+  return applySecurityHeaders(nextResponse);
 }
 
 /**
@@ -47,20 +49,21 @@ export function errorResponse(
   code?: string,
   additionalData?: Record<string, any>
 ): NextResponse<ApiResponse> {
-  const response: ApiResponse = {
+  const apiResponse: ApiResponse = {
     success: false,
     error,
   };
 
   if (code) {
-    response.code = code;
+    apiResponse.code = code;
   }
 
   if (additionalData) {
-    Object.assign(response, additionalData);
+    Object.assign(apiResponse, additionalData);
   }
 
-  return NextResponse.json(response, { status });
+  const nextResponse = NextResponse.json(apiResponse, { status });
+  return applySecurityHeaders(nextResponse);
 }
 
 /**

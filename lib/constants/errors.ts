@@ -35,6 +35,11 @@ export const ERROR_MESSAGES = {
   MISSING_REQUIRED_FIELDS: "errors.api.missingRequiredFields",
   INVALID_ROLE: "errors.api.invalidRole",
   INVALID_INPUT: "errors.api.invalidInput",
+  WEAK_PASSWORD: "errors.api.weakPassword",
+  
+  // Rate Limiting
+  RATE_LIMIT_EXCEEDED: "errors.api.rateLimitExceeded",
+  ACCOUNT_LOCKED: "errors.api.accountLocked",
 
   // Wallet & Transactions
   INSUFFICIENT_BALANCE: "errors.api.insufficientBalance",
@@ -132,6 +137,9 @@ export const ERROR_MESSAGES_FALLBACK: Record<string, string> = {
   [ERROR_MESSAGES.MISSING_REQUIRED_FIELDS]: "Missing required fields",
   [ERROR_MESSAGES.INVALID_ROLE]: "Invalid role",
   [ERROR_MESSAGES.INVALID_INPUT]: "Invalid input",
+  [ERROR_MESSAGES.WEAK_PASSWORD]: "Password does not meet security requirements",
+  [ERROR_MESSAGES.RATE_LIMIT_EXCEEDED]: "Too many requests. Please try again later.",
+  [ERROR_MESSAGES.ACCOUNT_LOCKED]: "Account temporarily locked due to too many failed attempts",
 
   [ERROR_MESSAGES.INSUFFICIENT_BALANCE]: "Insufficient balance",
   [ERROR_MESSAGES.INVALID_PAYMENT_METHOD]: "Invalid payment method",

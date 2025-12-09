@@ -1,6 +1,16 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import {
+  refreshAccessToken,
+  setAuthCookies,
+  clearAuthCookies,
+} from "@/lib/auth/token-refresh";
+import {
+  getCachedProfile,
+  setCachedProfile,
+} from "@/lib/auth/middleware-cache";
+import { applySecurityHeaders } from "@/lib/http/security-headers";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -52,11 +62,27 @@ export async function middleware(request: NextRequest) {
       } = await supabase.auth.getUser(token);
 
       if (user) {
-        const { data: profile } = await supabase
-          .from("user_profiles")
-          .select("role, status")
-          .eq("id", user.id)
-          .single();
+        // Try to get cached profile first
+        let profile = getCachedProfile(user.id);
+
+        if (!profile) {
+          // Cache miss, fetch from database
+          const { data: dbProfile } = await supabase
+            .from("user_profiles")
+            .select("role, status")
+            .eq("id", user.id)
+            .single();
+
+          if (dbProfile) {
+            // Cache the profile
+            setCachedProfile(user.id, dbProfile.role, dbProfile.status);
+            profile = {
+              role: dbProfile.role,
+              status: dbProfile.status,
+              cachedAt: Date.now(),
+            };
+          }
+        }
 
         if (profile) {
           if (profile.status === "banned") {
@@ -73,9 +99,10 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // If route is public, allow access
+  // If route is public, allow access (with security headers)
   if (isPublicRoute && !isAuthRoute) {
-    return NextResponse.next();
+    const response = NextResponse.next();
+    return applySecurityHeaders(response);
   }
 
   // If route is protected, check authentication and role
@@ -98,24 +125,125 @@ export async function middleware(request: NextRequest) {
       } = await supabase.auth.getUser(token);
 
       if (authError || !user) {
-        // Invalid token, redirect to login
+        // Token might be expired, try to refresh
+        const newTokens = await refreshAccessToken(request);
+
+        if (newTokens) {
+          // Token refreshed successfully, update cookies and continue
+          const response = NextResponse.next();
+          setAuthCookies(
+            response,
+            newTokens.accessToken,
+            newTokens.refreshToken
+          );
+
+          // Retry authentication with new token
+          const {
+            data: { user: refreshedUser },
+            error: refreshedError,
+          } = await supabase.auth.getUser(newTokens.accessToken);
+
+          if (refreshedError || !refreshedUser) {
+            // Still invalid after refresh, redirect to login
+            clearAuthCookies(response);
+            const loginUrl = new URL("/auth/login", request.url);
+            loginUrl.searchParams.set("redirect", pathname);
+            return NextResponse.redirect(loginUrl);
+          }
+
+          // Use refreshed user for profile check (try cache first)
+          let profile = getCachedProfile(refreshedUser.id);
+
+          if (!profile) {
+            const { data: dbProfile, error: profileError } = await supabase
+              .from("user_profiles")
+              .select("role, status")
+              .eq("id", refreshedUser.id)
+              .single();
+
+            if (profileError || !dbProfile) {
+              clearAuthCookies(response);
+              const loginUrl = new URL("/auth/login", request.url);
+              loginUrl.searchParams.set("redirect", pathname);
+              return NextResponse.redirect(loginUrl);
+            }
+
+            // Cache the profile
+            setCachedProfile(
+              refreshedUser.id,
+              dbProfile.role,
+              dbProfile.status
+            );
+            profile = {
+              role: dbProfile.role,
+              status: dbProfile.status,
+              cachedAt: Date.now(),
+            };
+          }
+
+          if (profile.status === "banned") {
+            clearAuthCookies(response);
+            return NextResponse.redirect(new URL("/banned", request.url));
+          }
+
+          // Check role-based access with refreshed user
+          const userRole = profile.role;
+
+          if (protectedRoutes.admin.test(pathname)) {
+            if (userRole !== "admin") {
+              const dashboardUrl = getDashboardUrl(userRole);
+              return NextResponse.redirect(new URL(dashboardUrl, request.url));
+            }
+          }
+
+          if (protectedRoutes.client.test(pathname)) {
+            if (userRole !== "client") {
+              const dashboardUrl = getDashboardUrl(userRole);
+              return NextResponse.redirect(new URL(dashboardUrl, request.url));
+            }
+          }
+
+          if (protectedRoutes.worker.test(pathname)) {
+            if (userRole !== "worker") {
+              const dashboardUrl = getDashboardUrl(userRole);
+              return NextResponse.redirect(new URL(dashboardUrl, request.url));
+            }
+          }
+
+          return applySecurityHeaders(response);
+        }
+
+        // Refresh failed, redirect to login
         const loginUrl = new URL("/auth/login", request.url);
         loginUrl.searchParams.set("redirect", pathname);
         return NextResponse.redirect(loginUrl);
       }
 
-      // Get user profile
-      const { data: profile, error: profileError } = await supabase
-        .from("user_profiles")
-        .select("role, status")
-        .eq("id", user.id)
-        .single();
+      // Get user profile (try cache first)
+      let profile = getCachedProfile(user.id);
 
-      if (profileError || !profile) {
-        // No profile, redirect to login
-        const loginUrl = new URL("/auth/login", request.url);
-        loginUrl.searchParams.set("redirect", pathname);
-        return NextResponse.redirect(loginUrl);
+      if (!profile) {
+        // Cache miss, fetch from database
+        const { data: dbProfile, error: profileError } = await supabase
+          .from("user_profiles")
+          .select("role, status")
+          .eq("id", user.id)
+          .single();
+
+        if (profileError || !dbProfile) {
+          // No profile, redirect to login
+          const loginUrl = new URL("/auth/login", request.url);
+          loginUrl.searchParams.set("redirect", pathname);
+          return NextResponse.redirect(loginUrl);
+        }
+
+        // Cache the profile
+        setCachedProfile(user.id, dbProfile.role, dbProfile.status);
+        profile = {
+          role: dbProfile.role,
+          status: dbProfile.status,
+          cachedAt: Date.now(),
+        };
       }
 
       // Check if banned
@@ -153,8 +281,9 @@ export async function middleware(request: NextRequest) {
         }
       }
 
-      // Access granted
-      return NextResponse.next();
+      // Access granted (with security headers)
+      const response = NextResponse.next();
+      return applySecurityHeaders(response);
     } catch {
       // On error, redirect to login
       const loginUrl = new URL("/auth/login", request.url);
@@ -163,7 +292,8 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  return NextResponse.next();
+  const response = NextResponse.next();
+  return applySecurityHeaders(response);
 }
 
 /**
