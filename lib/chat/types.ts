@@ -50,6 +50,12 @@ export interface CreateMessageInput {
   attachments?: Attachment[] | null;
 }
 
+export interface SendMessageRequest {
+  conversationId: string;
+  content?: string;
+  attachments?: Attachment[];
+}
+
 export interface GetMessagesParams {
   conversationId: string;
   userId: string;

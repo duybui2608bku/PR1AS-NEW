@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, KeyboardEvent } from "react";
-import { Button, Upload } from "antd";
+import { Upload } from "antd";
 import {
   SendOutlined,
   PictureOutlined,
@@ -20,7 +20,6 @@ interface ChatInputProps {
 
 export function ChatInput({ conversationId, onMessageSent }: ChatInputProps) {
   const [content, setContent] = useState("");
-  const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [previewFiles, setPreviewFiles] = useState<
     Array<{ file: File; preview: string }>
   >([]);
@@ -110,7 +109,6 @@ export function ChatInput({ conversationId, onMessageSent }: ChatInputProps) {
 
       // Clear input
       setContent("");
-      setAttachments([]);
       previewFiles.forEach((pf) => URL.revokeObjectURL(pf.preview));
       setPreviewFiles([]);
 
@@ -121,8 +119,8 @@ export function ChatInput({ conversationId, onMessageSent }: ChatInputProps) {
 
       // Callback with message
       onMessageSent?.(sentMessage);
-    } catch (error) {
-      void antdMessage.error("Gửi tin nhắn thất bại");
+    } catch {
+      showMessage.error("Gửi tin nhắn thất bại");
     }
   };
 

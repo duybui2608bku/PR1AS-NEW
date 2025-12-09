@@ -48,6 +48,16 @@ export const chatAPI = {
     return data.data;
   },
 
+  async getConversation(
+    conversationId: string
+  ): Promise<{ conversation: ConversationWithLastMessage }> {
+    const { data } = await axiosClient.get<{
+      data: { conversation: ConversationWithLastMessage };
+    }>(`/chat/conversations/${conversationId}`);
+
+    return data.data;
+  },
+
   async getConversationMessages(
     conversationId: string,
     cursor?: string,
@@ -73,6 +83,14 @@ export const chatAPI = {
       hasMore: data.data.pagination.hasMore,
       nextCursor: data.data.pagination.nextCursor,
     };
+  },
+
+  async getMessages(
+    conversationId: string,
+    cursor?: string,
+    limit: number = 30
+  ): Promise<GetMessagesResult> {
+    return this.getConversationMessages(conversationId, cursor, limit);
   },
 
   async sendMessage(params: {
@@ -123,5 +141,15 @@ export const chatAPI = {
 
   async markMessageAsRead(messageId: string): Promise<void> {
     await axiosClient.patch(`/chat/messages/${messageId}/read`);
+  },
+
+  async markAsRead(
+    conversationId: string,
+    messageIds: string[]
+  ): Promise<void> {
+    // Mark all messages as read in parallel
+    await Promise.all(
+      messageIds.map((messageId) => this.markMessageAsRead(messageId))
+    );
   },
 };

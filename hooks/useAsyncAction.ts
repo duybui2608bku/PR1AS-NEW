@@ -34,7 +34,7 @@ interface UseAsyncActionOptions {
   showErrorNotification?: boolean;
 }
 
-interface UseAsyncActionReturn<T> {
+interface UseAsyncActionReturn<T extends (...args: any[]) => Promise<any>> {
   /**
    * Loading state
    */
@@ -153,7 +153,10 @@ export function useAsyncAction<T extends (...args: any[]) => Promise<any>>(
 /**
  * Variant of useAsyncAction that returns data from the action
  */
-interface UseAsyncActionWithDataReturn<T, R> extends UseAsyncActionReturn<T> {
+interface UseAsyncActionWithDataReturn<
+  T extends (...args: any[]) => Promise<R>,
+  R
+> extends UseAsyncActionReturn<T> {
   /**
    * Data returned from the action
    */

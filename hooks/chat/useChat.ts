@@ -8,7 +8,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { chatAPI } from "@/lib/chat/api";
 import { showMessage } from "@/lib/utils/toast";
-import type { CreateMessageRequest } from "@/lib/chat/types";
+import type { SendMessageRequest } from "@/lib/chat/types";
 
 /**
  * Query keys for chat operations
@@ -100,7 +100,7 @@ export function useSendMessage() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (request: CreateMessageRequest) => chatAPI.sendMessage(request),
+    mutationFn: (request: SendMessageRequest) => chatAPI.sendMessage(request),
     onSuccess: (data) => {
       // Invalidate messages list for this conversation
       queryClient.invalidateQueries({
