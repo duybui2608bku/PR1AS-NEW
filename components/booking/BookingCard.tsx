@@ -14,7 +14,6 @@ import {
   Button,
   Typography,
   Descriptions,
-  message,
   Popconfirm,
   Avatar,
   Modal,
@@ -30,10 +29,15 @@ import {
   ExclamationCircleOutlined,
 } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
-import { bookingAPI } from "@/lib/booking/api-client";
 import type { Booking, BookingStatus } from "@/lib/booking/types";
 import dayjs from "dayjs";
-import { walletAPI } from "@/lib/wallet/api-client";
+import {
+  useConfirmBooking,
+  useDeclineBooking,
+  useWorkerCompleteBooking,
+  useClientCompleteBooking,
+} from "@/hooks/booking/useBooking";
+import { useFileComplaint } from "@/hooks/wallet/useWallet";
 
 const { Text, Title } = Typography;
 
@@ -49,9 +53,15 @@ export default function BookingCard({
   onUpdate,
 }: BookingCardProps) {
   const { t } = useTranslation();
-  const [loading, setLoading] = useState<string | null>(null);
   const [complaintModalVisible, setComplaintModalVisible] = useState(false);
   const [complaintText, setComplaintText] = useState("");
+
+  // React Query mutations
+  const confirmBooking = useConfirmBooking();
+  const declineBooking = useDeclineBooking();
+  const workerCompleteBooking = useWorkerCompleteBooking();
+  const clientCompleteBooking = useClientCompleteBooking();
+  const fileComplaint = useFileComplaint();
 
   // Extract service name from booking metadata (set in backend via service.name_key)
   const serviceNameKey = (booking.metadata as any)?.service_name_key as
@@ -91,57 +101,35 @@ export default function BookingCard({
   };
 
   const handleConfirm = async () => {
-    try {
-      setLoading("confirm");
-      await bookingAPI.confirmBooking(booking.id);
-      message.success(t("booking.confirmSuccess"));
-      onUpdate?.();
-    } catch (error: any) {
-      message.error(error.message || t("common.error"));
-    } finally {
-      setLoading(null);
-    }
+    confirmBooking.mutate(booking.id, {
+      onSuccess: () => {
+        onUpdate?.();
+      },
+    });
   };
 
   const handleDecline = async () => {
-    try {
-      setLoading("decline");
-      await bookingAPI.declineBooking(booking.id);
-      message.success(t("booking.declineSuccess"));
-      onUpdate?.();
-    } catch (error: any) {
-      message.error(error.message || t("common.error"));
-    } finally {
-      setLoading(null);
-    }
+    declineBooking.mutate(booking.id, {
+      onSuccess: () => {
+        onUpdate?.();
+      },
+    });
   };
 
   const handleWorkerComplete = async () => {
-    try {
-      setLoading("complete");
-      await bookingAPI.workerCompleteBooking(booking.id);
-      message.success(
-        t("booking.workerCompleteSuccess") || "Đã đánh dấu hoàn thành"
-      );
-      onUpdate?.();
-    } catch (error: any) {
-      message.error(error.message || t("common.error"));
-    } finally {
-      setLoading(null);
-    }
+    workerCompleteBooking.mutate(booking.id, {
+      onSuccess: () => {
+        onUpdate?.();
+      },
+    });
   };
 
   const handleClientComplete = async () => {
-    try {
-      setLoading("complete");
-      await bookingAPI.clientCompleteBooking(booking.id);
-      message.success(t("booking.completeSuccess"));
-      onUpdate?.();
-    } catch (error: any) {
-      message.error(error.message || t("common.error"));
-    } finally {
-      setLoading(null);
-    }
+    clientCompleteBooking.mutate(booking.id, {
+      onSuccess: () => {
+        onUpdate?.();
+      },
+    });
   };
 
   const canWorkerConfirm = () => {
@@ -235,29 +223,22 @@ export default function BookingCard({
 
   const handleSubmitComplaint = async () => {
     if (!booking.escrow_id) return;
-    try {
-      setLoading("complaint");
-      await walletAPI.fileComplaint(
-        booking.escrow_id,
-        complaintText ||
+
+    fileComplaint.mutate(
+      {
+        escrowId: booking.escrow_id,
+        description:
+          complaintText ||
           t("booking.defaultComplaintReason") ||
-          "Dịch vụ bị trễ, worker chưa hoàn thành công việc"
-      );
-      message.success(
-        t("booking.complaintSuccess") ||
-          "Đã gửi khiếu nại. Thanh toán sẽ được giữ lại để admin xem xét."
-      );
-      setComplaintModalVisible(false);
-      onUpdate?.();
-    } catch (error: any) {
-      message.error(
-        error?.message ||
-          t("booking.complaintError") ||
-          "Không thể gửi khiếu nại. Vui lòng thử lại."
-      );
-    } finally {
-      setLoading(null);
-    }
+          "Dịch vụ bị trễ, worker chưa hoàn thành công việc",
+      },
+      {
+        onSuccess: () => {
+          setComplaintModalVisible(false);
+          onUpdate?.();
+        },
+      }
+    );
   };
 
   return (
@@ -272,7 +253,7 @@ export default function BookingCard({
                   type="primary"
                   icon={<CheckCircleOutlined />}
                   onClick={handleConfirm}
-                  loading={loading === "confirm"}
+                  loading={confirmBooking.isPending}
                   block
                 >
                   {t("booking.confirm")}
@@ -292,7 +273,7 @@ export default function BookingCard({
                   <Button
                     danger
                     icon={<CloseCircleOutlined />}
-                    loading={loading === "decline"}
+                    loading={declineBooking.isPending}
                     block
                   >
                     {t("booking.decline")}
@@ -305,7 +286,7 @@ export default function BookingCard({
                   type="primary"
                   icon={<CheckCircleOutlined />}
                   onClick={handleWorkerComplete}
-                  loading={loading === "complete"}
+                  loading={workerCompleteBooking.isPending}
                   block
                 >
                   {t("booking.complete")}
@@ -317,7 +298,7 @@ export default function BookingCard({
                   type="primary"
                   icon={<CheckCircleOutlined />}
                   onClick={handleClientComplete}
-                  loading={loading === "complete"}
+                  loading={clientCompleteBooking.isPending}
                   block
                 >
                   {t("booking.confirmCompletion") || "Xác nhận hoàn thành"}
@@ -329,7 +310,7 @@ export default function BookingCard({
                   danger
                   icon={<ExclamationCircleOutlined />}
                   onClick={handleOpenComplaintModal}
-                  loading={loading === "complaint"}
+                  loading={fileComplaint.isPending}
                   block
                 >
                   {t("booking.complain") || "Khiếu nại"}
@@ -462,7 +443,7 @@ export default function BookingCard({
         open={complaintModalVisible}
         onOk={handleSubmitComplaint}
         onCancel={() => setComplaintModalVisible(false)}
-        okButtonProps={{ loading: loading === "complaint" }}
+        okButtonProps={{ loading: fileComplaint.isPending }}
       >
         <Space direction="vertical" style={{ width: "100%" }}>
           <Typography.Paragraph>

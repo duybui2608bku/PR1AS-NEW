@@ -133,3 +133,28 @@ export function useMakePayment() {
     },
   });
 }
+
+/**
+ * File complaint for escrow
+ */
+export function useFileComplaint() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      escrowId,
+      description,
+    }: {
+      escrowId: string;
+      description: string;
+    }) => walletAPI.fileComplaint(escrowId, description),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: walletKeys.escrows() });
+      queryClient.invalidateQueries({ queryKey: walletKeys.balance() });
+      showMessage.success("Complaint filed successfully");
+    },
+    onError: (error: Error) => {
+      showMessage.error(error.message || "Failed to file complaint");
+    },
+  });
+}
