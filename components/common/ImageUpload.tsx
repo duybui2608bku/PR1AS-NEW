@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Upload, Avatar, Button, message, Spin } from "antd";
+import { Upload, Avatar, Button, Spin } from "antd";
 import {
   UploadOutlined,
   UserOutlined,
@@ -14,6 +14,7 @@ import {
   deleteImage,
   validateImage,
 } from "@/lib/utils/image-upload";
+import { showMessage } from "@/lib/utils/toast";
 import { useTranslation } from "react-i18next";
 
 interface ImageUploadProps {
@@ -97,7 +98,7 @@ export default function ImageUpload({
       fileTooLarge: t("upload.image.messages.fileTooLarge"),
     });
     if (!validation.valid) {
-      message.error(validation.error);
+      showMessage.error(validation.error);
       return false;
     }
 
@@ -119,12 +120,12 @@ export default function ImageUpload({
           onChange(newImageUrl, newFilePath);
         }
 
-        message.success(t("upload.image.messages.uploadSuccess"));
+        showMessage.success(t("upload.image.messages.uploadSuccess"));
       } else {
-        message.error(result.error || t("upload.image.messages.uploadFailed"));
+        showMessage.error(result.error || t("upload.image.messages.uploadFailed"));
       }
     } catch {
-      message.error(t("upload.image.messages.uploadError"));
+      showMessage.error(t("upload.image.messages.uploadError"));
     } finally {
       setLoading(false);
     }
@@ -156,12 +157,12 @@ export default function ImageUpload({
           onChange(undefined);
         }
 
-        message.success(t("upload.image.messages.deleteSuccess"));
+        showMessage.success(t("upload.image.messages.deleteSuccess"));
       } else {
-        message.error(result.error || t("upload.image.messages.deleteFailed"));
+        showMessage.error(result.error || t("upload.image.messages.deleteFailed"));
       }
     } catch {
-      message.error(t("upload.image.messages.deleteError"));
+      showMessage.error(t("upload.image.messages.deleteError"));
     } finally {
       setLoading(false);
     }

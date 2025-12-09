@@ -173,8 +173,7 @@ export default function WorkerPublicProfilePage() {
         null
       );
       router.push(`/client/chat?conversationId=${conversation.id}`);
-    } catch (error) {
-      console.error("Failed to create conversation:", error);
+    } catch {
       message.error("Không thể tạo cuộc trò chuyện. Vui lòng thử lại!");
     } finally {
       setChatLoading(false);

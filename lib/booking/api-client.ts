@@ -1,35 +1,27 @@
 /**
  * Booking API Client
- * Client-side API wrapper for booking operations
+ * Client-side API wrapper for booking operations using Axios
  */
 
+import { axiosClient } from "@/lib/http/axios-client";
+import { getAccessToken } from "@/lib/auth/client-helpers";
+import { ERROR_MESSAGES, getErrorMessage } from "@/lib/constants/errors";
 import {
   Booking,
   CreateBookingRequest,
   BookingCalculation,
 } from "./types";
 
-const API_BASE = "/api/booking";
-
-async function getAuthHeaders(): Promise<HeadersInit> {
-  const supabase = (await import("@/lib/supabase/client")).getSupabaseClient();
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-
-  const headers: HeadersInit = {
-    "Content-Type": "application/json",
-  };
-
-  // Add Authorization header if session exists
-  // If not, API route will check cookies instead
-  if (session?.access_token) {
-    headers.Authorization = `Bearer ${session.access_token}`;
-  }
-
-  return headers;
+interface ApiResponse<T> {
+  success: boolean;
+  data?: T;
+  error?: string;
 }
 
+/**
+ * Booking API Client
+ * All methods use Axios for consistent error handling
+ */
 export const bookingAPI = {
   /**
    * Calculate booking price before creating
@@ -39,167 +31,222 @@ export const bookingAPI = {
     bookingType: "hourly" | "daily" | "weekly" | "monthly",
     durationHours: number
   ): Promise<BookingCalculation> {
-    const headers = await getAuthHeaders();
-    const response = await fetch(`${API_BASE}/calculate`, {
-      method: "POST",
-      headers,
-      credentials: "include", // Important: Send cookies with request
-      body: JSON.stringify({
-        worker_service_id: workerServiceId,
-        booking_type: bookingType,
-        duration_hours: durationHours,
-      }),
-    });
+    try {
+      const accessToken = await getAccessToken();
+      const { data } = await axiosClient.post<ApiResponse<{ calculation: BookingCalculation }>>(
+        "/booking/calculate",
+        {
+          worker_service_id: workerServiceId,
+          booking_type: bookingType,
+          duration_hours: durationHours,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
 
-    const json = await response.json();
+      if (!data.success || !data.data?.calculation) {
+        throw new Error(data.error || getErrorMessage(ERROR_MESSAGES.CALCULATE_PRICE_FAILED));
+      }
 
-    if (!response.ok || !json?.success) {
-      throw new Error(json?.error || "Failed to calculate price");
+      return data.data.calculation;
+    } catch (error) {
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error(getErrorMessage(ERROR_MESSAGES.CALCULATE_PRICE_FAILED));
     }
-
-    return json.data?.calculation as BookingCalculation;
   },
 
   /**
    * Create a new booking request
    */
   async createBooking(request: CreateBookingRequest): Promise<Booking> {
-    const headers = await getAuthHeaders();
-    const response = await fetch(`${API_BASE}/create`, {
-      method: "POST",
-      headers,
-      body: JSON.stringify(request),
-    });
+    try {
+      const accessToken = await getAccessToken();
+      const { data } = await axiosClient.post<ApiResponse<{ booking: Booking }>>(
+        "/booking/create",
+        request,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
 
-    const json = await response.json();
+      if (!data.success || !data.data?.booking) {
+        throw new Error(data.error || getErrorMessage(ERROR_MESSAGES.CREATE_BOOKING_FAILED));
+      }
 
-    if (!response.ok || !json?.success) {
-      throw new Error(json?.error || "Failed to create booking");
+      return data.data.booking;
+    } catch (error) {
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error(getErrorMessage(ERROR_MESSAGES.CREATE_BOOKING_FAILED));
     }
-
-    return json.data?.booking as Booking;
   },
 
   /**
-   * Get bookings list
+   * Get bookings list with optional filters
    */
   async getBookings(filters?: {
     status?: string[];
     page?: number;
     limit?: number;
   }): Promise<Booking[]> {
-    const headers = await getAuthHeaders();
-    const params = new URLSearchParams();
-    if (filters?.status) {
-      params.append("status", filters.status.join(","));
-    }
-    if (filters?.page) {
-      params.append("page", filters.page.toString());
-    }
-    if (filters?.limit) {
-      params.append("limit", filters.limit.toString());
-    }
+    try {
+      const accessToken = await getAccessToken();
+      const params: Record<string, string> = {};
 
-    const response = await fetch(`${API_BASE}/list?${params.toString()}`, {
-      method: "GET",
-      headers,
-    });
+      if (filters?.status && filters.status.length > 0) {
+        params.status = filters.status.join(",");
+      }
+      if (filters?.page) {
+        params.page = filters.page.toString();
+      }
+      if (filters?.limit) {
+        params.limit = filters.limit.toString();
+      }
 
-    const json = await response.json();
+      const { data } = await axiosClient.get<ApiResponse<{ bookings: Booking[] }>>(
+        "/booking/list",
+        {
+          params,
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
 
-    if (!response.ok || !json?.success) {
-      throw new Error(json?.error || "Failed to fetch bookings");
+      if (!data.success) {
+        throw new Error(data.error || getErrorMessage(ERROR_MESSAGES.FETCH_BOOKINGS_FAILED));
+      }
+
+      return data.data?.bookings || [];
+    } catch (error) {
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error(getErrorMessage(ERROR_MESSAGES.FETCH_BOOKINGS_FAILED));
     }
-
-    return (json.data?.bookings || []) as Booking[];
   },
 
   /**
    * Worker confirms booking
    */
   async confirmBooking(bookingId: string): Promise<Booking> {
-    const headers = await getAuthHeaders();
-    const response = await fetch(`${API_BASE}/${bookingId}/confirm`, {
-      method: "POST",
-      headers,
-    });
+    try {
+      const accessToken = await getAccessToken();
+      const { data } = await axiosClient.post<ApiResponse<{ booking: Booking }>>(
+        `/booking/${bookingId}/confirm`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
 
-    const json = await response.json();
+      if (!data.success || !data.data?.booking) {
+        throw new Error(data.error || getErrorMessage(ERROR_MESSAGES.CONFIRM_BOOKING_FAILED));
+      }
 
-    if (!response.ok || !json?.success) {
-      throw new Error(json?.error || "Failed to confirm booking");
+      return data.data.booking;
+    } catch (error) {
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error(getErrorMessage(ERROR_MESSAGES.CONFIRM_BOOKING_FAILED));
     }
-
-    return json.data?.booking as Booking;
   },
 
   /**
    * Worker declines booking
    */
   async declineBooking(bookingId: string): Promise<Booking> {
-    const headers = await getAuthHeaders();
-    const response = await fetch(`${API_BASE}/${bookingId}/decline`, {
-      method: "POST",
-      headers,
-    });
+    try {
+      const accessToken = await getAccessToken();
+      const { data } = await axiosClient.post<ApiResponse<{ booking: Booking }>>(
+        `/booking/${bookingId}/decline`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
 
-    const json = await response.json();
+      if (!data.success || !data.data?.booking) {
+        throw new Error(data.error || getErrorMessage(ERROR_MESSAGES.DECLINE_BOOKING_FAILED));
+      }
 
-    if (!response.ok || !json?.success) {
-      throw new Error(json?.error || "Failed to decline booking");
+      return data.data.booking;
+    } catch (error) {
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error(getErrorMessage(ERROR_MESSAGES.DECLINE_BOOKING_FAILED));
     }
-
-    return json.data?.booking as Booking;
   },
 
   /**
    * Worker marks booking as completed
    */
   async workerCompleteBooking(bookingId: string): Promise<Booking> {
-    const headers = await getAuthHeaders();
-    const response = await fetch(`${API_BASE}/${bookingId}/complete-worker`, {
-      method: "POST",
-      headers,
-    });
-
-    const contentType = response.headers.get("content-type") || "";
-
-    // Guard against non-JSON responses (HTML error pages, redirects, etc.)
-    if (!contentType.includes("application/json")) {
-      const text = await response.text();
-      console.error(
-        "[workerCompleteBooking] Non-JSON response:",
-        response.status,
-        text.slice(0, 200)
+    try {
+      const accessToken = await getAccessToken();
+      const { data } = await axiosClient.post<ApiResponse<{ booking: Booking }>>(
+        `/booking/${bookingId}/complete-worker`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
       );
-      throw new Error("Server returned an invalid response when completing booking.");
+
+      if (!data.success || !data.data?.booking) {
+        throw new Error(data.error || getErrorMessage(ERROR_MESSAGES.COMPLETE_BOOKING_FAILED));
+      }
+
+      return data.data.booking;
+    } catch (error) {
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error(getErrorMessage(ERROR_MESSAGES.COMPLETE_BOOKING_FAILED));
     }
-
-    const json = await response.json();
-
-    if (!response.ok || !json?.success) {
-      throw new Error(json?.error || "Failed to complete booking");
-    }
-
-    return json.data?.booking as Booking;
   },
 
   /**
    * Client confirms completion and releases payment
    */
   async clientCompleteBooking(bookingId: string): Promise<Booking> {
-    const headers = await getAuthHeaders();
-    const response = await fetch(`${API_BASE}/${bookingId}/complete-client`, {
-      method: "POST",
-      headers,
-    });
+    try {
+      const accessToken = await getAccessToken();
+      const { data } = await axiosClient.post<ApiResponse<{ booking: Booking }>>(
+        `/booking/${bookingId}/complete-client`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
 
-    const json = await response.json();
+      if (!data.success || !data.data?.booking) {
+        throw new Error(data.error || getErrorMessage(ERROR_MESSAGES.COMPLETE_BOOKING_FAILED));
+      }
 
-    if (!response.ok || !json?.success) {
-      throw new Error(json?.error || "Failed to complete booking");
+      return data.data.booking;
+    } catch (error) {
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error(getErrorMessage(ERROR_MESSAGES.COMPLETE_BOOKING_FAILED));
     }
-
-    return json.data?.booking as Booking;
   },
 };

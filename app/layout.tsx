@@ -4,6 +4,7 @@ import "./globals-layout.css";
 import { AntdRegistry } from "@ant-design/nextjs-registry";
 import I18nProvider from "@/components/providers/I18nProvider";
 import { AntdAppProvider } from "@/components/providers/AntdProvider";
+import { QueryProvider } from "@/lib/react-query/QueryProvider";
 import { getSiteSettingsServer } from "@/lib/utils/site-settings";
 
 export const viewport: Viewport = {
@@ -107,9 +108,11 @@ export default function RootLayout({
       </head>
       <body className="antialiased font-sans">
         <AntdRegistry>
-          <AntdAppProvider>
-            <I18nProvider>{children}</I18nProvider>
-          </AntdAppProvider>
+          <QueryProvider>
+            <AntdAppProvider>
+              <I18nProvider>{children}</I18nProvider>
+            </AntdAppProvider>
+          </QueryProvider>
         </AntdRegistry>
       </body>
     </html>

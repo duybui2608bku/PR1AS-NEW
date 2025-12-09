@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, KeyboardEvent } from "react";
-import { Button, Upload, message as antdMessage } from "antd";
+import { Button, Upload } from "antd";
 import {
   SendOutlined,
   PictureOutlined,
@@ -10,6 +10,7 @@ import {
 import Image from "next/image";
 import { EmojiPicker } from "./EmojiPicker";
 import { useSendMessage } from "@/hooks/chat/useSendMessage";
+import { showMessage } from "@/lib/utils/toast";
 import type { Attachment } from "@/lib/chat/types";
 
 interface ChatInputProps {
@@ -58,13 +59,13 @@ export function ChatInput({ conversationId, onMessageSent }: ChatInputProps) {
   const handleImageSelect = async (file: File) => {
     // Validate file size (5MB)
     if (file.size > 5 * 1024 * 1024) {
-      void antdMessage.error("Kích thước ảnh không được vượt quá 5MB");
+      showMessage.error("Kích thước ảnh không được vượt quá 5MB");
       return false;
     }
 
     // Validate file type
     if (!file.type.startsWith("image/")) {
-      void antdMessage.error("Chỉ được phép upload ảnh");
+      showMessage.error("Chỉ được phép upload ảnh");
       return false;
     }
 

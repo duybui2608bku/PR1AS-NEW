@@ -15,7 +15,6 @@ import {
   DatePicker,
   Input,
   Button,
-  message,
   Alert,
   Space,
   Typography,
@@ -27,12 +26,15 @@ import {
 } from "antd";
 import { CalendarOutlined } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
-import { bookingAPI } from "@/lib/booking/api-client";
 import type {
   BookingCalculation,
   CreateBookingRequest,
 } from "@/lib/booking/types";
 import dayjs from "dayjs";
+import {
+  useCalculatePrice,
+  useCreateBooking,
+} from "@/hooks/booking/useBooking";
 
 const { Text } = Typography;
 const { TextArea } = Input;
@@ -72,12 +74,6 @@ export default function BookingModal({
 }: BookingModalProps) {
   const { t } = useTranslation();
   const [form] = Form.useForm();
-  const [loading, setLoading] = useState(false);
-  const [calculating, setCalculating] = useState(false);
-  const [calculation, setCalculation] = useState<BookingCalculation | null>(
-    null
-  );
-  const [calculationError, setCalculationError] = useState<string | null>(null);
   const [bookingType, setBookingType] = useState<
     "hourly" | "daily" | "weekly" | "monthly"
   >("hourly");
@@ -87,6 +83,10 @@ export default function BookingModal({
   const [selectedServiceName, setSelectedServiceName] = useState<
     string | undefined
   >(serviceName);
+
+  // React Query mutations
+  const createBooking = useCreateBooking();
+  const calculatePrice = useCalculatePrice();
 
   /**
    * Tự động cập nhật ngày kết thúc dựa trên:
@@ -176,8 +176,7 @@ export default function BookingModal({
   useEffect(() => {
     if (open) {
       form.resetFields();
-      setCalculation(null);
-      setCalculationError(null);
+      calculatePrice.reset();
       setBookingType("hourly");
       setDurationHours(1);
       setSelectedWorkerServiceId(workerServiceId);
@@ -186,15 +185,13 @@ export default function BookingModal({
   }, [open, form, workerServiceId, serviceName]);
 
   useEffect(() => {
-    const calculatePrice = async () => {
+    const triggerCalculation = () => {
       if (!selectedWorkerServiceId) {
-        setCalculation(null);
-        setCalculationError(null);
+        calculatePrice.reset();
         return;
       }
       if (!durationHours || durationHours <= 0) {
-        setCalculation(null);
-        setCalculationError(null);
+        calculatePrice.reset();
         return;
       }
 
@@ -209,77 +206,58 @@ export default function BookingModal({
         effectiveDurationHours = durationHours * 160;
       }
 
-      try {
-        setCalculating(true);
-        setCalculationError(null);
-        const result = await bookingAPI.calculatePrice(
-          selectedWorkerServiceId,
-          bookingType,
-          effectiveDurationHours
-        );
-        setCalculation(result);
-      } catch (error: any) {
-        setCalculation(null);
-        setCalculationError(
-          error.message ||
-            t("booking.calculationError") ||
-            "Không thể tính giá."
-        );
-      } finally {
-        setCalculating(false);
-      }
+      calculatePrice.mutate({
+        workerServiceId: selectedWorkerServiceId,
+        bookingType: bookingType,
+        durationHours: effectiveDurationHours,
+      });
     };
 
     if (open && durationHours > 0) {
-      calculatePrice();
+      triggerCalculation();
     }
-  }, [open, bookingType, durationHours, selectedWorkerServiceId, t]);
+  }, [open, bookingType, durationHours, selectedWorkerServiceId]);
 
   const handleSubmit = async (values: any) => {
-    try {
-      setLoading(true);
-
-      // Chuyển đổi đơn vị duration sang giờ thực tế giống như lúc calculate price
-      let effectiveDurationHours = durationHours;
-      if (bookingType === "daily") {
-        effectiveDurationHours = durationHours * 8;
-      } else if (bookingType === "weekly") {
-        effectiveDurationHours = durationHours * 56;
-      } else if (bookingType === "monthly") {
-        effectiveDurationHours = durationHours * 160;
-      }
-
-      // Đặt theo giờ: không gửi end_date, tránh lỗi validate "End date must be after start date"
-      // Các loại khác: nếu user chọn end_date thì gửi ISO string.
-      const endDateISO =
-        bookingType === "hourly" || !values.end_date
-          ? undefined
-          : values.end_date.toISOString();
-
-      const bookingRequest: CreateBookingRequest = {
-        worker_id: workerId,
-        worker_service_id: selectedWorkerServiceId,
-        booking_type: bookingType,
-        duration_hours: effectiveDurationHours,
-        start_date: values.start_date.toISOString(),
-        end_date: endDateISO,
-        location: values.location,
-        special_instructions: values.special_instructions,
-      };
-      await bookingAPI.createBooking(bookingRequest);
-      message.success(t("booking.createSuccess"));
-      onSuccess?.();
-      onClose();
-    } catch (error: any) {
-      message.error(error.message || t("common.error"));
-    } finally {
-      setLoading(false);
+    // Chuyển đổi đơn vị duration sang giờ thực tế giống như lúc calculate price
+    let effectiveDurationHours = durationHours;
+    if (bookingType === "daily") {
+      effectiveDurationHours = durationHours * 8;
+    } else if (bookingType === "weekly") {
+      effectiveDurationHours = durationHours * 56;
+    } else if (bookingType === "monthly") {
+      effectiveDurationHours = durationHours * 160;
     }
+
+    // Đặt theo giờ: không gửi end_date, tránh lỗi validate "End date must be after start date"
+    // Các loại khác: nếu user chọn end_date thì gửi ISO string.
+    const endDateISO =
+      bookingType === "hourly" || !values.end_date
+        ? undefined
+        : values.end_date.toISOString();
+
+    const bookingRequest: CreateBookingRequest = {
+      worker_id: workerId,
+      worker_service_id: selectedWorkerServiceId,
+      booking_type: bookingType,
+      duration_hours: effectiveDurationHours,
+      start_date: values.start_date.toISOString(),
+      end_date: endDateISO,
+      location: values.location,
+      special_instructions: values.special_instructions,
+    };
+
+    createBooking.mutate(bookingRequest, {
+      onSuccess: () => {
+        onSuccess?.();
+        onClose();
+      },
+    });
   };
 
   const handleClose = () => {
     form.resetFields();
-    setCalculation(null);
+    calculatePrice.reset();
     onClose();
   };
 
@@ -555,21 +533,21 @@ export default function BookingModal({
         </Row>
 
         {/* Row 5: Price Calculation (full width at bottom) */}
-        {calculating || calculationError || calculation ? (
+        {calculatePrice.isPending || calculatePrice.isError || calculatePrice.data ? (
           <Row gutter={[16, 16]}>
             <Col xs={24}>
-              {calculating ? (
+              {calculatePrice.isPending ? (
                 <Spin
                   style={{ display: "block", textAlign: "center", padding: 20 }}
                 />
-              ) : calculationError ? (
+              ) : calculatePrice.isError ? (
                 <Alert
                   message={t("booking.calculationError") || "Lỗi tính giá"}
-                  description={calculationError}
+                  description={calculatePrice.error?.message || "Không thể tính giá"}
                   type="error"
                   showIcon
                 />
-              ) : calculation ? (
+              ) : calculatePrice.data ? (
                 <Alert
                   message={
                     <Space direction="vertical" style={{ width: "100%" }}>
@@ -595,15 +573,15 @@ export default function BookingModal({
                           label={t("booking.hourlyRate") || "Giá theo giờ"}
                         >
                           <Text strong>
-                            ${calculation.hourly_rate_usd.toFixed(2)}
+                            ${calculatePrice.data.hourly_rate_usd.toFixed(2)}
                           </Text>
                         </Descriptions.Item>
-                        {calculation.discount_percent > 0 && (
+                        {calculatePrice.data.discount_percent > 0 && (
                           <Descriptions.Item
                             label={t("booking.discount") || "Giảm giá"}
                           >
                             <Text type="success">
-                              -{calculation.discount_percent}%
+                              -{calculatePrice.data.discount_percent}%
                             </Text>
                           </Descriptions.Item>
                         )}
@@ -614,11 +592,11 @@ export default function BookingModal({
                             strong
                             style={{ fontSize: 18, color: "#3f8600" }}
                           >
-                            ${calculation.final_amount_usd.toFixed(2)}
+                            ${calculatePrice.data.final_amount_usd.toFixed(2)}
                           </Text>
                         </Descriptions.Item>
                       </Descriptions>
-                      {!calculation.can_afford ? (
+                      {!calculatePrice.data.can_afford ? (
                         <Alert
                           message={t("booking.insufficientBalance")}
                           description={
@@ -626,13 +604,13 @@ export default function BookingModal({
                               <Text>
                                 {t("booking.requiredAmount")}:{" "}
                                 <Text strong>
-                                  ${calculation.required_amount.toFixed(2)}
+                                  ${calculatePrice.data.required_amount.toFixed(2)}
                                 </Text>
                               </Text>
                               <Text>
                                 {t("booking.availableBalance")}:{" "}
                                 <Text strong>
-                                  ${calculation.client_balance.toFixed(2)}
+                                  ${calculatePrice.data.client_balance.toFixed(2)}
                                 </Text>
                               </Text>
                             </Space>
@@ -646,7 +624,7 @@ export default function BookingModal({
                           message={t("booking.sufficientBalance") || "Số dư đủ"}
                           description={`${t(
                             "booking.availableBalance"
-                          )}: $${calculation.client_balance.toFixed(2)}`}
+                          )}: $${calculatePrice.data.client_balance.toFixed(2)}`}
                           type="success"
                           showIcon
                           style={{ marginTop: 12 }}
@@ -654,7 +632,7 @@ export default function BookingModal({
                       )}
                     </Space>
                   }
-                  type={calculation.can_afford ? "info" : "warning"}
+                  type={calculatePrice.data.can_afford ? "info" : "warning"}
                   showIcon
                 />
               ) : null}
@@ -668,12 +646,12 @@ export default function BookingModal({
             <Button onClick={handleClose}>{t("common.cancel")}</Button>
             <Tooltip
               title={
-                calculating
+                calculatePrice.isPending
                   ? t("booking.calculating") || "Đang tính giá..."
-                  : !calculation
+                  : !calculatePrice.data
                   ? t("booking.waitingForCalculation") ||
                     "Vui lòng đợi tính giá..."
-                  : !calculation.can_afford
+                  : !calculatePrice.data.can_afford
                   ? t("booking.insufficientBalance") || "Số dư không đủ"
                   : undefined
               }
@@ -681,9 +659,11 @@ export default function BookingModal({
               <Button
                 type="primary"
                 htmlType="submit"
-                loading={loading || calculating}
+                loading={createBooking.isPending || calculatePrice.isPending}
                 disabled={
-                  calculating || !calculation || !calculation.can_afford
+                  calculatePrice.isPending ||
+                  !calculatePrice.data ||
+                  !calculatePrice.data.can_afford
                 }
                 icon={<CalendarOutlined />}
               >

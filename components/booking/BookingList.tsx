@@ -6,7 +6,7 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Card,
   List,
@@ -20,10 +20,9 @@ import {
 } from "antd";
 import { ReloadOutlined, CalendarOutlined } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
-import { bookingAPI } from "@/lib/booking/api-client";
-import type { Booking, BookingStatus } from "@/lib/booking/types";
+import type { BookingStatus } from "@/lib/booking/types";
 import BookingCard from "./BookingCard";
-import { showNotification } from "@/lib/utils/toast";
+import { useBookings } from "@/hooks/booking/useBooking";
 
 const { Title } = Typography;
 
@@ -37,38 +36,21 @@ export default function BookingList({
   initialStatus,
 }: BookingListProps) {
   const { t } = useTranslation();
-  const [bookings, setBookings] = useState<Booking[]>([]);
-  const [loading, setLoading] = useState(false);
   const [statusFilter, setStatusFilter] = useState<BookingStatus[]>(
     initialStatus || []
   );
 
-  const fetchBookings = async () => {
-    try {
-      setLoading(true);
-      const filters: any = {};
-      if (statusFilter.length > 0) {
-        filters.status = statusFilter;
-      }
-      const data = await bookingAPI.getBookings(filters);
-      setBookings(data || []);
-    } catch (error: any) {
-      showNotification.error(
-        "Không thể tải danh sách đặt chỗ",
-        error?.message || "Vui lòng thử lại sau."
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchBookings();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [statusFilter]);
+  // Use React Query hook
+  const {
+    data: bookings = [],
+    isLoading: loading,
+    refetch,
+  } = useBookings({
+    status: statusFilter.length > 0 ? statusFilter : undefined,
+  });
 
   const handleUpdate = () => {
-    fetchBookings();
+    refetch();
   };
 
   const statusOptions: { label: string; value: BookingStatus }[] = [
@@ -143,7 +125,7 @@ export default function BookingList({
                 </Select.Option>
               ))}
             </Select>
-            <Button icon={<ReloadOutlined />} onClick={fetchBookings}>
+            <Button icon={<ReloadOutlined />} onClick={() => refetch()}>
               {t("common.refresh")}
             </Button>
           </Space>

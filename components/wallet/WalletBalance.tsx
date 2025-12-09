@@ -6,8 +6,7 @@
 
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
-import { Card, Statistic, Button, Space, message } from "antd";
+import { Card, Statistic, Button, Space } from "antd";
 import {
   WalletOutlined,
   PlusOutlined,
@@ -15,10 +14,10 @@ import {
   SyncOutlined,
 } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
-import { walletAPI } from "@/lib/wallet/api-client";
-import type { Wallet, WalletSummary } from "@/lib/wallet/types";
-import { getErrorMessage } from "@/lib/utils/common";
+import { showMessage } from "@/lib/utils/toast";
 import Loading from "@/components/common/Loading";
+import { useWalletBalance } from "@/hooks/wallet/useWallet";
+import { useRouter } from "next/navigation";
 
 interface WalletBalanceProps {
   onDeposit?: () => void;
@@ -30,34 +29,26 @@ export default function WalletBalance({
   onWithdraw,
 }: WalletBalanceProps) {
   const { t } = useTranslation();
-  const [loading, setLoading] = useState(true);
-  const [wallet, setWallet] = useState<Wallet | null>(null);
-  const [summary, setSummary] = useState<WalletSummary | null>(null);
+  const router = useRouter();
 
-  const loadWalletData = useCallback(async () => {
-    try {
-      setLoading(true);
-      const data = await walletAPI.getBalance();
-      setWallet(data.wallet);
-      setSummary(data.summary);
-    } catch (error: unknown) {
-      const errorMessage = getErrorMessage(error, "Unknown error");
-      if (errorMessage === "Not authenticated") {
-        message.error(t("wallet.balance.loginRequired"));
-        setTimeout(() => {
-          window.location.href = "/auth/login";
-        }, 2000);
-      } else {
-        message.error(errorMessage || t("wallet.balance.failed"));
-      }
-    } finally {
-      setLoading(false);
-    }
-  }, [t]);
+  // Use React Query hook
+  const {
+    data,
+    isLoading: loading,
+    error,
+    refetch,
+  } = useWalletBalance();
 
-  useEffect(() => {
-    loadWalletData();
-  }, [loadWalletData]);
+  // Handle authentication error
+  if (error && error.message === "Not authenticated") {
+    showMessage.error(t("wallet.balance.loginRequired"));
+    setTimeout(() => {
+      router.push("/auth/login");
+    }, 2000);
+  }
+
+  const wallet = data?.wallet || null;
+  const summary = data?.summary || null;
 
   if (loading) {
     return (
@@ -90,7 +81,7 @@ export default function WalletBalance({
       extra={
         <Button
           icon={<SyncOutlined />}
-          onClick={loadWalletData}
+          onClick={() => refetch()}
           loading={loading}
           type="text"
         >

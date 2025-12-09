@@ -14,6 +14,7 @@ import {
   EscrowStatus,
 } from "@/lib/wallet/types";
 import { httpRequestJson } from "@/lib/http/client";
+import { getAuthHeaders } from "@/lib/auth/client-helpers";
 
 interface AdminTransactionsFilters {
   type?: TransactionType[];
@@ -27,27 +28,6 @@ interface AdminEscrowsFilters {
   has_complaint?: boolean;
   page?: number;
   limit?: number;
-}
-
-async function getAuthHeaders(): Promise<HeadersInit> {
-  const supabase = (await import("@/lib/supabase/client")).getSupabaseClient();
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-
-  const headers: HeadersInit = {
-    "Content-Type": "application/json",
-  };
-
-  console.log("session", session);
-
-  // Add Authorization header if session exists
-  // If not, API route will check cookies instead
-  if (session?.access_token) {
-    headers.Authorization = `Bearer ${session.access_token}`;
-  }
-
-  return headers;
 }
 
 const adminWalletAPI = {
