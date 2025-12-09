@@ -27,8 +27,7 @@ export function MessageBubble({
       try {
         const parsed = JSON.parse(message.attachments);
         return Array.isArray(parsed) ? parsed : null;
-      } catch (e) {
-        console.error("Failed to parse attachments:", e);
+      } catch {
         return null;
       }
     }
@@ -102,7 +101,6 @@ export function MessageBubble({
                       className="w-full h-auto max-h-64 object-cover rounded-lg"
                       loading="lazy"
                       onError={() => {
-                        console.error("Failed to load image:", attachment.url);
                         setImageErrors((prev) => new Set(prev).add(index));
                       }}
                     />

@@ -3,8 +3,8 @@
  * Client-side helpers to call wallet API routes
  */
 
-import { getSupabaseClient } from "@/lib/supabase/client";
 import { axiosClient } from "@/lib/http/axios-client";
+import { getAccessToken } from "@/lib/auth/client-helpers";
 import {
   Wallet,
   Transaction,
@@ -25,22 +25,6 @@ import {
   FeeCalculationResponse,
   AdminWalletStats,
 } from "./types";
-
-/**
- * Get current access token from Supabase (for routes that require Bearer)
- */
-async function getAccessToken(): Promise<string> {
-  const supabase = getSupabaseClient();
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-
-  if (!session?.access_token) {
-    throw new Error("Not authenticated");
-  }
-
-  return session.access_token;
-}
 
 /**
  * Wallet API Client

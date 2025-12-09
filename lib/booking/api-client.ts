@@ -8,27 +8,9 @@ import {
   CreateBookingRequest,
   BookingCalculation,
 } from "./types";
+import { getAuthHeaders } from "@/lib/auth/client-helpers";
 
 const API_BASE = "/api/booking";
-
-async function getAuthHeaders(): Promise<HeadersInit> {
-  const supabase = (await import("@/lib/supabase/client")).getSupabaseClient();
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-
-  const headers: HeadersInit = {
-    "Content-Type": "application/json",
-  };
-
-  // Add Authorization header if session exists
-  // If not, API route will check cookies instead
-  if (session?.access_token) {
-    headers.Authorization = `Bearer ${session.access_token}`;
-  }
-
-  return headers;
-}
 
 export const bookingAPI = {
   /**
@@ -166,12 +148,6 @@ export const bookingAPI = {
 
     // Guard against non-JSON responses (HTML error pages, redirects, etc.)
     if (!contentType.includes("application/json")) {
-      const text = await response.text();
-      console.error(
-        "[workerCompleteBooking] Non-JSON response:",
-        response.status,
-        text.slice(0, 200)
-      );
       throw new Error("Server returned an invalid response when completing booking.");
     }
 

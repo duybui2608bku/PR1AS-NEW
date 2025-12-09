@@ -7,7 +7,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { Card, Statistic, Button, Space, message } from "antd";
+import { Card, Statistic, Button, Space } from "antd";
 import {
   WalletOutlined,
   PlusOutlined,
@@ -18,6 +18,7 @@ import { useTranslation } from "react-i18next";
 import { walletAPI } from "@/lib/wallet/api-client";
 import type { Wallet, WalletSummary } from "@/lib/wallet/types";
 import { getErrorMessage } from "@/lib/utils/common";
+import { showMessage } from "@/lib/utils/toast";
 import Loading from "@/components/common/Loading";
 
 interface WalletBalanceProps {
@@ -43,12 +44,12 @@ export default function WalletBalance({
     } catch (error: unknown) {
       const errorMessage = getErrorMessage(error, "Unknown error");
       if (errorMessage === "Not authenticated") {
-        message.error(t("wallet.balance.loginRequired"));
+        showMessage.error(t("wallet.balance.loginRequired"));
         setTimeout(() => {
           window.location.href = "/auth/login";
         }, 2000);
       } else {
-        message.error(errorMessage || t("wallet.balance.failed"));
+        showMessage.error(errorMessage || t("wallet.balance.failed"));
       }
     } finally {
       setLoading(false);
