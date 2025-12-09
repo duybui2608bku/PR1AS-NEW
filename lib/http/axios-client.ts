@@ -62,25 +62,52 @@ axiosClient.interceptors.request.use(
 
 /**
  * Response interceptor
- * - Always throw a normalized Error when status is not ok
+ * - Unwrap data from successful responses
+ * - Normalize errors for failed requests
  */
 axiosClient.interceptors.response.use(
-  (response: AxiosResponse) => response,
+  (response: AxiosResponse) => {
+    // For successful responses, return the data directly
+    // This allows: const data = await axiosClient.get('/endpoint')
+    // Instead of: const { data } = await axiosClient.get('/endpoint')
+    return response;
+  },
   (error: AxiosError<ApiErrorShape>) => {
+    // Handle response errors (4xx, 5xx)
     if (error.response) {
       const data = error.response.data;
+      const status = error.response.status;
+
+      // Extract error message from various possible fields
       const message =
         data?.error ||
         data?.message ||
-        `Request failed with status ${error.response.status}`;
+        `Request failed with status ${status}`;
 
-      return Promise.reject(new Error(message));
+      // Create a custom error with additional context
+      const customError = new Error(message) as Error & {
+        statusCode?: number;
+        code?: string | number;
+        data?: ApiErrorShape;
+      };
+
+      customError.statusCode = status;
+      customError.code = data?.code;
+      customError.data = data;
+
+      return Promise.reject(customError);
     }
 
+    // Handle network errors (no response received)
     if (error.request) {
-      return Promise.reject(new Error("Network error or no response received"));
+      const networkError = new Error(
+        "Network error. Please check your internet connection."
+      ) as Error & { isNetworkError: boolean };
+      networkError.isNetworkError = true;
+      return Promise.reject(networkError);
     }
 
+    // Handle other errors (request setup, etc.)
     return Promise.reject(error);
   }
 );
