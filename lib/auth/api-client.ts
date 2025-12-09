@@ -1,9 +1,11 @@
 /**
  * API Client for Authentication operations
- * Provides client-side helpers to call auth API routes
+ * Migrated to use Axios for consistent error handling
  */
 
+import { axiosClient } from "@/lib/http/axios-client";
 import { getSupabaseClient } from "@/lib/supabase/client";
+import { ERROR_MESSAGES, getErrorMessage } from "@/lib/constants/errors";
 import type { ApiResponse } from "@/lib/http/response";
 
 export type UserRole = "client" | "worker" | "admin";
@@ -20,23 +22,8 @@ export interface UserProfile {
 }
 
 /**
- * Get authorization header with current user's token
- */
-async function getAuthHeader(): Promise<string> {
-  const supabase = getSupabaseClient();
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-
-  if (!session?.access_token) {
-    throw new Error("Not authenticated");
-  }
-
-  return `Bearer ${session.access_token}`;
-}
-
-/**
- * Authentication API
+ * Authentication API Client
+ * All methods use Axios for consistent error handling
  */
 export const authAPI = {
   /**
@@ -48,63 +35,64 @@ export const authAPI = {
     role: UserRole,
     fullName?: string
   ) {
-    const response = await fetch("/api/auth/signup", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include", // Ensure cookies are sent/received
-      body: JSON.stringify({ email, password, role, fullName }),
-    });
+    try {
+      const { data } = await axiosClient.post<
+        ApiResponse<{
+          user: { id: string; email: string; role: UserRole };
+          session?: { access_token?: string; refresh_token?: string };
+        }>
+      >("/auth/signup", { email, password, role, fullName });
 
-    const json: ApiResponse<{
-      user: { id: string; email: string; role: UserRole };
-      session?: { access_token?: string; refresh_token?: string };
-    }> = await response.json();
+      if (!data.success) {
+        throw new Error(data.message || data.error || "Sign up failed");
+      }
 
-    if (!response.ok || !json.success) {
-      throw new Error(json.message || json.error || "Sign up failed");
+      // Small delay to ensure cookies are properly set
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      return data;
+    } catch (error) {
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error("Sign up failed");
     }
-
-    // Small delay to ensure cookies are properly set before redirect
-    await new Promise((resolve) => setTimeout(resolve, 100));
-
-    return json;
   },
 
   /**
    * Sign up with OAuth (Google)
-   * Returns the callback URL that should be used with Supabase signInWithOAuth
+   * Returns the callback URL for Supabase signInWithOAuth
    */
   async signUpOAuth(role: UserRole, provider: "google" = "google") {
-    const response = await fetch("/api/auth/signup-oauth", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ role, provider }),
-    });
+    try {
+      const { data } = await axiosClient.post<
+        ApiResponse<{ callbackUrl: string }>
+      >("/auth/signup-oauth", { role, provider });
 
-    const json: ApiResponse<{ callbackUrl: string }> = await response.json();
+      if (!data.success || !data.data) {
+        throw new Error(data.message || data.error || "OAuth signup failed");
+      }
 
-    if (!response.ok || !json.success) {
-      throw new Error(json.message || json.error || "OAuth signup failed");
+      return data.data;
+    } catch (error) {
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error("OAuth signup failed");
     }
-
-    return json.data!;
   },
 
   /**
-   * Sign in with OAuth using Supabase client
-   * This is a helper that combines the API call with Supabase OAuth
+   * Sign in with Google OAuth
+   * Combines API call with Supabase OAuth flow
    */
   async signInWithGoogle(role: UserRole) {
     const supabase = getSupabaseClient();
 
-    // Get the callback URL from our API
+    // Get callback URL from API
     const { callbackUrl } = await this.signUpOAuth(role);
 
-    // Use Supabase to initiate OAuth flow
+    // Initiate OAuth flow with Supabase
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
@@ -121,32 +109,32 @@ export const authAPI = {
    * Login with email/password
    */
   async login(email: string, password: string) {
-    const response = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include", // Ensure cookies are sent/received
-      body: JSON.stringify({ email, password }),
-    });
+    try {
+      const { data } = await axiosClient.post<
+        ApiResponse<{
+          user: { id: string; email: string; role: UserRole; status: string };
+          session?: { access_token?: string; refresh_token?: string };
+        }>
+      >("/auth/login", { email, password });
 
-    const json: ApiResponse<{
-      user: { id: string; email: string; role: UserRole; status: string };
-      session?: { access_token?: string; refresh_token?: string };
-    }> = await response.json();
+      if (!data.success) {
+        throw new Error(data.message || data.error || "Login failed");
+      }
 
-    if (!response.ok || !json.success) {
-      throw new Error(json.message || json.error || "Login failed");
+      // Small delay to ensure cookies are properly set
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      return data;
+    } catch (error) {
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error("Login failed");
     }
-
-    // Small delay to ensure cookies are properly set before redirect
-    await new Promise((resolve) => setTimeout(resolve, 100));
-
-    return json;
   },
 
   /**
-   * Logout
+   * Logout current user
    */
   async logout() {
     const supabase = getSupabaseClient();
@@ -156,11 +144,12 @@ export const authAPI = {
 
     if (error) throw error;
 
-    // Also call our API endpoint for any server-side cleanup
-    await fetch("/api/auth/logout", {
-      method: "POST",
-      credentials: "include", // Ensure cookies are sent for deletion
-    });
+    // Call API endpoint for server-side cleanup
+    try {
+      await axiosClient.post("/auth/logout");
+    } catch {
+      // Ignore errors on logout API call
+    }
 
     return { success: true };
   },
@@ -169,70 +158,94 @@ export const authAPI = {
    * Get current user's profile
    */
   async getProfile(): Promise<UserProfile> {
-    // Don't require Authorization header - API will read from httpOnly cookies
-    const response = await fetch("/api/auth/profile", {
-      credentials: "include", // Important: Send cookies with request
-    });
+    try {
+      const { data } = await axiosClient.get<
+        ApiResponse<{ profile: UserProfile }>
+      >("/auth/profile");
 
-    const json: ApiResponse<{ profile: UserProfile }> = await response.json();
-
-    if (!response.ok || !json.success) {
-      if (json.code === "ACCOUNT_BANNED" || json.error === "ACCOUNT_BANNED") {
-        // Redirect to banned page
-        window.location.href = "/banned";
+      if (!data.success || !data.data?.profile) {
+        if (data.code === "ACCOUNT_BANNED" || data.error === "ACCOUNT_BANNED") {
+          // Redirect to banned page
+          window.location.href = "/banned";
+        }
+        throw new Error(
+          data.message ||
+            data.error ||
+            getErrorMessage(ERROR_MESSAGES.GET_PROFILE_FAILED)
+        );
       }
-      throw new Error(
-        json.message || json.error || "Failed to get profile"
-      );
-    }
 
-    return json.data!.profile;
+      return data.data.profile;
+    } catch (error) {
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error(getErrorMessage(ERROR_MESSAGES.GET_PROFILE_FAILED));
+    }
   },
 
   /**
    * Create profile for authenticated user (after OAuth)
    */
   async createProfile(role: UserRole) {
-    const authHeader = await getAuthHeader();
-    const response = await fetch("/api/auth/create-profile", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: authHeader,
-      },
-      body: JSON.stringify({ role }),
-    });
+    try {
+      const supabase = getSupabaseClient();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
 
-    const json: ApiResponse<unknown> = await response.json();
+      if (!session?.access_token) {
+        throw new Error("Not authenticated");
+      }
 
-    if (!response.ok || !json.success) {
-      throw new Error(
-        json.message || json.error || "Failed to create profile"
+      const { data } = await axiosClient.post<ApiResponse<unknown>>(
+        "/auth/create-profile",
+        { role },
+        {
+          headers: {
+            Authorization: `Bearer ${session.access_token}`,
+          },
+        }
       );
-    }
 
-    return json;
+      if (!data.success) {
+        throw new Error(
+          data.message ||
+            data.error ||
+            getErrorMessage(ERROR_MESSAGES.CREATE_PROFILE_FAILED)
+        );
+      }
+
+      return data;
+    } catch (error) {
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error(getErrorMessage(ERROR_MESSAGES.CREATE_PROFILE_FAILED));
+    }
   },
 
   /**
    * Handle OAuth callback
    */
   async handleCallback(userId: string, email: string, role?: UserRole) {
-    const response = await fetch("/api/auth/callback", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ userId, email, role }),
-    });
+    try {
+      const { data } = await axiosClient.post<ApiResponse<unknown>>(
+        "/auth/callback",
+        { userId, email, role }
+      );
 
-    const json: ApiResponse<unknown> = await response.json();
+      if (!data.success) {
+        throw new Error(data.message || data.error || "Callback failed");
+      }
 
-    if (!response.ok || !json.success) {
-      throw new Error(json.message || json.error || "Callback failed");
+      return data;
+    } catch (error) {
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error("Callback failed");
     }
-
-    return json;
   },
 
   /**
@@ -248,7 +261,7 @@ export const authAPI = {
   },
 
   /**
-   * Get current user
+   * Get current user from Supabase
    */
   async getCurrentUser() {
     const supabase = getSupabaseClient();
