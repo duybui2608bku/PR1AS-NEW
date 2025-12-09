@@ -16,6 +16,7 @@ import {
   WorkerImage,
   WorkerService,
   WorkerServicePrice,
+  SetAvailabilityRequest,
 } from "./types";
 import { axiosClient } from "@/lib/http/axios-client";
 
@@ -212,3 +213,62 @@ export function formatCurrency(amount: number, currency: string): string {
 
   return formatters[currency]?.format(amount) || `${amount} ${currency}`;
 }
+
+// =============================================================================
+// COMBINED WORKER API (for convenience)
+// =============================================================================
+
+/**
+ * Combined Worker API
+ * Provides a unified interface for all worker-related operations
+ */
+export const workerAPI = {
+  // Profile operations
+  async getProfile(): Promise<WorkerProfileComplete> {
+    return workerProfileAPI.getProfile();
+  },
+
+  async getPublicProfile(workerId: string): Promise<WorkerProfileComplete> {
+    const { data } = await axiosClient.get<{ data: WorkerProfileComplete }>(
+      `/workers/${workerId}`
+    );
+    return data.data;
+  },
+
+  async updateProfile(
+    update: WorkerProfileStep1Request
+  ): Promise<WorkerProfileComplete> {
+    const { data } = await axiosClient.patch<{ data: WorkerProfileComplete }>(
+      "/worker/profile",
+      update
+    );
+    return data.data;
+  },
+
+  async publishProfile(): Promise<void> {
+    return workerProfileAPI.publish();
+  },
+
+  async unpublishProfile(): Promise<void> {
+    await axiosClient.patch("/worker/profile/unpublish");
+  },
+
+  // Service operations
+  async getServiceCategories(): Promise<ServiceCategory[]> {
+    return servicesAPI.getCategories();
+  },
+
+  async updateServicePricing(
+    serviceId: string,
+    pricing: UpdateServicePriceRequest
+  ): Promise<WorkerServicePrice> {
+    return workerServicesAPI.updatePrice(serviceId, pricing);
+  },
+
+  // Availability operations
+  async updateAvailability(
+    availability: SetAvailabilityRequest
+  ): Promise<void> {
+    await axiosClient.patch("/worker/availability", availability);
+  },
+};

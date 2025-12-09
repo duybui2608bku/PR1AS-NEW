@@ -20,7 +20,7 @@ export async function middleware(request: NextRequest) {
     /^\/workers\/.*/, // Worker public profiles
     /^\/market/, // Market/listing pages
   ];
-  const isPublicRoute = 
+  const isPublicRoute =
     publicRoutes.some((route) => pathname === route) ||
     publicRoutePatterns.some((pattern) => pattern.test(pathname));
 

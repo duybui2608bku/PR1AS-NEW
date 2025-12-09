@@ -63,6 +63,13 @@ export const walletAPI = {
   },
 
   /**
+   * Alias for deposit (request deposit)
+   */
+  async requestDeposit(request: DepositRequest): Promise<DepositResponse> {
+    return this.deposit(request);
+  },
+
+  /**
    * Create bank transfer deposit (get QR code)
    */
   async depositBankTransfer(
@@ -127,6 +134,15 @@ export const walletAPI = {
     }
 
     return response.json();
+  },
+
+  /**
+   * Alias for withdraw (request withdrawal)
+   */
+  async requestWithdrawal(
+    request: WithdrawalRequest
+  ): Promise<WithdrawalResponse> {
+    return this.withdraw(request);
   },
 
   /**
@@ -282,6 +298,22 @@ export const walletAPI = {
     );
 
     return data;
+  },
+
+  // ===========================================================================
+  // PLATFORM SETTINGS
+  // ===========================================================================
+
+  /**
+   * Get platform settings
+   * Note: This may require admin access depending on the endpoint implementation
+   */
+  async getPlatformSettings(): Promise<PlatformSettings> {
+    const { data } = await axiosClient.get<{
+      data: { settings: PlatformSettings };
+    }>("/admin/wallet/settings");
+
+    return data.data.settings;
   },
 };
 

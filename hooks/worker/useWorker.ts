@@ -9,9 +9,9 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { workerAPI } from "@/lib/worker/api-client";
 import { showMessage } from "@/lib/utils/toast";
 import type {
-  WorkerProfileUpdate,
-  WorkerServicePriceUpdate,
-  WorkerAvailabilityUpdate,
+  WorkerProfileStep1Request,
+  UpdateServicePriceRequest,
+  SetAvailabilityRequest,
 } from "@/lib/worker/types";
 
 /**
@@ -68,7 +68,7 @@ export function useUpdateWorkerProfile() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (update: WorkerProfileUpdate) =>
+    mutationFn: (update: WorkerProfileStep1Request) =>
       workerAPI.updateProfile(update),
     onSuccess: (data) => {
       // Update profile in cache
@@ -93,7 +93,7 @@ export function useUpdateServicePricing() {
       pricing,
     }: {
       serviceId: string;
-      pricing: WorkerServicePriceUpdate;
+      pricing: UpdateServicePriceRequest;
     }) => workerAPI.updateServicePricing(serviceId, pricing),
     onSuccess: () => {
       // Invalidate profile to refetch with new pricing
@@ -114,7 +114,7 @@ export function useUpdateAvailability() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (availability: WorkerAvailabilityUpdate) =>
+    mutationFn: (availability: SetAvailabilityRequest) =>
       workerAPI.updateAvailability(availability),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: workerKeys.profile() });

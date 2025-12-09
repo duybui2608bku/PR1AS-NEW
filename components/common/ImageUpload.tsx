@@ -9,6 +9,7 @@ import {
   LoadingOutlined,
 } from "@ant-design/icons";
 import type { UploadProps } from "antd";
+import Image from "next/image";
 import {
   uploadImage,
   deleteImage,
@@ -98,7 +99,9 @@ export default function ImageUpload({
       fileTooLarge: t("upload.image.messages.fileTooLarge"),
     });
     if (!validation.valid) {
-      showMessage.error(validation.error);
+      showMessage.error(
+        validation.error || t("upload.image.messages.uploadFailed")
+      );
       return false;
     }
 
@@ -122,7 +125,9 @@ export default function ImageUpload({
 
         showMessage.success(t("upload.image.messages.uploadSuccess"));
       } else {
-        showMessage.error(result.error || t("upload.image.messages.uploadFailed"));
+        showMessage.error(
+          result.error || t("upload.image.messages.uploadFailed")
+        );
       }
     } catch {
       showMessage.error(t("upload.image.messages.uploadError"));
@@ -159,19 +164,14 @@ export default function ImageUpload({
 
         showMessage.success(t("upload.image.messages.deleteSuccess"));
       } else {
-        showMessage.error(result.error || t("upload.image.messages.deleteFailed"));
+        showMessage.error(
+          result.error || t("upload.image.messages.deleteFailed")
+        );
       }
     } catch {
       showMessage.error(t("upload.image.messages.deleteError"));
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      handleUpload(file);
     }
   };
 
@@ -271,12 +271,11 @@ export default function ImageUpload({
             border: "1px solid #d9d9d9",
           }}
         >
-          <img
+          <Image
             src={imageUrl}
             alt="Uploaded"
+            fill
             style={{
-              width: "100%",
-              height: "100%",
               objectFit: "cover",
             }}
           />
