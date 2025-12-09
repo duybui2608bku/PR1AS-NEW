@@ -1,80 +1,83 @@
 /**
  * Market API Client
  * Client-side API for fetching worker marketplace data
+ * Migrated to use Axios for consistent error handling
  */
 
+import { axiosClient } from "@/lib/http/axios-client";
+import { ERROR_MESSAGES, getErrorMessage } from "@/lib/constants/errors";
 import { WorkerFilters, WorkersResponse } from "./types";
 import { ApiResponse } from "@/lib/http/response";
 
 /**
- * Build query string from filters
+ * Build query params object from filters
  */
-function buildQueryString(filters: WorkerFilters): string {
-  const params = new URLSearchParams();
+function buildQueryParams(filters: WorkerFilters): Record<string, string> {
+  const params: Record<string, string> = {};
 
   if (filters.age_min !== undefined) {
-    params.append("age_min", filters.age_min.toString());
+    params.age_min = filters.age_min.toString();
   }
   if (filters.age_max !== undefined) {
-    params.append("age_max", filters.age_max.toString());
+    params.age_max = filters.age_max.toString();
   }
   if (filters.service_id) {
-    params.append("service_id", filters.service_id);
+    params.service_id = filters.service_id;
   }
   if (filters.category_id) {
-    params.append("category_id", filters.category_id);
+    params.category_id = filters.category_id;
   }
   if (filters.price_min !== undefined) {
-    params.append("price_min", filters.price_min.toString());
+    params.price_min = filters.price_min.toString();
   }
   if (filters.price_max !== undefined) {
-    params.append("price_max", filters.price_max.toString());
+    params.price_max = filters.price_max.toString();
   }
   if (filters.search) {
-    params.append("search", filters.search);
+    params.search = filters.search;
   }
   if (filters.page !== undefined) {
-    params.append("page", filters.page.toString());
+    params.page = filters.page.toString();
   }
   if (filters.limit !== undefined) {
-    params.append("limit", filters.limit.toString());
+    params.limit = filters.limit.toString();
   }
 
-  return params.toString();
+  return params;
 }
 
+/**
+ * Market API Client
+ * Uses Axios for consistent error handling
+ */
 export const marketAPI = {
   /**
    * Fetch workers with filters
-   *
-   * NOTE: After refactor, API responses are wrapped in ApiResponse<T>.
-   * This client un-wraps the `data` field so callers still receive
-   * a plain `WorkersResponse` object.
+   * Returns paginated list of workers
    */
   async getWorkers(filters: WorkerFilters = {}): Promise<WorkersResponse> {
-    const queryString = buildQueryString(filters);
-    const url = `/api/market/workers${queryString ? `?${queryString}` : ""}`;
+    try {
+      const params = buildQueryParams(filters);
 
-    const response = await fetch(url, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-    });
-
-    const json: ApiResponse<WorkersResponse> = await response.json();
-
-    if (!response.ok || !json.success) {
-      throw new Error(
-        json.error || json.message || "Failed to fetch workers"
+      const { data } = await axiosClient.get<ApiResponse<WorkersResponse>>(
+        "/market/workers",
+        { params }
       );
-    }
 
-    if (!json.data) {
-      throw new Error("No data returned from workers API");
-    }
+      if (!data.success || !data.data) {
+        throw new Error(
+          data.error ||
+            data.message ||
+            getErrorMessage(ERROR_MESSAGES.FETCH_WORKERS_FAILED)
+        );
+      }
 
-    return json.data;
+      return data.data;
+    } catch (error) {
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error(getErrorMessage(ERROR_MESSAGES.FETCH_WORKERS_FAILED));
+    }
   },
 };
