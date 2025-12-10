@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Card,
   Button,
@@ -11,12 +11,14 @@ import {
   Spin,
   Row,
   Col,
+  Modal,
 } from "antd";
 import {
   PlusOutlined,
   LoadingOutlined,
   PictureOutlined,
   ShoppingOutlined,
+  DeleteOutlined,
 } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
 import { showMessage } from "@/lib/utils/toast";
@@ -32,6 +34,12 @@ import {
   ServiceWithPrice,
 } from "@/lib/worker/types";
 import { WorkerImageType } from "@/lib/utils/enums";
+import { PROFILE_CONSTRAINTS } from "@/lib/worker/constants";
+import {
+  validateGalleryImageCount,
+  validateServicePricing,
+} from "@/lib/worker/validation";
+import { useRetry } from "@/lib/hooks/useRetry";
 import ImageUpload from "@/components/common/ImageUpload";
 import ServiceSelector from "@/components/worker/ServiceSelector";
 import ServiceCard from "@/components/worker/ServiceCard";
@@ -61,6 +69,25 @@ export default function Step2ServicesAndPricing({
   );
   const [showServiceSelector, setShowServiceSelector] = useState(false);
   const [savingImage, setSavingImage] = useState(false);
+  const [removingServiceId, setRemovingServiceId] = useState<string | null>(null);
+  const [previousGalleryUrls, setPreviousGalleryUrls] = useState<string[]>([]);
+
+  // Retry logic for API calls
+  const { execute: addImageWithRetry, loading: addingImage } = useRetry(
+    workerImagesAPI.addImage,
+    {
+      maxRetries: 3,
+      retryDelay: 1000,
+    }
+  );
+
+  const { execute: removeServiceWithRetry } = useRetry(
+    workerServicesAPI.removeService,
+    {
+      maxRetries: 3,
+      retryDelay: 1000,
+    }
+  );
 
   useEffect(() => {
     loadData();
@@ -85,11 +112,14 @@ export default function Step2ServicesAndPricing({
   const handleAvatarChange = async (url: string | undefined, filePath?: string) => {
     if (!url || !filePath) return;
 
+    const previousAvatar = avatarUrl;
+
     try {
       setSavingImage(true);
+      // Optimistic update
       setAvatarUrl(url);
 
-      await workerImagesAPI.addImage({
+      await addImageWithRetry({
         image_url: url,
         file_path: filePath,
         image_type: WorkerImageType.AVATAR,
@@ -97,7 +127,14 @@ export default function Step2ServicesAndPricing({
 
       showMessage.success(t("worker.profile.avatarUploaded"));
     } catch (error) {
-      showMessage.error(getErrorMessage(error));
+      // Rollback on error
+      setAvatarUrl(previousAvatar);
+      const errorMessage = getErrorMessage(error);
+      if (errorMessage.includes("network") || errorMessage.includes("timeout")) {
+        showMessage.error(t("common.networkError"));
+      } else {
+        showMessage.error(errorMessage);
+      }
     } finally {
       setSavingImage(false);
     }
@@ -106,10 +143,23 @@ export default function Step2ServicesAndPricing({
   const handleGalleryAdd = async (url: string | undefined, filePath?: string) => {
     if (!url || !filePath) return;
 
+    // Validate gallery image count
+    const validation = validateGalleryImageCount(galleryUrls.length + 1);
+    if (validation) {
+      showMessage.error(validation);
+      return;
+    }
+
+    const previousUrls = galleryUrls;
+
     try {
       setSavingImage(true);
-      setGalleryUrls([...galleryUrls, url]);
-      await workerImagesAPI.addImage({
+      // Optimistic update
+      const newUrls = [...galleryUrls, url];
+      setGalleryUrls(newUrls);
+      setPreviousGalleryUrls(previousUrls);
+
+      await addImageWithRetry({
         image_url: url,
         file_path: filePath,
         image_type: WorkerImageType.GALLERY,
@@ -117,40 +167,112 @@ export default function Step2ServicesAndPricing({
 
       showMessage.success(t("worker.profile.imageAdded"));
     } catch (error) {
-      showMessage.error(getErrorMessage(error));
+      // Rollback on error
+      setGalleryUrls(previousUrls);
+      const errorMessage = getErrorMessage(error);
+      if (errorMessage.includes("network") || errorMessage.includes("timeout")) {
+        showMessage.error(t("common.networkError"));
+      } else {
+        showMessage.error(errorMessage);
+      }
     } finally {
       setSavingImage(false);
     }
   };
 
-  const handleServiceAdded = () => {
+  const handleServiceAdded = useCallback(() => {
     setShowServiceSelector(false);
     loadData();
-  };
+  }, []);
+
+  // Check for duplicate services before adding
+  const checkDuplicateService = useCallback((serviceId: string): boolean => {
+    return workerServices.some(
+      (ws) => ws.worker_service?.service_id === serviceId
+    );
+  }, [workerServices]);
 
   const handleServiceRemoved = async (workerServiceId: string) => {
-    try {
-      await workerServicesAPI.removeService(workerServiceId);
-      showMessage.success(t("worker.profile.serviceRemoved"));
-      loadData();
-    } catch (error) {
-      showMessage.error(getErrorMessage(error));
-    }
+    const service = workerServices.find(
+      (ws) => ws.worker_service?.id === workerServiceId
+    );
+    const serviceName = service?.name_key || t("worker.profile.service");
+
+    Modal.confirm({
+      title: t("worker.profile.confirmRemoveService"),
+      content: t("worker.profile.confirmRemoveServiceDesc", {
+        service: serviceName,
+      }),
+      okText: t("common.remove"),
+      okType: "danger",
+      cancelText: t("common.cancel"),
+      onOk: async () => {
+        try {
+          setRemovingServiceId(workerServiceId);
+          await removeServiceWithRetry(workerServiceId);
+          showMessage.success(t("worker.profile.serviceRemoved"));
+          loadData();
+        } catch (error) {
+          const errorMessage = getErrorMessage(error);
+          if (errorMessage.includes("network") || errorMessage.includes("timeout")) {
+            showMessage.error(t("common.networkError"));
+          } else {
+            showMessage.error(errorMessage);
+          }
+        } finally {
+          setRemovingServiceId(null);
+        }
+      },
+    });
   };
 
-  const handleContinue = () => {
+  const handleContinue = useCallback(() => {
+    // Validate avatar
     if (!avatarUrl) {
       showMessage.error(t("worker.profile.avatarRequired"));
       return;
     }
 
-    if (workerServices.length === 0) {
-      showMessage.error(t("worker.profile.atLeastOneService"));
+    // Validate services count
+    if (workerServices.length < PROFILE_CONSTRAINTS.MIN_SERVICES_REQUIRED) {
+      showMessage.error(
+        t("worker.profile.atLeastOneService", {
+          min: PROFILE_CONSTRAINTS.MIN_SERVICES_REQUIRED,
+        })
+      );
       return;
     }
 
+    // Validate that all services have pricing
+    const servicesWithoutPricing = workerServices.filter(
+      (ws) => !ws.pricing || !ws.pricing.price_usd
+    );
+
+    if (servicesWithoutPricing.length > 0) {
+      showMessage.error(t("worker.profile.servicesNeedPricing"));
+      return;
+    }
+
+    // Validate pricing ranges
+    for (const service of workerServices) {
+      if (service.pricing) {
+        const pricingError = validateServicePricing(
+          service.pricing.price_usd,
+          service.pricing.daily_discount_percent,
+          service.pricing.weekly_discount_percent,
+          service.pricing.monthly_discount_percent
+        );
+        if (pricingError) {
+          showMessage.error(
+            `${service.name_key}: ${pricingError}`
+          );
+          return;
+        }
+      }
+    }
+
     onComplete();
-  };
+  }, [avatarUrl, workerServices, onComplete, t]);
 
   if (loading) {
     return (
@@ -197,31 +319,62 @@ export default function Step2ServicesAndPricing({
           </Col>
 
           <Col xs={24} md={16}>
-            <Title level={5}>{t("worker.profile.gallery")}</Title>
-            <Space direction="horizontal" style={{ width: "100%" }}>
+            <Title level={5}>
+              {t("worker.profile.gallery")}
+              {galleryUrls.length >= PROFILE_CONSTRAINTS.MAX_GALLERY_IMAGES && (
+                <span style={{ color: "#ff4d4f", fontSize: 12, marginLeft: 8 }}>
+                  ({t("worker.profile.maxImagesReached", {
+                    max: PROFILE_CONSTRAINTS.MAX_GALLERY_IMAGES,
+                  })})
+                </span>
+              )}
+            </Title>
+            <Space direction="horizontal" style={{ width: "100%" }} wrap>
               {galleryUrls.map((url, index) => (
-                <img
-                  key={url}
-                  src={url}
-                  alt={`Gallery ${index + 1}`}
-                  style={{
-                    width: 100,
-                    height: 100,
-                    objectFit: "cover",
-                    borderRadius: 8,
-                    marginRight: 8,
-                  }}
-                />
+                <div key={url} style={{ position: "relative" }}>
+                  <img
+                    src={url}
+                    alt={`Gallery ${index + 1}`}
+                    style={{
+                      width: 100,
+                      height: 100,
+                      objectFit: "cover",
+                      borderRadius: 8,
+                      marginRight: 8,
+                      marginBottom: 8,
+                    }}
+                  />
+                  <Button
+                    type="text"
+                    danger
+                    icon={<DeleteOutlined />}
+                    size="small"
+                    style={{
+                      position: "absolute",
+                      top: 0,
+                      right: 8,
+                    }}
+                    onClick={() => {
+                      const newUrls = galleryUrls.filter((_, i) => i !== index);
+                      setGalleryUrls(newUrls);
+                    }}
+                  />
+                </div>
               ))}
-              <ImageUpload
-                value={undefined}
-                onChange={handleGalleryAdd}
-                folder="worker-gallery"
-                type="image"
-              />
+              {galleryUrls.length < PROFILE_CONSTRAINTS.MAX_GALLERY_IMAGES && (
+                <ImageUpload
+                  value={undefined}
+                  onChange={handleGalleryAdd}
+                  folder="worker-gallery"
+                  type="image"
+                />
+              )}
             </Space>
             <Paragraph type="secondary" style={{ marginTop: 8, fontSize: 12 }}>
-              {t("worker.profile.galleryHint")}
+              {t("worker.profile.galleryHint", {
+                max: PROFILE_CONSTRAINTS.MAX_GALLERY_IMAGES,
+                current: galleryUrls.length,
+              })}
             </Paragraph>
           </Col>
         </Row>
@@ -278,7 +431,9 @@ export default function Step2ServicesAndPricing({
       {showServiceSelector && (
         <ServiceSelector
           visible={showServiceSelector}
-          services={services}
+          services={services.filter(
+            (s) => !checkDuplicateService(s.id)
+          )}
           onClose={() => setShowServiceSelector(false)}
           onServiceAdded={handleServiceAdded}
         />

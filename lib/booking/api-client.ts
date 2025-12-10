@@ -91,14 +91,18 @@ export const bookingAPI = {
 
   /**
    * Get bookings list with optional filters
+   * Uses cookies for authentication (via withCredentials: true in axios config)
    */
   async getBookings(filters?: {
     status?: string[];
     page?: number;
     limit?: number;
+    date_from?: string;
+    date_to?: string;
   }): Promise<Booking[]> {
     try {
-      const accessToken = await getAccessToken();
+      console.log("[bookingAPI.getBookings] Starting request with filters:", filters);
+      
       const params: Record<string, string> = {};
 
       if (filters?.status && filters.status.length > 0) {
@@ -110,23 +114,36 @@ export const bookingAPI = {
       if (filters?.limit) {
         params.limit = filters.limit.toString();
       }
+      if (filters?.date_from) {
+        params.date_from = filters.date_from;
+      }
+      if (filters?.date_to) {
+        params.date_to = filters.date_to;
+      }
 
+      console.log("[bookingAPI.getBookings] Making request to /booking/list with params:", params);
+      // Note: Authentication is handled via cookies (withCredentials: true)
+      // The API route uses requireAuth() middleware which reads from cookies
       const { data } = await axiosClient.get<ApiResponse<{ bookings: Booking[] }>>(
         "/booking/list",
         {
           params,
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
         }
       );
 
+      console.log("[bookingAPI.getBookings] Received response:", data);
+
       if (!data.success) {
-        throw new Error(data.error || getErrorMessage(ERROR_MESSAGES.FETCH_BOOKINGS_FAILED));
+        const errorMsg = data.error || getErrorMessage(ERROR_MESSAGES.FETCH_BOOKINGS_FAILED);
+        console.error("[bookingAPI.getBookings] API returned error:", errorMsg);
+        throw new Error(errorMsg);
       }
 
-      return data.data?.bookings || [];
+      const bookings = data.data?.bookings || [];
+      console.log("[bookingAPI.getBookings] Returning bookings:", bookings.length);
+      return bookings;
     } catch (error) {
+      console.error("[bookingAPI.getBookings] Error caught:", error);
       if (error instanceof Error) {
         throw error;
       }

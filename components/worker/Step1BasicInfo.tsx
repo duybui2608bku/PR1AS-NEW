@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback, useEffect } from "react";
 import {
   Form,
   Input,
@@ -14,8 +14,6 @@ import {
   Card,
   Tag,
   Divider,
-  TimePicker,
-  Radio,
 } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
@@ -26,8 +24,12 @@ import {
   WorkerProfileComplete,
   WorkerProfileStep1Request,
 } from "@/lib/worker/types";
-import { DayOfWeek, AvailabilityType, TagType } from "@/lib/utils/enums";
-import dayjs, { Dayjs } from "dayjs";
+import { TagType } from "@/lib/utils/enums";
+import { validateStep1Profile, validateTags } from "@/lib/worker/validation";
+import { PROFILE_CONSTRAINTS } from "@/lib/worker/constants";
+import { useDebouncedCallback } from "@/lib/hooks/useDebounce";
+import { useRetry } from "@/lib/hooks/useRetry";
+import AvailabilityPicker from "@/components/worker/AvailabilityPicker";
 
 const { TextArea } = Input;
 const { Title, Paragraph } = Typography;
@@ -51,22 +53,34 @@ const LIFESTYLE_OPTIONS = [
   "LIFESTYLE_INDEPENDENT",
 ];
 
-const DAY_NAMES: Record<DayOfWeek, string> = {
-  [DayOfWeek.MONDAY]: "Monday",
-  [DayOfWeek.TUESDAY]: "Tuesday",
-  [DayOfWeek.WEDNESDAY]: "Wednesday",
-  [DayOfWeek.THURSDAY]: "Thursday",
-  [DayOfWeek.FRIDAY]: "Friday",
-  [DayOfWeek.SATURDAY]: "Saturday",
-  [DayOfWeek.SUNDAY]: "Sunday",
-};
-
 export default function Step1BasicInfo({ profile, onComplete }: Step1BasicInfoProps) {
   const { t } = useTranslation();
   const [form] = Form.useForm();
-  const [loading, setLoading] = useState(false);
   const [tags, setTags] = useState<string[]>(profile?.tags?.map(t => t.tag_key) || []);
   const [newTag, setNewTag] = useState("");
+  const [availabilities, setAvailabilities] = useState(
+    profile?.availabilities || []
+  );
+  const [previousProfile, setPreviousProfile] = useState<WorkerProfileComplete | null>(profile);
+
+  // Initialize availabilities from profile
+  useEffect(() => {
+    if (profile?.availabilities && profile.availabilities.length > 0) {
+      setAvailabilities(profile.availabilities);
+    }
+  }, [profile?.availabilities]);
+
+  // Retry logic for API calls
+  const { execute: saveProfileWithRetry, loading: saving } = useRetry(
+    workerProfileAPI.saveProfile,
+    {
+      maxRetries: 3,
+      retryDelay: 1000,
+      onRetry: (attempt) => {
+        showMessage.warning(t("common.retrying", { attempt }));
+      },
+    }
+  );
 
   // Initialize form with existing profile data
   const initialValues = profile
@@ -85,63 +99,119 @@ export default function Step1BasicInfo({ profile, onComplete }: Step1BasicInfoPr
     : {};
 
   const handleAddTag = () => {
-    if (newTag && !tags.includes(newTag)) {
-      setTags([...tags, newTag]);
-      setNewTag("");
+    const trimmedTag = newTag.trim();
+    if (!trimmedTag) {
+      showMessage.warning(t("worker.profile.tagEmpty"));
+      return;
     }
+
+    // Check for duplicates (case-insensitive)
+    if (tags.some(t => t.toLowerCase() === trimmedTag.toLowerCase())) {
+      showMessage.warning(t("worker.profile.tagDuplicate"));
+      return;
+    }
+
+    // Validate tag length
+    if (trimmedTag.length > PROFILE_CONSTRAINTS.MAX_TAG_LENGTH) {
+      showMessage.error(
+        t("worker.profile.tagTooLong", {
+          max: PROFILE_CONSTRAINTS.MAX_TAG_LENGTH,
+        })
+      );
+      return;
+    }
+
+    // Check max tags limit
+    if (tags.length >= PROFILE_CONSTRAINTS.MAX_TAGS) {
+      showMessage.error(
+        t("worker.profile.maxTagsReached", {
+          max: PROFILE_CONSTRAINTS.MAX_TAGS,
+        })
+      );
+      return;
+    }
+
+    setTags([...tags, trimmedTag]);
+    setNewTag("");
   };
 
   const handleRemoveTag = (tagToRemove: string) => {
     setTags(tags.filter(tag => tag !== tagToRemove));
   };
 
-  const handleSubmit = async (values: any) => {
+  const handleSubmit = useCallback(async (values: any) => {
+    // Prepare tags data
+    const tagsData = tags.map(tag => ({
+      tag_key: tag.trim(),
+      tag_value: tag.trim(),
+      tag_type: TagType.INTEREST,
+    }));
+
+    const requestData: WorkerProfileStep1Request = {
+      full_name: values.full_name?.trim(),
+      nickname: values.nickname?.trim(),
+      age: values.age,
+      height_cm: values.height_cm,
+      weight_kg: values.weight_kg,
+      zodiac_sign: values.zodiac_sign,
+      lifestyle: values.lifestyle,
+      personal_quote: values.personal_quote?.trim(),
+      bio: values.bio?.trim(),
+      tags: tagsData,
+      availabilities: availabilities,
+    };
+
+    // Validate data before submitting
+    const validation = validateStep1Profile(requestData);
+    if (!validation.valid) {
+      // Show first error
+      const firstError = validation.errors[0];
+      form.setFields([
+        {
+          name: firstError.field,
+          errors: [firstError.message],
+        },
+      ]);
+      showMessage.error(firstError.message);
+      return;
+    }
+
+    // Optimistic update: save previous state for rollback
+    const previousState = previousProfile;
+
     try {
-      setLoading(true);
+      // Optimistic update: update local state immediately
+      if (previousState) {
+        setPreviousProfile({
+          ...previousState,
+          ...requestData,
+        } as WorkerProfileComplete);
+      }
 
-      // Prepare tags data
-      const tagsData = tags.map(tag => ({
-        tag_key: tag,
-        tag_value: tag,
-        tag_type: TagType.INTEREST,
-      }));
-
-      // Prepare availabilities data (simplified - can be enhanced)
-      const availabilitiesData: any[] = [];
-
-      // For now, we'll add a simple all-day availability for weekdays
-      // This can be enhanced with a more complex availability picker
-      [DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY, DayOfWeek.THURSDAY, DayOfWeek.FRIDAY].forEach(day => {
-        availabilitiesData.push({
-          day_of_week: day,
-          availability_type: AvailabilityType.ALL_DAY,
-        });
-      });
-
-      const requestData: WorkerProfileStep1Request = {
-        full_name: values.full_name,
-        nickname: values.nickname,
-        age: values.age,
-        height_cm: values.height_cm,
-        weight_kg: values.weight_kg,
-        zodiac_sign: values.zodiac_sign,
-        lifestyle: values.lifestyle,
-        personal_quote: values.personal_quote,
-        bio: values.bio,
-        tags: tagsData,
-        availabilities: availabilitiesData,
-      };
-
-      await workerProfileAPI.saveProfile(requestData);
+      // Save with retry logic
+      await saveProfileWithRetry(requestData);
       showMessage.success(t("worker.profile.step1SaveSuccess"));
       onComplete();
     } catch (error) {
+      // Rollback on error
+      if (previousState) {
+        setPreviousProfile(previousState);
+      }
+
       const errorMessage = getErrorMessage(error);
-      showMessage.error(errorMessage);
-    } finally {
-      setLoading(false);
+      
+      // Show specific error messages
+      if (errorMessage.includes("network") || errorMessage.includes("timeout")) {
+        showMessage.error(t("common.networkError"));
+      } else if (errorMessage.includes("429")) {
+        showMessage.error(t("common.tooManyRequests"));
+      } else {
+        showMessage.error(errorMessage);
+      }
     }
-  };
+  }, [tags, availabilities, form, previousProfile, saveProfileWithRetry, onComplete, t]);
+
+  // Note: Form submission is handled by Ant Design Form, debouncing is done via button disable
 
   return (
     <div>
@@ -184,15 +254,20 @@ export default function Step1BasicInfo({ profile, onComplete }: Step1BasicInfoPr
                 name="age"
                 rules={[
                   { required: true, message: t("worker.profile.ageRequired") },
-                  { type: "number", min: 18, max: 100, message: t("worker.profile.ageRange") },
+                  {
+                    type: "number",
+                    min: PROFILE_CONSTRAINTS.MIN_AGE,
+                    max: PROFILE_CONSTRAINTS.MAX_AGE,
+                    message: t("worker.profile.ageRange"),
+                  },
                 ]}
               >
                 <InputNumber
                   size="large"
                   style={{ width: "100%" }}
                   placeholder="25"
-                  min={18}
-                  max={100}
+                  min={PROFILE_CONSTRAINTS.MIN_AGE}
+                  max={PROFILE_CONSTRAINTS.MAX_AGE}
                 />
               </Form.Item>
             </Col>
@@ -201,13 +276,21 @@ export default function Step1BasicInfo({ profile, onComplete }: Step1BasicInfoPr
               <Form.Item
                 label={t("worker.profile.height")}
                 name="height_cm"
+                rules={[
+                  {
+                    type: "number",
+                    min: PROFILE_CONSTRAINTS.MIN_HEIGHT_CM,
+                    max: PROFILE_CONSTRAINTS.MAX_HEIGHT_CM,
+                    message: t("worker.profile.heightRange"),
+                  },
+                ]}
               >
                 <InputNumber
                   size="large"
                   style={{ width: "100%" }}
                   placeholder="170"
-                  min={100}
-                  max={250}
+                  min={PROFILE_CONSTRAINTS.MIN_HEIGHT_CM}
+                  max={PROFILE_CONSTRAINTS.MAX_HEIGHT_CM}
                   addonAfter="cm"
                 />
               </Form.Item>
@@ -217,13 +300,21 @@ export default function Step1BasicInfo({ profile, onComplete }: Step1BasicInfoPr
               <Form.Item
                 label={t("worker.profile.weight")}
                 name="weight_kg"
+                rules={[
+                  {
+                    type: "number",
+                    min: PROFILE_CONSTRAINTS.MIN_WEIGHT_KG,
+                    max: PROFILE_CONSTRAINTS.MAX_WEIGHT_KG,
+                    message: t("worker.profile.weightRange"),
+                  },
+                ]}
               >
                 <InputNumber
                   size="large"
                   style={{ width: "100%" }}
                   placeholder="65"
-                  min={30}
-                  max={300}
+                  min={PROFILE_CONSTRAINTS.MIN_WEIGHT_KG}
+                  max={PROFILE_CONSTRAINTS.MAX_WEIGHT_KG}
                   addonAfter="kg"
                 />
               </Form.Item>
@@ -267,22 +358,39 @@ export default function Step1BasicInfo({ profile, onComplete }: Step1BasicInfoPr
           <Form.Item
             label={t("worker.profile.personalQuote")}
             name="personal_quote"
+            rules={[
+              {
+                max: PROFILE_CONSTRAINTS.MAX_QUOTE_LENGTH,
+                message: t("worker.profile.quoteTooLong", {
+                  max: PROFILE_CONSTRAINTS.MAX_QUOTE_LENGTH,
+                }),
+              },
+            ]}
           >
             <Input
               size="large"
               placeholder={t("worker.profile.personalQuotePlaceholder")}
-              maxLength={200}
+              maxLength={PROFILE_CONSTRAINTS.MAX_QUOTE_LENGTH}
+              showCount
             />
           </Form.Item>
 
           <Form.Item
             label={t("worker.profile.bio")}
             name="bio"
+            rules={[
+              {
+                max: PROFILE_CONSTRAINTS.MAX_BIO_LENGTH,
+                message: t("worker.profile.bioTooLong", {
+                  max: PROFILE_CONSTRAINTS.MAX_BIO_LENGTH,
+                }),
+              },
+            ]}
           >
             <TextArea
               rows={4}
               placeholder={t("worker.profile.bioPlaceholder")}
-              maxLength={1000}
+              maxLength={PROFILE_CONSTRAINTS.MAX_BIO_LENGTH}
               showCount
             />
           </Form.Item>
@@ -318,11 +426,25 @@ export default function Step1BasicInfo({ profile, onComplete }: Step1BasicInfoPr
           </Form.Item>
         </Card>
 
+        {/* Temporarily hidden - Availability section */}
+        {/* <Card title={t("worker.profile.availability")} style={{ marginBottom: 24 }}>
+          <AvailabilityPicker
+            value={availabilities}
+            onChange={setAvailabilities}
+          />
+        </Card> */}
+
         <Divider />
 
         <Form.Item>
           <Space style={{ width: "100%", justifyContent: "flex-end" }}>
-            <Button size="large" type="primary" htmlType="submit" loading={loading}>
+            <Button
+              size="large"
+              type="primary"
+              htmlType="submit"
+              loading={saving}
+              disabled={saving}
+            >
               {t("common.saveAndContinue")}
             </Button>
           </Space>

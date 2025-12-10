@@ -157,6 +157,7 @@ export enum AvailabilityType {
   ALL_DAY = 'all_day',
   TIME_RANGE = 'time_range',
   NOT_AVAILABLE = 'not_available',
+  CUSTOM = 'custom',    
 }
 
 // =============================================================================

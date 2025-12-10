@@ -6,6 +6,8 @@ import { Spin } from "antd";
 import ListingCard, { WorkerProfile } from "./ListingCard";
 import { marketAPI } from "@/lib/market/api-client";
 import { WorkerMarketProfile } from "@/lib/market/types";
+import { favoritesAPI } from "@/lib/favorites/api-client";
+import { authAPI } from "@/lib/auth/api-client";
 
 interface ListingGridProps {
   selectedCategory: string | null;
@@ -16,6 +18,21 @@ export default function ListingGrid({ selectedCategory }: ListingGridProps) {
   const [workers, setWorkers] = useState<WorkerMarketProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [favoritedWorkerIds, setFavoritedWorkerIds] = useState<Set<string>>(new Set());
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  // Check authentication status
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        await authAPI.getProfile();
+        setIsAuthenticated(true);
+      } catch {
+        setIsAuthenticated(false);
+      }
+    };
+    checkAuth();
+  }, []);
 
   // Fetch workers from API
   useEffect(() => {
@@ -27,6 +44,18 @@ export default function ListingGrid({ selectedCategory }: ListingGridProps) {
           limit: 50, // Fetch more workers for home page
         });
         setWorkers(response.workers);
+
+        // If authenticated, fetch favorites
+        if (isAuthenticated && response.workers.length > 0) {
+          try {
+            const workerIds = response.workers.map((w) => w.id);
+            const favoritedIds = await favoritesAPI.checkFavorites(workerIds);
+            setFavoritedWorkerIds(new Set(favoritedIds));
+          } catch (err) {
+            console.error("Failed to fetch favorites:", err);
+            // Continue without favorites
+          }
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to load workers");
         setWorkers([]);
@@ -36,7 +65,7 @@ export default function ListingGrid({ selectedCategory }: ListingGridProps) {
     };
 
     fetchWorkers();
-  }, []);
+  }, [isAuthenticated]);
 
   // Transform API data to WorkerProfile format
   const transformedWorkers: WorkerProfile[] = useMemo(() => {
@@ -73,9 +102,10 @@ export default function ListingGrid({ selectedCategory }: ListingGridProps) {
         rating: 4.7, // Default rating (can be enhanced later with actual ratings)
         imageSrc,
         category,
+        isFavorite: favoritedWorkerIds.has(worker.id),
       };
     });
-  }, [workers, t]);
+  }, [workers, t, favoritedWorkerIds]);
 
   // Filter workers by category if selected
   const filteredWorkers = useMemo(() => {

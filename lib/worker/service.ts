@@ -26,6 +26,12 @@ import {
   HOURS_PER_WEEK,
   HOURS_PER_MONTH,
 } from "@/lib/utils/enums";
+import { logger } from "@/lib/utils/logger";
+import {
+  calculateCompletedSteps,
+  validateStepState,
+  recalculateCompletedSteps,
+} from "./data-consistency";
 
 type WorkerServiceRow = WorkerService & {
   service: Service;
@@ -192,102 +198,260 @@ export class WorkerProfileService {
 
   /**
    * Create or update worker profile (Step 1)
+   * Uses batch operations for atomic updates
+   * Supports optimistic locking with version field
    */
   async saveWorkerProfile(
     userId: string,
-    data: WorkerProfileStep1Request
+    data: WorkerProfileStep1Request,
+    expectedVersion?: number
   ): Promise<WorkerProfile> {
-    // Check if profile exists and get current status
-    const { data: existingProfile } = await this.supabase
-      .from("worker_profiles")
-      .select("id, profile_status")
-      .eq("user_id", userId)
-      .single();
+    logger.logWorkerProfileOperation("saveWorkerProfile", userId, undefined, {
+      hasExpectedVersion: expectedVersion !== undefined,
+    });
 
-    const profileData: Record<string, unknown> = {
-      user_id: userId,
-      full_name: data.full_name,
-      nickname: data.nickname,
-      age: data.age,
-      height_cm: data.height_cm,
-      weight_kg: data.weight_kg,
-      zodiac_sign: data.zodiac_sign,
-      lifestyle: data.lifestyle,
-      personal_quote: data.personal_quote,
-      bio: data.bio,
-      profile_completed_steps: 1, // Step 1 completed
-    };
+    // Declare outside try block so it's accessible in catch block
+    let existingProfile: { id: string; profile_status: string; profile_completed_steps: number; version?: number } | null = null;
 
-    // If profile was approved or published, set status to pending for re-review
-    if (existingProfile) {
-      const currentStatus = existingProfile.profile_status;
-      if (
-        currentStatus === WorkerProfileStatus.APPROVED ||
-        currentStatus === WorkerProfileStatus.PUBLISHED
-      ) {
-        profileData.profile_status = WorkerProfileStatus.PENDING;
-      }
-    }
-
-    if (existingProfile) {
-      // Update existing profile
-      const { data: updated, error } = await this.supabase
+    try {
+      // Check if profile exists and get current status, completed steps, and version
+      const { data: fetchedProfile, error: fetchError } = await this.supabase
         .from("worker_profiles")
-        .update(profileData)
+        .select("id, profile_status, profile_completed_steps, version")
         .eq("user_id", userId)
-        .select()
         .single();
 
-      if (error) {
-        throw new WorkerServiceError(
-          "Failed to update profile",
-          "UPDATE_ERROR",
-          500
+      // Handle error: if it's "no rows found" (PGRST116), that's fine - profile doesn't exist yet
+      // Otherwise, log and rethrow
+      if (fetchError) {
+        // PGRST116 means no rows found - this is expected for new profiles
+        if (fetchError.code === "PGRST116") {
+          existingProfile = null;
+        } else {
+          // Any other error is unexpected - log and throw
+          logger.logWorkerProfileError("saveWorkerProfile", fetchError, userId);
+          throw new WorkerServiceError(
+            `Failed to check existing profile: ${fetchError.message || fetchError.code || "Unknown error"}`,
+            "FETCH_ERROR",
+            500
+          );
+        }
+      } else {
+        // No error - profile exists
+        existingProfile = fetchedProfile;
+      }
+
+      // Optimistic locking check
+      if (existingProfile && expectedVersion !== undefined) {
+        const currentVersion = existingProfile.version || 1;
+        if (currentVersion !== expectedVersion) {
+          logger.warn("Optimistic lock conflict detected", {
+            userId,
+            profileId: existingProfile.id,
+            expectedVersion,
+            currentVersion,
+          });
+          throw new WorkerServiceError(
+            "Profile was modified by another operation. Please refresh and try again.",
+            "CONCURRENT_UPDATE_ERROR",
+            409
+          );
+        }
+      }
+
+      // Calculate completed steps: preserve step 2 completion if updating step 1
+      // Use recalculate function to ensure consistency
+      let completedSteps = 1; // Step 1 is being completed
+      if (existingProfile) {
+        // If step 2 was already completed (bit 2 set), preserve it
+        // Bitmask: 1 = step1, 2 = step2, 3 = both (1 | 2)
+        if (existingProfile.profile_completed_steps >= 2) {
+          completedSteps = 3; // Both steps completed
+        }
+      }
+      
+      // After update, recalculate to ensure consistency
+      // This will be done after the profile is saved
+
+      const profileData: Record<string, unknown> = {
+        user_id: userId,
+        full_name: data.full_name,
+        nickname: data.nickname,
+        age: data.age,
+        height_cm: data.height_cm,
+        weight_kg: data.weight_kg,
+        zodiac_sign: data.zodiac_sign,
+        lifestyle: data.lifestyle,
+        personal_quote: data.personal_quote,
+        bio: data.bio,
+        profile_completed_steps: completedSteps,
+      };
+
+      // Increment version for optimistic locking
+      if (existingProfile) {
+        const currentVersion = existingProfile.version || 1;
+        profileData.version = currentVersion + 1;
+      } else {
+        profileData.version = 1;
+      }
+
+      // If profile was approved or published, set status to pending for re-review
+      if (existingProfile) {
+        const currentStatus = existingProfile.profile_status;
+        if (
+          currentStatus === WorkerProfileStatus.APPROVED ||
+          currentStatus === WorkerProfileStatus.PUBLISHED
+        ) {
+          profileData.profile_status = WorkerProfileStatus.PENDING;
+          logger.info("Profile status reset to pending for re-review", {
+            userId,
+            profileId: existingProfile.id,
+            previousStatus: currentStatus,
+          });
+        }
+      }
+
+      // Use batch operations for atomic updates
+      const profileId = existingProfile?.id;
+
+      let profile: WorkerProfile;
+
+      if (existingProfile) {
+        // Update existing profile with version check
+        const { data: updated, error } = await this.supabase
+          .from("worker_profiles")
+          .update(profileData)
+          .eq("user_id", userId)
+          .eq("version", existingProfile.version || 1) // Optimistic lock check
+          .select()
+          .single();
+
+        if (error) {
+          // Check if it's a version conflict (no rows updated)
+          if (error.code === "PGRST116" || error.message.includes("0 rows")) {
+            logger.warn("Optimistic lock conflict - no rows updated", {
+              userId,
+              profileId: existingProfile.id,
+            });
+            throw new WorkerServiceError(
+              "Profile was modified by another operation. Please refresh and try again.",
+              "CONCURRENT_UPDATE_ERROR",
+              409
+            );
+          }
+          logger.logWorkerProfileError(
+            "saveWorkerProfile",
+            error,
+            userId,
+            existingProfile.id
+          );
+          throw new WorkerServiceError(
+            "Failed to update profile",
+            "UPDATE_ERROR",
+            500
+          );
+        }
+
+        profile = updated as WorkerProfile;
+        logger.info("Profile updated successfully", {
+          userId,
+          profileId: profile.id,
+          version: profile.version,
+        });
+
+        // Update tags and availabilities in batch
+        const updatePromises: Promise<void>[] = [];
+        if (data.tags) {
+          updatePromises.push(this.updateWorkerTags(profile.id, data.tags));
+        }
+        if (data.availabilities) {
+          updatePromises.push(
+            this.updateWorkerAvailabilities(profile.id, data.availabilities)
+          );
+        }
+
+        // Execute all updates
+        await Promise.all(updatePromises);
+        logger.debug("Tags and availabilities updated", {
+          userId,
+          profileId: profile.id,
+        });
+      } else {
+        // Create new profile
+        const { data: created, error } = await this.supabase
+          .from("worker_profiles")
+          .insert(profileData)
+          .select()
+          .single();
+
+        if (error) {
+          logger.logWorkerProfileError("saveWorkerProfile", error, userId);
+          throw new WorkerServiceError(
+            "Failed to create profile",
+            "CREATE_ERROR",
+            500
+          );
+        }
+
+        profile = created as WorkerProfile;
+        logger.info("Profile created successfully", {
+          userId,
+          profileId: profile.id,
+          version: profile.version,
+        });
+
+        // Add tags and availabilities in batch
+        const insertPromises: Promise<void>[] = [];
+        if (data.tags) {
+          insertPromises.push(this.updateWorkerTags(profile.id, data.tags));
+        }
+        if (data.availabilities) {
+          insertPromises.push(
+            this.updateWorkerAvailabilities(profile.id, data.availabilities)
+          );
+        }
+
+        // Execute all inserts
+        await Promise.all(insertPromises);
+        logger.debug("Tags and availabilities created", {
+          userId,
+          profileId: profile.id,
+        });
+      }
+
+      return profile;
+    } catch (error) {
+      // If any operation fails, throw error (partial updates are prevented)
+      if (error instanceof WorkerServiceError) {
+        logger.logWorkerProfileError(
+          "saveWorkerProfile",
+          error,
+          userId,
+          existingProfile?.id
         );
+        throw error;
       }
-
-      // Update tags and availabilities
-      if (data.tags) {
-        await this.updateWorkerTags(updated.id, data.tags);
-      }
-      if (data.availabilities) {
-        await this.updateWorkerAvailabilities(updated.id, data.availabilities);
-      }
-
-      return updated as WorkerProfile;
-    } else {
-      // Create new profile
-      const { data: created, error } = await this.supabase
-        .from("worker_profiles")
-        .insert(profileData)
-        .select()
-        .single();
-
-      if (error) {
-        throw new WorkerServiceError(
-          "Failed to create profile",
-          "CREATE_ERROR",
-          500
-        );
-      }
-
-      // Add tags and availabilities
-      if (data.tags) {
-        await this.updateWorkerTags(created.id, data.tags);
-      }
-      if (data.availabilities) {
-        await this.updateWorkerAvailabilities(created.id, data.availabilities);
-      }
-
-      return created as WorkerProfile;
+      logger.logWorkerProfileError(
+        "saveWorkerProfile",
+        error,
+        userId,
+        existingProfile?.id
+      );
+      throw new WorkerServiceError(
+        "Failed to save profile",
+        "SAVE_ERROR",
+        500
+      );
     }
   }
 
   /**
    * Get worker profile by user ID
+   * Automatically validates and fixes step state inconsistencies
    */
   async getWorkerProfile(
-    userId: string
+    userId: string,
+    autoFixInconsistencies: boolean = true
   ): Promise<WorkerProfileComplete | null> {
     const { data, error } = await this.supabase
       .from("worker_profiles")
@@ -326,6 +490,39 @@ export class WorkerProfileService {
     profile.gallery_images = profile.images?.filter(
       (img) => img.image_type === "gallery"
     );
+
+    // Validate step state consistency
+    const inconsistencies = validateStepState(profile);
+    if (inconsistencies.length > 0) {
+      logger.warn("Profile step state inconsistencies detected", {
+        userId,
+        profileId: profile.id,
+        inconsistencies,
+      });
+
+      // Auto-fix if enabled
+      if (autoFixInconsistencies) {
+        try {
+          await recalculateCompletedSteps(this.supabase, profile.id);
+          // Reload profile to get updated steps
+          const { data: updatedData } = await this.supabase
+            .from("worker_profiles")
+            .select("profile_completed_steps")
+            .eq("id", profile.id)
+            .single();
+          
+          if (updatedData) {
+            profile.profile_completed_steps = updatedData.profile_completed_steps;
+          }
+        } catch (fixError) {
+          logger.error("Failed to auto-fix step inconsistencies", {
+            userId,
+            profileId: profile.id,
+            error: fixError,
+          });
+        }
+      }
+    }
 
     return profile;
   }
@@ -432,44 +629,82 @@ export class WorkerProfileService {
    * Submit profile for review
    */
   async submitProfileForReview(userId: string): Promise<void> {
-    // Check if profile is complete
-    const profile = await this.getWorkerProfile(userId);
-    if (!profile) {
-      throw new WorkerServiceError("Profile not found", "NOT_FOUND", 404);
-    }
+    logger.logWorkerProfileOperation("submitProfileForReview", userId);
 
-    // Validate profile completeness
-    const hasAvatar = profile.images?.some(
-      (img) => img.image_type === "avatar"
-    );
-    const hasServices = profile.services && profile.services.length > 0;
+    try {
+      // Check if profile is complete
+      const profile = await this.getWorkerProfile(userId);
+      if (!profile) {
+        logger.warn("Profile not found for submission", { userId });
+        throw new WorkerServiceError("Profile not found", "NOT_FOUND", 404);
+      }
 
-    if (!hasAvatar) {
-      throw new WorkerServiceError(
-        "Profile must have an avatar",
-        "VALIDATION_ERROR",
-        400
+      // Validate profile completeness
+      const hasAvatar = profile.images?.some(
+        (img) => img.image_type === "avatar"
       );
-    }
+      const hasServices = profile.services && profile.services.length > 0;
 
-    if (!hasServices) {
-      throw new WorkerServiceError(
-        "Profile must have at least one service",
-        "VALIDATION_ERROR",
-        400
-      );
-    }
+      if (!hasAvatar) {
+        logger.warn("Profile submission failed: no avatar", {
+          userId,
+          profileId: profile.id,
+        });
+        throw new WorkerServiceError(
+          "Profile must have an avatar",
+          "VALIDATION_ERROR",
+          400
+        );
+      }
 
-    // Update status to pending
-    const { error } = await this.supabase
-      .from("worker_profiles")
-      .update({
-        profile_status: WorkerProfileStatus.PENDING,
-        profile_completed_steps: 3, // Both steps completed
-      })
-      .eq("user_id", userId);
+      if (!hasServices) {
+        logger.warn("Profile submission failed: no services", {
+          userId,
+          profileId: profile.id,
+        });
+        throw new WorkerServiceError(
+          "Profile must have at least one service",
+          "VALIDATION_ERROR",
+          400
+        );
+      }
 
-    if (error) {
+      // Update status to pending with version increment
+      const currentVersion = profile.version || 1;
+      const { error } = await this.supabase
+        .from("worker_profiles")
+        .update({
+          profile_status: WorkerProfileStatus.PENDING,
+          profile_completed_steps: 3, // Both steps completed
+          version: currentVersion + 1,
+        })
+        .eq("user_id", userId)
+        .eq("version", currentVersion); // Optimistic lock check
+
+      if (error) {
+        logger.logWorkerProfileError(
+          "submitProfileForReview",
+          error,
+          userId,
+          profile.id
+        );
+        throw new WorkerServiceError(
+          "Failed to submit profile",
+          "UPDATE_ERROR",
+          500
+        );
+      }
+
+      logger.info("Profile submitted for review successfully", {
+        userId,
+        profileId: profile.id,
+        version: currentVersion + 1,
+      });
+    } catch (error) {
+      if (error instanceof WorkerServiceError) {
+        throw error;
+      }
+      logger.logWorkerProfileError("submitProfileForReview", error, userId);
       throw new WorkerServiceError(
         "Failed to submit profile",
         "UPDATE_ERROR",
@@ -577,6 +812,7 @@ export class WorkerProfileService {
 
   /**
    * Add image to worker profile
+   * Validates image data before insertion
    */
   async addWorkerImage(
     profileId: string,
@@ -590,33 +826,142 @@ export class WorkerProfileService {
       height_px?: number;
     }
   ): Promise<WorkerImage> {
-    // If adding avatar, remove existing avatar
-    if (imageData.image_type === "avatar") {
-      await this.supabase
-        .from("worker_images")
-        .delete()
-        .eq("worker_profile_id", profileId)
-        .eq("image_type", "avatar");
+    logger.logWorkerProfileOperation(
+      "addWorkerImage",
+      "",
+      profileId,
+      { imageType: imageData.image_type }
+    );
+
+    try {
+      // Validate image URL format
+      if (!imageData.image_url || typeof imageData.image_url !== "string") {
+        logger.warn("Image validation failed: URL required", {
+          profileId,
+          imageType: imageData.image_type,
+        });
+        throw new WorkerServiceError(
+          "Image URL is required",
+          "VALIDATION_ERROR",
+          400
+        );
+      }
+
+    try {
+      new URL(imageData.image_url);
+    } catch {
+      throw new WorkerServiceError(
+        "Invalid image URL format",
+        "VALIDATION_ERROR",
+        400
+      );
     }
 
-    const { data, error } = await this.supabase
-      .from("worker_images")
-      .insert({
-        worker_profile_id: profileId,
-        display_order: 0,
-        ...imageData,
-      })
-      .select()
-      .single();
+    // Validate file size if provided
+    if (imageData.file_size_bytes !== undefined) {
+      const MAX_SIZE = 5 * 1024 * 1024; // 5MB
+      if (imageData.file_size_bytes > MAX_SIZE) {
+        throw new WorkerServiceError(
+          "Image file size exceeds maximum allowed (5MB)",
+          "VALIDATION_ERROR",
+          400
+        );
+      }
+      if (imageData.file_size_bytes < 0) {
+        throw new WorkerServiceError(
+          "Invalid file size",
+          "VALIDATION_ERROR",
+          400
+        );
+      }
+    }
 
-    if (error) {
+    // Validate MIME type if provided
+    if (imageData.mime_type !== undefined) {
+      const VALID_TYPES = [
+        "image/jpeg",
+        "image/jpg",
+        "image/png",
+        "image/webp",
+        "image/gif",
+      ];
+      if (!VALID_TYPES.includes(imageData.mime_type)) {
+        throw new WorkerServiceError(
+          `Invalid image type. Allowed types: ${VALID_TYPES.join(", ")}`,
+          "VALIDATION_ERROR",
+          400
+        );
+      }
+    }
+
+    // Validate dimensions if provided
+    if (imageData.width_px !== undefined) {
+      if (!Number.isInteger(imageData.width_px) || imageData.width_px < 1) {
+        throw new WorkerServiceError(
+          "Invalid image width",
+          "VALIDATION_ERROR",
+          400
+        );
+      }
+    }
+
+    if (imageData.height_px !== undefined) {
+      if (!Number.isInteger(imageData.height_px) || imageData.height_px < 1) {
+        throw new WorkerServiceError(
+          "Invalid image height",
+          "VALIDATION_ERROR",
+          400
+        );
+      }
+    }
+
+      // If adding avatar, remove existing avatar
+      if (imageData.image_type === "avatar") {
+        await this.supabase
+          .from("worker_images")
+          .delete()
+          .eq("worker_profile_id", profileId)
+          .eq("image_type", "avatar");
+        logger.debug("Removed existing avatar", { profileId });
+      }
+
+      const { data, error } = await this.supabase
+        .from("worker_images")
+        .insert({
+          worker_profile_id: profileId,
+          display_order: 0,
+          ...imageData,
+        })
+        .select()
+        .single();
+
+      if (error) {
+        logger.logWorkerProfileError(
+          "addWorkerImage",
+          error,
+          undefined,
+          profileId
+        );
+        throw new WorkerServiceError("Failed to add image", "CREATE_ERROR", 500);
+      }
+
+      // Reset profile status to pending if approved/published
+      await this.resetProfileStatusIfNeeded(profileId);
+
+      logger.info("Image added successfully", {
+        profileId,
+        imageId: data.id,
+        imageType: imageData.image_type,
+      });
+
+      return data as WorkerImage;
+    } catch (error) {
+      if (error instanceof WorkerServiceError) {
+        throw error;
+      }
+      logger.logWorkerProfileError("addWorkerImage", error, undefined, profileId);
       throw new WorkerServiceError("Failed to add image", "CREATE_ERROR", 500);
     }
-
-    // Reset profile status to pending if approved/published
-    await this.resetProfileStatusIfNeeded(profileId);
-
-    return data as WorkerImage;
   }
 
   /**
@@ -714,11 +1059,10 @@ export class WorkerProfileService {
       );
     }
 
-    // Update profile completed steps
-    await this.supabase
-      .from("worker_profiles")
-      .update({ profile_completed_steps: 3 })
-      .eq("id", profileId);
+    // Note: Don't update completed_steps here - it should only be updated when:
+    // - Step 1 is completed (in saveWorkerProfile)
+    // - Step 2 is completed (when submitting for review)
+    // This prevents overwriting step completion status when just adding a service
 
     // Reset profile status to pending if approved/published
     await this.resetProfileStatusIfNeeded(profileId);

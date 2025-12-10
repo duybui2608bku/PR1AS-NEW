@@ -10,6 +10,8 @@
     "edit": "编辑",
     "search": "搜索",
     "filter": "筛选",
+    "startDate": "开始日期",
+    "endDate": "结束日期",
     "back": "返回",
     "continue": "继续",
     "next": "下一页",
@@ -21,8 +23,11 @@
     "yes": "是",
     "no": "否",
     "close": "关闭",
+    "refresh": "刷新",
+    "retry": "重试",
     "homeButton": "返回首页",
     "backToDashboard": "返回仪表板",
+    "total": "总计",
     "hours": "小时",
     "days": "天",
     "weeks": "周",
@@ -310,12 +315,27 @@
     "supportEmail": "支持邮箱："
   },
   "worker": {
+    "sidebar": {
+      "profileSetup": "设置档案",
+      "myWallet": "我的钱包",
+      "messages": "消息",
+      "myJobs": "我的工作"
+    },
     "dashboard": {
       "title": "工作者仪表板",
       "availableJobs": "可用工作",
       "inProgress": "进行中",
       "completed": "已完成",
-      "totalEarnings": "总收入"
+      "totalEarnings": "总收入",
+      "earningsChart": "收入图表",
+      "earnings": "收入",
+      "escrowsByStatus": "工作状态",
+      "status": {
+        "held": "持有中",
+        "released": "已释放",
+        "disputed": "争议中",
+        "refunded": "已退款"
+      }
     },
     "profile": {
       "setupTitle": "设置您的工作者档案",
@@ -484,12 +504,28 @@
     }
   },
   "client": {
+    "sidebar": {
+      "myWallet": "我的钱包",
+      "messages": "消息",
+      "postJob": "发布工作",
+      "myJobs": "我的工作"
+    },
     "dashboard": {
       "title": "客户仪表板",
-      "activeJobs": "活跃工作",
+      "welcome": "欢迎回来！",
+      "subtitle": "管理您的服务预订并发现新的提供商。",
+      "bookService": "预订服务",
+      "totalBookings": "总预订数",
+      "thisMonth": "本月",
+      "activeServices": "进行中的服务",
       "inProgress": "进行中",
-      "completed": "已完成",
-      "totalSpent": "总支出"
+      "totalSpent": "总支出",
+      "allTime": "全部时间",
+      "favoriteWorkers": "收藏的工人",
+      "savedProfiles": "已保存的档案",
+      "recentActivity": "最近活动",
+      "noActivity": "没有最近活动",
+      "viewAllActivity": "查看所有活动"
     },
     "profile": {
       "title": "基础资料设置",
@@ -563,6 +599,12 @@
         "completed": "已完成",
         "failed": "失败",
         "cancelled": "已取消"
+      },
+      "paymentMethods": {
+        "paypal": "PayPal",
+        "bank_transfer": "银行转账",
+        "escrow": "托管",
+        "internal": "内部"
       }
     },
     "deposit": {
@@ -633,8 +675,48 @@
       }
     }
   },
+  "notification": {
+    "booking_request": {
+      "title": "新预订请求",
+      "message": "您收到了一个新的预订请求"
+    },
+    "booking_confirmed": {
+      "title": "预订已确认",
+      "message": "您的预订已被工作人员确认"
+    },
+    "booking_declined": {
+      "title": "预订已拒绝",
+      "message": "工作人员已拒绝您的预订请求"
+    },
+    "booking_cancelled": {
+      "title": "预订已取消",
+      "message": "您的预订已被取消"
+    },
+    "booking_completed": {
+      "title": "预订已完成",
+      "message": "客户已确认完成。付款将被释放。"
+    },
+    "payment_received": {
+      "title": "已收到付款",
+      "message": "付款已收到"
+    },
+    "payment_released": {
+      "title": "付款已释放",
+      "message": "付款已从托管中释放"
+    },
+    "escrow_released": {
+      "title": "托管已释放",
+      "message": "托管已释放"
+    },
+    "system_announcement": {
+      "title": "系统公告",
+      "message": "系统公告"
+    }
+  },
   "booking": {
     "title": "预订管理",
+    "myBookings": "我的预订",
+    "favoriteWorkers": "收藏的工人",
     "service": "服务",
     "create": "创建预订",
     "calculate": "计算价格",
@@ -692,6 +774,11 @@
     "duration": "时长",
     "createdAt": "创建时间",
     "filterByStatus": "按状态筛选",
+    "filterDateFrom": "开始日期",
+    "filterDateTo": "结束日期",
+    "dateFromAfterDateTo": "开始日期不能晚于结束日期",
+    "dateToBeforeDateFrom": "结束日期不能早于开始日期",
+    "loadError": "无法加载预订列表。请重试。",
     "noBookings": "暂无预订",
     "all": "全部",
     "active": "进行中",
@@ -770,6 +857,14 @@
     "more": "更多",
     "viewProfile": "查看资料",
     "pagination": "显示 {start} - {end}，共 {total} 名工作者"
+  },
+  "favorites": {
+    "added": "已添加到收藏",
+    "removed": "已从收藏中移除",
+    "loginRequired": "请登录以添加收藏",
+    "error": "更新收藏失败",
+    "fetchError": "无法加载收藏的工人列表",
+    "empty": "您还没有添加任何工人到收藏"
   },
   "mockdata": {
     "workers": {

@@ -185,3 +185,41 @@
 .dark .border-gray-100 {
   border-color: #111111 !important;
 }
+
+/* Dark mode sidebar background - pure black */
+:root.dark .ant-layout-sider-dark,
+:root.dark .ant-layout-sider.ant-layout-sider-dark {
+  background: #000000 !important;
+}
+
+/* Dark mode menu background - pure black */
+:root.dark .ant-menu-dark,
+:root.dark .ant-menu-dark .ant-menu {
+  background: #000000 !important;
+}
+
+/* Dark mode menu items - ensure text is white */
+:root.dark .ant-menu-dark .ant-menu-item,
+:root.dark .ant-menu-dark .ant-menu-item-selected,
+:root.dark .ant-menu-dark .ant-menu-item-active {
+  color: rgba(255, 255, 255, 0.85) !important;
+  background: #000000 !important;
+}
+
+:root.dark .ant-menu-dark .ant-menu-item-selected {
+  background-color: rgba(255, 56, 92, 0.1) !important;
+  color: #FF385C !important;
+}
+
+:root.dark .ant-menu-dark .ant-menu-item:hover {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  color: rgba(255, 255, 255, 0.95) !important;
+}
+
+:root.dark .ant-menu-dark .ant-menu-item-icon {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+:root.dark .ant-menu-dark .ant-menu-item-selected .ant-menu-item-icon {
+  color: #FF385C !important;
+}

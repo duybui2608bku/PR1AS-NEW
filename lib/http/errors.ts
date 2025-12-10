@@ -13,6 +13,7 @@ import {
   forbiddenResponse,
   notFoundResponse,
 } from "./response";
+import { errorTracker } from "@/lib/utils/error-tracker";
 
 /**
  * Error codes used across the application
@@ -42,7 +43,7 @@ export enum ErrorCode {
   INVALID_ROLE = "INVALID_ROLE",
   INVALID_INPUT = "INVALID_INPUT",
   WEAK_PASSWORD = "WEAK_PASSWORD",
-  
+
   // Rate Limiting
   RATE_LIMIT_EXCEEDED = "RATE_LIMIT_EXCEEDED",
   ACCOUNT_LOCKED = "ACCOUNT_LOCKED",
@@ -67,6 +68,7 @@ export enum ErrorCode {
   // Worker Profile
   WORKER_PROFILE_NOT_FOUND = "WORKER_PROFILE_NOT_FOUND",
   WORKER_PROFILE_NOT_PUBLISHED = "WORKER_PROFILE_NOT_PUBLISHED",
+  CONCURRENT_UPDATE_ERROR = "CONCURRENT_UPDATE_ERROR",
 
   // File Upload
   NO_FILE_PROVIDED = "NO_FILE_PROVIDED",
@@ -96,16 +98,79 @@ export class ApiError extends Error {
 }
 
 /**
+ * Map WorkerServiceError code to ErrorCode enum
+ */
+function mapWorkerServiceErrorCode(workerCode: string): ErrorCode {
+  const codeMap: Record<string, ErrorCode> = {
+    FETCH_ERROR: ErrorCode.INTERNAL_ERROR,
+    CREATE_ERROR: ErrorCode.OPERATION_FAILED,
+    UPDATE_ERROR: ErrorCode.OPERATION_FAILED,
+    DELETE_ERROR: ErrorCode.OPERATION_FAILED,
+    SAVE_ERROR: ErrorCode.OPERATION_FAILED,
+    CONCURRENT_UPDATE_ERROR: ErrorCode.CONCURRENT_UPDATE_ERROR,
+    DUPLICATE_ERROR: ErrorCode.VALIDATION_ERROR,
+    NOT_FOUND: ErrorCode.WORKER_PROFILE_NOT_FOUND,
+  };
+
+  return codeMap[workerCode] || ErrorCode.INTERNAL_ERROR;
+}
+
+/**
  * Handle API errors and return appropriate response
  */
-export function handleApiError(error: unknown): NextResponse {
-  // Handle ApiError instances
+export function handleApiError(
+  error: unknown,
+  context?: { endpoint?: string; userId?: string }
+): NextResponse {
+  // Track error for monitoring
   if (error instanceof ApiError) {
+    errorTracker.trackApiError(
+      error,
+      context?.endpoint || "unknown",
+      error.statusCode,
+      context?.userId
+    );
     return errorResponse(error.message, error.statusCode, error.code);
+  }
+
+  // Handle WorkerServiceError (convert to ApiError)
+  // Check for WorkerServiceError by name and properties
+  if (
+    error instanceof Error &&
+    error.name === "WorkerServiceError" &&
+    "code" in error &&
+    "statusCode" in error
+  ) {
+    const workerError = error as {
+      code: string;
+      statusCode: number;
+      message: string;
+    };
+    const errorCode = mapWorkerServiceErrorCode(workerError.code);
+    const apiError = new ApiError(
+      workerError.message,
+      workerError.statusCode,
+      errorCode
+    );
+    errorTracker.trackApiError(
+      apiError,
+      context?.endpoint || "unknown",
+      apiError.statusCode,
+      context?.userId
+    );
+    return errorResponse(apiError.message, apiError.statusCode, apiError.code);
   }
 
   // Handle standard Error instances
   if (error instanceof Error) {
+    // Track error
+    errorTracker.trackApiError(
+      error,
+      context?.endpoint || "unknown",
+      undefined,
+      context?.userId
+    );
+
     // Check for common error patterns
     const message = error.message.toLowerCase();
 
@@ -134,10 +199,12 @@ export function handleApiError(error: unknown): NextResponse {
 
   // Handle string errors
   if (typeof error === "string") {
+    errorTracker.trackError(new Error(error), context);
     return internalErrorResponse(error, ErrorCode.INTERNAL_ERROR);
   }
 
   // Unknown error type
+  errorTracker.trackError(error, context);
   return internalErrorResponse(
     "An unexpected error occurred",
     ErrorCode.INTERNAL_ERROR
@@ -161,7 +228,9 @@ export function withErrorHandling<
     try {
       return await handler(request, context);
     } catch (error) {
-      return handleApiError(error);
+      // Extract endpoint from request URL
+      const endpoint = new URL(request.url).pathname;
+      return handleApiError(error, { endpoint });
     }
   };
 }

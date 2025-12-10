@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, Steps, Button, Typography, Space, Spin, Alert } from "antd";
 import {
   UserOutlined,
@@ -15,6 +15,7 @@ import { getErrorMessage } from "@/lib/utils/common";
 import { workerProfileAPI } from "@/lib/worker/api-client";
 import { WorkerProfileComplete } from "@/lib/worker/types";
 import { WorkerProfileStatus } from "@/lib/utils/enums";
+import { useRetry } from "@/lib/hooks/useRetry";
 import Step1BasicInfo from "@/components/worker/Step1BasicInfo";
 import Step2ServicesAndPricing from "@/components/worker/Step2ServicesAndPricing";
 
@@ -27,6 +28,19 @@ export default function WorkerProfileSetupPage() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [profile, setProfile] = useState<WorkerProfileComplete | null>(null);
+  const [stepValidationErrors, setStepValidationErrors] = useState<string[]>([]);
+
+  // Retry logic for loading profile
+  const { execute: loadProfileWithRetry } = useRetry(
+    workerProfileAPI.getProfile,
+    {
+      maxRetries: 3,
+      retryDelay: 1000,
+      onRetry: (attempt) => {
+        showMessage.warning(t("common.retrying", { attempt }));
+      },
+    }
+  );
 
   useEffect(() => {
     loadProfile();
@@ -35,7 +49,8 @@ export default function WorkerProfileSetupPage() {
   const loadProfile = async () => {
     try {
       setLoading(true);
-      const profileData = await workerProfileAPI.getProfile();
+      setStepValidationErrors([]);
+      const profileData = await loadProfileWithRetry();
       setProfile(profileData);
 
       // Determine current step based on profile_completed_steps
@@ -60,35 +75,111 @@ export default function WorkerProfileSetupPage() {
       }
     } catch (error) {
       // Profile doesn't exist yet, start from step 0
+      const errorMessage = getErrorMessage(error);
+      if (errorMessage.includes("network") || errorMessage.includes("timeout")) {
+        showMessage.error(t("common.networkError"));
+        setStepValidationErrors([t("common.networkError")]);
+      } else if (!errorMessage.includes("404") && !errorMessage.includes("not found")) {
+        showMessage.error(errorMessage);
+        setStepValidationErrors([errorMessage]);
+      }
       setCurrentStep(0);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleStep1Complete = async () => {
-    await loadProfile();
-    setCurrentStep(1);
-  };
+  // Validate step before navigation
+  const validateStep = useCallback((step: number): boolean => {
+    if (!profile) return true; // Allow navigation if no profile
 
-  const handleStep2Complete = async () => {
-    await loadProfile();
-    setCurrentStep(2);
-  };
+    const errors: string[] = [];
 
-  const handleSubmitForReview = async () => {
+    if (step === 1) {
+      // Validate step 1 completion
+      if (!profile.full_name || !profile.age) {
+        errors.push(t("worker.profile.step1Incomplete"));
+      }
+    } else if (step === 2) {
+      // Validate step 2 completion
+      if (!profile.avatar) {
+        errors.push(t("worker.profile.avatarRequired"));
+      }
+      if (!profile.services || profile.services.length === 0) {
+        errors.push(t("worker.profile.atLeastOneService"));
+      }
+    }
+
+    if (errors.length > 0) {
+      setStepValidationErrors(errors);
+      showMessage.error(errors[0]);
+      return false;
+    }
+
+    setStepValidationErrors([]);
+    return true;
+  }, [profile, t]);
+
+  const handleStep1Complete = useCallback(async () => {
+    try {
+      await loadProfile();
+      if (validateStep(1)) {
+        setCurrentStep(1);
+      }
+    } catch (error) {
+      const errorMessage = getErrorMessage(error);
+      showMessage.error(errorMessage);
+    }
+  }, [validateStep]);
+
+  const handleStep2Complete = useCallback(async () => {
+    try {
+      await loadProfile();
+      if (validateStep(2)) {
+        setCurrentStep(2);
+      }
+    } catch (error) {
+      const errorMessage = getErrorMessage(error);
+      showMessage.error(errorMessage);
+    }
+  }, [validateStep]);
+
+  // Retry logic for submit
+  const { execute: submitWithRetry } = useRetry(
+    workerProfileAPI.submitForReview,
+    {
+      maxRetries: 3,
+      retryDelay: 1000,
+      onRetry: (attempt) => {
+        showMessage.warning(t("common.retrying", { attempt }));
+      },
+    }
+  );
+
+  const handleSubmitForReview = useCallback(async () => {
+    // Final validation before submit
+    if (!validateStep(2)) {
+      return;
+    }
+
     try {
       setSubmitting(true);
-      await workerProfileAPI.submitForReview();
+      await submitWithRetry();
       showMessage.success(t("worker.profile.submitSuccess"));
       router.push("/worker/dashboard");
     } catch (error) {
       const errorMessage = getErrorMessage(error);
-      showMessage.error(errorMessage);
+      if (errorMessage.includes("network") || errorMessage.includes("timeout")) {
+        showMessage.error(t("common.networkError"));
+      } else if (errorMessage.includes("429")) {
+        showMessage.error(t("common.tooManyRequests"));
+      } else {
+        showMessage.error(errorMessage);
+      }
     } finally {
       setSubmitting(false);
     }
-  };
+  }, [validateStep, submitWithRetry, router, t]);
 
   if (loading) {
     return (
@@ -120,6 +211,24 @@ export default function WorkerProfileSetupPage() {
         <Title level={2} style={{ textAlign: "center", marginBottom: 40 }}>
           {t("worker.profile.setupTitle")}
         </Title>
+
+        {stepValidationErrors.length > 0 && (
+          <Alert
+            message={t("common.validationErrors")}
+            description={
+              <ul style={{ margin: 0, paddingLeft: 20 }}>
+                {stepValidationErrors.map((error, index) => (
+                  <li key={index}>{error}</li>
+                ))}
+              </ul>
+            }
+            type="error"
+            showIcon
+            closable
+            onClose={() => setStepValidationErrors([])}
+            style={{ marginBottom: 24 }}
+          />
+        )}
 
         {showStatusInfo && (
           <Alert

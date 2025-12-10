@@ -10,6 +10,8 @@
     "edit": "Edit",
     "search": "Search",
     "filter": "Filter",
+    "startDate": "Start Date",
+    "endDate": "End Date",
     "back": "Back",
     "continue": "Continue",
     "next": "Next",
@@ -22,6 +24,7 @@
     "no": "No",
     "close": "Close",
     "refresh": "Refresh",
+    "retry": "Retry",
     "homeButton": "Back to Home",
     "backToDashboard": "Back to Dashboard",
     "total": "Total",
@@ -329,12 +332,27 @@
     }
   },
   "worker": {
+    "sidebar": {
+      "profileSetup": "Profile Setup",
+      "myWallet": "My Wallet",
+      "messages": "Messages",
+      "myJobs": "My Jobs"
+    },
     "dashboard": {
       "title": "Worker Dashboard",
       "availableJobs": "Available Jobs",
       "inProgress": "In Progress",
       "completed": "Completed",
-      "totalEarnings": "Total Earnings"
+      "totalEarnings": "Total Earnings",
+      "earningsChart": "Earnings Chart",
+      "earnings": "Earnings",
+      "escrowsByStatus": "Jobs by Status",
+      "status": {
+        "held": "Held",
+        "released": "Released",
+        "disputed": "Disputed",
+        "refunded": "Refunded"
+      }
     },
     "profile": {
       "setupTitle": "Setup Your Worker Profile",
@@ -506,12 +524,34 @@
     }
   },
   "client": {
+    "sidebar": {
+      "myWallet": "My Wallet",
+      "messages": "Messages",
+      "postJob": "Post Job",
+      "myJobs": "My Jobs"
+    },
     "dashboard": {
       "title": "Client Dashboard",
-      "activeJobs": "Active Jobs",
-      "inProgress": "In Progress",
-      "completed": "Completed",
-      "totalSpent": "Total Spent"
+      "welcome": "Welcome back!",
+      "subtitle": "Manage your service bookings and discover new providers.",
+      "bookService": "Book Service",
+      "totalBookings": "Total Bookings",
+      "thisMonth": "This month",
+      "activeServices": "Active Services",
+      "inProgress": "In progress",
+      "totalSpent": "Total Spent",
+      "allTime": "All time",
+      "favoriteWorkers": "Favorite Workers",
+      "savedProfiles": "Saved profiles",
+      "recentActivity": "Recent Activity",
+      "noActivity": "No recent activity",
+      "viewAllActivity": "View All Activity",
+      "bookingsChart": "Bookings Over Time",
+      "spendingChart": "Spending Over Time",
+      "bookingsByStatus": "Bookings by Status",
+      "bookings": "Bookings",
+      "spending": "Spending",
+      "count": "Count"
     },
     "profile": {
       "title": "Basic Profile Settings",
@@ -574,9 +614,13 @@
         "payment": "Payment",
         "earning": "Earning",
         "platformFee": "Platform Fee",
+        "platform_fee": "Platform Fee",
+        "insurance_fee": "Insurance Fee",
         "refund": "Refund",
         "escrowCreate": "Escrow Create",
         "escrowRelease": "Escrow Release",
+        "escrow_hold": "Escrow Hold",
+        "escrow_release": "Escrow Release",
         "withdrawalFee": "Withdrawal Fee"
       },
       "statuses": {
@@ -585,6 +629,12 @@
         "completed": "Completed",
         "failed": "Failed",
         "cancelled": "Cancelled"
+      },
+      "paymentMethods": {
+        "paypal": "PayPal",
+        "bank_transfer": "Bank Transfer",
+        "escrow": "Escrow",
+        "internal": "Internal"
       }
     },
     "deposit": {
@@ -655,8 +705,48 @@
       }
     }
   },
+  "notification": {
+    "booking_request": {
+      "title": "New Booking Request",
+      "message": "You have received a new booking request"
+    },
+    "booking_confirmed": {
+      "title": "Booking Confirmed",
+      "message": "Your booking has been confirmed by the worker"
+    },
+    "booking_declined": {
+      "title": "Booking Declined",
+      "message": "The worker has declined your booking request"
+    },
+    "booking_cancelled": {
+      "title": "Booking Cancelled",
+      "message": "Your booking has been cancelled"
+    },
+    "booking_completed": {
+      "title": "Booking Completed",
+      "message": "The client has confirmed completion. Payment will be released."
+    },
+    "payment_received": {
+      "title": "Payment Received",
+      "message": "Payment has been received"
+    },
+    "payment_released": {
+      "title": "Payment Released",
+      "message": "Payment has been released from escrow"
+    },
+    "escrow_released": {
+      "title": "Escrow Released",
+      "message": "Escrow has been released"
+    },
+    "system_announcement": {
+      "title": "System Announcement",
+      "message": "System announcement"
+    }
+  },
   "booking": {
     "title": "Bookings",
+    "myBookings": "My Bookings",
+    "favoriteWorkers": "Favorite Workers",
     "service": "Service",
     "create": "Create booking",
     "calculate": "Calculate price",
@@ -714,6 +804,11 @@
     "duration": "Duration",
     "createdAt": "Created at",
     "filterByStatus": "Filter by status",
+    "filterDateFrom": "From date",
+    "filterDateTo": "To date",
+    "dateFromAfterDateTo": "Start date cannot be after end date",
+    "dateToBeforeDateFrom": "End date cannot be before start date",
+    "loadError": "Unable to load bookings. Please try again.",
     "noBookings": "No bookings",
     "all": "All",
     "active": "Active",
@@ -973,6 +1068,14 @@
     "more": "more",
     "viewProfile": "View Profile",
     "pagination": "Showing {start} - {end} of {total} workers"
+  },
+  "favorites": {
+    "added": "Added to favorites",
+    "removed": "Removed from favorites",
+    "loginRequired": "Please login to add favorites",
+    "error": "Failed to update favorite",
+    "fetchError": "Failed to load favorite workers",
+    "empty": "You haven't added any workers to favorites yet"
   },
   "mockdata": {
     "workers": {

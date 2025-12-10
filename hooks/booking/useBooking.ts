@@ -37,11 +37,24 @@ export function useBookings(filters?: {
   status?: string[];
   page?: number;
   limit?: number;
+  date_from?: string;
+  date_to?: string;
 }) {
   return useQuery({
     queryKey: bookingKeys.list(filters),
-    queryFn: () => bookingAPI.getBookings(filters),
+    queryFn: async () => {
+      try {
+        console.log("[useBookings] Fetching bookings with filters:", filters);
+        const result = await bookingAPI.getBookings(filters);
+        console.log("[useBookings] Successfully fetched bookings:", result.length);
+        return result;
+      } catch (error) {
+        console.error("[useBookings] Error fetching bookings:", error);
+        throw error;
+      }
+    },
     staleTime: 2 * 60 * 1000, // 2 minutes
+    retry: 1, // Only retry once on failure
   });
 }
 

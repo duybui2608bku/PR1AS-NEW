@@ -84,13 +84,20 @@ class AdminUserAPI {
         ...options,
       });
 
-      const data = await response.json();
+      const jsonData = await response.json();
 
       if (!response.ok) {
-        return { error: data.error || "Request failed" };
+        return { error: jsonData.error || "Request failed" };
       }
 
-      return { data, message: data.message };
+      // API returns { success: true, data: T, message?: string }
+      // Unwrap the data property
+      if (jsonData.success && jsonData.data !== undefined) {
+        return { data: jsonData.data, message: jsonData.message };
+      }
+
+      // Fallback for non-standard responses
+      return { data: jsonData, message: jsonData.message };
     } catch (error) {
       return { error: "Network error" };
     }

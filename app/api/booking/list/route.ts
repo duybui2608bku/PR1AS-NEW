@@ -32,6 +32,16 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
     filters.status = statusParam.split(",") as BookingStatus[];
   }
 
+  const dateFromParam = searchParams.get("date_from");
+  if (dateFromParam) {
+    filters.date_from = dateFromParam;
+  }
+
+  const dateToParam = searchParams.get("date_to");
+  if (dateToParam) {
+    filters.date_to = dateToParam;
+  }
+
   const page = parseInt(searchParams.get("page") || "1");
   const limit = parseInt(searchParams.get("limit") || "20");
 

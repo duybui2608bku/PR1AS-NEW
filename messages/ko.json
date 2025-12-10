@@ -10,6 +10,8 @@
     "edit": "편집",
     "search": "검색",
     "filter": "필터",
+    "startDate": "시작 날짜",
+    "endDate": "종료 날짜",
     "back": "뒤로",
     "continue": "계속",
     "next": "다음",
@@ -21,8 +23,11 @@
     "yes": "예",
     "no": "아니오",
     "close": "닫기",
+    "refresh": "새로고침",
+    "retry": "다시 시도",
     "homeButton": "홈으로",
     "backToDashboard": "대시보드로",
+    "total": "총",
     "hours": "시간",
     "days": "일",
     "weeks": "주",
@@ -347,12 +352,27 @@
     "supportEmail": "지원 이메일:"
   },
   "worker": {
+    "sidebar": {
+      "profileSetup": "프로필 설정",
+      "myWallet": "내 지갑",
+      "messages": "메시지",
+      "myJobs": "내 작업"
+    },
     "dashboard": {
       "title": "워커 대시보드",
       "availableJobs": "이용 가능한 작업",
       "inProgress": "진행 중",
       "completed": "완료됨",
-      "totalEarnings": "총 수입"
+      "totalEarnings": "총 수입",
+      "earningsChart": "수입 차트",
+      "earnings": "수입",
+      "escrowsByStatus": "작업 상태",
+      "status": {
+        "held": "보류 중",
+        "released": "해제됨",
+        "disputed": "분쟁 중",
+        "refunded": "환불됨"
+      }
     },
     "profile": {
       "setupTitle": "워커 프로필 설정하기",
@@ -521,12 +541,28 @@
     }
   },
   "client": {
+    "sidebar": {
+      "myWallet": "내 지갑",
+      "messages": "메시지",
+      "postJob": "작업 게시",
+      "myJobs": "내 작업"
+    },
     "dashboard": {
       "title": "클라이언트 대시보드",
-      "activeJobs": "활성 작업",
+      "welcome": "다시 오신 것을 환영합니다!",
+      "subtitle": "서비스 예약을 관리하고 새로운 제공업체를 발견하세요.",
+      "bookService": "서비스 예약",
+      "totalBookings": "총 예약",
+      "thisMonth": "이번 달",
+      "activeServices": "진행 중인 서비스",
       "inProgress": "진행 중",
-      "completed": "완료됨",
-      "totalSpent": "총 지출"
+      "totalSpent": "총 지출",
+      "allTime": "전체 기간",
+      "favoriteWorkers": "즐겨찾는 작업자",
+      "savedProfiles": "저장된 프로필",
+      "recentActivity": "최근 활동",
+      "noActivity": "최근 활동 없음",
+      "viewAllActivity": "모든 활동 보기"
     },
     "profile": {
       "title": "기본 프로필 설정",
@@ -600,6 +636,12 @@
         "completed": "완료됨",
         "failed": "실패",
         "cancelled": "취소됨"
+      },
+      "paymentMethods": {
+        "paypal": "PayPal",
+        "bank_transfer": "은행 송금",
+        "escrow": "에스크로",
+        "internal": "내부"
       }
     },
     "deposit": {
@@ -670,8 +712,48 @@
       }
     }
   },
+  "notification": {
+    "booking_request": {
+      "title": "새 예약 요청",
+      "message": "새 예약 요청을 받았습니다"
+    },
+    "booking_confirmed": {
+      "title": "예약 확인됨",
+      "message": "작업자가 예약을 확인했습니다"
+    },
+    "booking_declined": {
+      "title": "예약 거부됨",
+      "message": "작업자가 예약 요청을 거부했습니다"
+    },
+    "booking_cancelled": {
+      "title": "예약 취소됨",
+      "message": "예약이 취소되었습니다"
+    },
+    "booking_completed": {
+      "title": "예약 완료",
+      "message": "클라이언트가 완료를 확인했습니다. 결제가 해제됩니다."
+    },
+    "payment_received": {
+      "title": "결제 수신됨",
+      "message": "결제가 수신되었습니다"
+    },
+    "payment_released": {
+      "title": "결제 해제됨",
+      "message": "에스크로에서 결제가 해제되었습니다"
+    },
+    "escrow_released": {
+      "title": "에스크로 해제됨",
+      "message": "에스크로가 해제되었습니다"
+    },
+    "system_announcement": {
+      "title": "시스템 공지",
+      "message": "시스템 공지"
+    }
+  },
   "booking": {
     "title": "예약 관리",
+    "myBookings": "내 예약",
+    "favoriteWorkers": "즐겨찾는 작업자",
     "service": "서비스",
     "create": "예약 생성",
     "calculate": "가격 계산",
@@ -729,6 +811,11 @@
     "duration": "기간",
     "createdAt": "생성 일시",
     "filterByStatus": "상태로 필터링",
+    "filterDateFrom": "시작 날짜",
+    "filterDateTo": "종료 날짜",
+    "dateFromAfterDateTo": "시작 날짜는 종료 날짜보다 늦을 수 없습니다",
+    "dateToBeforeDateFrom": "종료 날짜는 시작 날짜보다 이전일 수 없습니다",
+    "loadError": "예약 목록을 불러올 수 없습니다. 다시 시도해 주세요.",
     "noBookings": "예약이 없습니다",
     "all": "전체",
     "active": "진행 중",
@@ -807,6 +894,14 @@
     "more": "더보기",
     "viewProfile": "프로필 보기",
     "pagination": "{total}명 중 {start} - {end} 표시"
+  },
+  "favorites": {
+    "added": "즐겨찾기에 추가됨",
+    "removed": "즐겨찾기에서 제거됨",
+    "loginRequired": "즐겨찾기를 추가하려면 로그인하세요",
+    "error": "즐겨찾기 업데이트 실패",
+    "fetchError": "즐겨찾는 작업자 목록을 불러오지 못했습니다",
+    "empty": "아직 즐겨찾기에 추가한 작업자가 없습니다"
   },
   "mockdata": {
     "workers": {

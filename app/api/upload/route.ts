@@ -2,95 +2,124 @@ import { NextRequest } from "next/server";
 import { successResponse } from "@/lib/http/response";
 import { withErrorHandling, ApiError, ErrorCode } from "@/lib/http/errors";
 import { ERROR_MESSAGES, getErrorMessage } from "@/lib/constants/errors";
-import {
-  HttpStatus,
-  IMAGE_MAX_SIZE,
-  VALID_IMAGE_TYPES,
-} from "@/lib/utils/enums";
+import { HttpStatus } from "@/lib/utils/enums";
 import { requireAuth } from "@/lib/auth/middleware";
+import {
+  validateImageFileSecure,
+  scanFileForMalware,
+} from "@/lib/utils/file-security";
+import { sanitizeFileName, sanitizeImageUrl } from "@/lib/worker/security";
+import { applySecurityHeaders } from "@/lib/http/security-headers";
+import { withCSRFProtection } from "@/lib/http/csrf-middleware";
 
-export const POST = withErrorHandling(async (request: NextRequest) => {
-  // Authenticate user
-  await requireAuth(request);
+export const POST = withErrorHandling(
+  withCSRFProtection(async (request: NextRequest) => {
+    // Authenticate user
+    await requireAuth(request);
 
-  // Get form data
-  const formData = await request.formData();
-  const file = formData.get("file") as File;
-  // Note: folder parameter is accepted for backward compatibility but not used by third-party API
+    // Get form data
+    const formData = await request.formData();
+    const file = formData.get("file") as File;
+    // Note: folder parameter is accepted for backward compatibility but not used by third-party API
 
-  if (!file) {
-    throw new ApiError(
-      getErrorMessage(ERROR_MESSAGES.NO_FILE_PROVIDED),
-      HttpStatus.BAD_REQUEST,
-      ErrorCode.NO_FILE_PROVIDED
-    );
-  }
+    if (!file) {
+      throw new ApiError(
+        getErrorMessage(ERROR_MESSAGES.NO_FILE_PROVIDED),
+        HttpStatus.BAD_REQUEST,
+        ErrorCode.NO_FILE_PROVIDED
+      );
+    }
 
-  // Validate file type
-  if (!VALID_IMAGE_TYPES.includes(file.type as any)) {
-    throw new ApiError(
-      getErrorMessage(ERROR_MESSAGES.INVALID_FILE_TYPE),
-      HttpStatus.BAD_REQUEST,
-      ErrorCode.INVALID_FILE_TYPE
-    );
-  }
+    // Sanitize file name
+    const sanitizedFileName = sanitizeFileName(file.name);
+    if (!sanitizedFileName) {
+      throw new ApiError(
+        "Invalid file name",
+        HttpStatus.BAD_REQUEST,
+        ErrorCode.INVALID_FILE_TYPE
+      );
+    }
 
-  // Validate file size (max 5MB)
-  if (file.size > IMAGE_MAX_SIZE) {
-    throw new ApiError(
-      getErrorMessage(ERROR_MESSAGES.FILE_TOO_LARGE),
-      HttpStatus.BAD_REQUEST,
-      ErrorCode.FILE_TOO_LARGE
-    );
-  }
+    // Enhanced file validation (type, size, signature)
+    const validation = await validateImageFileSecure(file);
+    if (!validation.valid) {
+      throw new ApiError(
+        validation.error || getErrorMessage(ERROR_MESSAGES.INVALID_FILE_TYPE),
+        HttpStatus.BAD_REQUEST,
+        ErrorCode.INVALID_FILE_TYPE
+      );
+    }
 
-  // Prepare form data for third-party API
-  const uploadFormData = new FormData();
-  uploadFormData.append("images[]", file);
-  uploadFormData.append("server", "server_1");
+    // Scan file for malware (basic check)
+    const malwareScan = await scanFileForMalware(file);
+    if (!malwareScan.safe) {
+      throw new ApiError(
+        `File security check failed: ${malwareScan.threats?.join(", ")}`,
+        HttpStatus.BAD_REQUEST,
+        ErrorCode.INVALID_FILE_TYPE
+      );
+    }
 
-  // Upload to third-party API
-  const uploadResponse = await fetch("https://cfig.ibytecdn.org/upload", {
-    method: "POST",
-    body: uploadFormData,
-  });
+    // Prepare form data for third-party API
+    const uploadFormData = new FormData();
+    uploadFormData.append("images[]", file);
+    uploadFormData.append("server", "server_1");
 
-  if (!uploadResponse.ok) {
-    throw new ApiError(
-      "Failed to upload image to third-party service",
-      HttpStatus.INTERNAL_SERVER_ERROR,
-      ErrorCode.UPLOAD_FAILED
-    );
-  }
+    // Upload to third-party API
+    const uploadResponse = await fetch("https://cfig.ibytecdn.org/upload", {
+      method: "POST",
+      body: uploadFormData,
+    });
 
-  const uploadResult = await uploadResponse.json();
+    if (!uploadResponse.ok) {
+      throw new ApiError(
+        "Failed to upload image to third-party service",
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        ErrorCode.UPLOAD_FAILED
+      );
+    }
 
-  // Validate response structure
-  if (!uploadResult?.success || !Array.isArray(uploadResult.results)) {
-    throw new ApiError(
-      "Invalid response from upload service",
-      HttpStatus.INTERNAL_SERVER_ERROR,
-      ErrorCode.UPLOAD_FAILED
-    );
-  }
+    const uploadResult = await uploadResponse.json();
 
-  const firstResult = uploadResult.results[0];
+    // Validate response structure
+    if (!uploadResult?.success || !Array.isArray(uploadResult.results)) {
+      throw new ApiError(
+        "Invalid response from upload service",
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        ErrorCode.UPLOAD_FAILED
+      );
+    }
 
-  if (!firstResult?.success || !firstResult?.url) {
-    throw new ApiError(
-      "Upload failed: no URL returned",
-      HttpStatus.INTERNAL_SERVER_ERROR,
-      ErrorCode.UPLOAD_FAILED
-    );
-  }
+    const firstResult = uploadResult.results[0];
 
-  // Return response in expected format
-  return successResponse({
-    path: firstResult.url, // Use URL as path for backward compatibility
-    publicUrl: firstResult.url,
-    fileName: firstResult.filename || file.name,
-  });
-});
+    if (!firstResult?.success || !firstResult?.url) {
+      throw new ApiError(
+        "Upload failed: no URL returned",
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        ErrorCode.UPLOAD_FAILED
+      );
+    }
+
+    // Sanitize returned URL
+    const sanitizedUrl = sanitizeImageUrl(firstResult.url);
+    if (!sanitizedUrl) {
+      throw new ApiError(
+        "Invalid URL returned from upload service",
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        ErrorCode.UPLOAD_FAILED
+      );
+    }
+
+    // Return response in expected format
+    const response = successResponse({
+      path: sanitizedUrl, // Use URL as path for backward compatibility
+      publicUrl: sanitizedUrl,
+      fileName: sanitizedFileName,
+    });
+
+    return applySecurityHeaders(response);
+  })
+);
 
 // Delete image
 // Note: Third-party API doesn't support deletion, so this endpoint returns success

@@ -163,4 +163,10 @@ export const RATE_LIMIT_CONFIGS = {
     maxAttempts: 5,
     windowMs: 60 * 60 * 1000, // 1 hour
   } as RateLimitConfig,
+
+  // Worker profile: 10 updates per minute per user
+  WORKER_PROFILE: {
+    maxAttempts: 10,
+    windowMs: 60 * 1000, // 1 minute
+  } as RateLimitConfig,
 };

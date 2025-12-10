@@ -9,12 +9,17 @@ import { WorkerProfileService } from "@/lib/worker/service";
 import { successResponse } from "@/lib/http/response";
 import { withErrorHandling, ApiError, ErrorCode } from "@/lib/http/errors";
 import { HttpStatus } from "@/lib/utils/enums";
+import { applySecurityHeaders } from "@/lib/http/security-headers";
+import { withCSRFProtection } from "@/lib/http/csrf-middleware";
 
-export const PATCH = withErrorHandling(async (request: NextRequest) => {
-  const { user, supabase } = await requireWorker(request);
+export const PATCH = withErrorHandling(
+  withCSRFProtection(async (request: NextRequest) => {
+    const { user, supabase } = await requireWorker(request);
 
-  const service = new WorkerProfileService(supabase);
-  await service.submitProfileForReview(user.id);
+    const service = new WorkerProfileService(supabase);
+    await service.submitProfileForReview(user.id);
 
-  return successResponse(null, "Profile submitted for review");
-});
+    const response = successResponse(null, "Profile submitted for review");
+    return applySecurityHeaders(response);
+  })
+);

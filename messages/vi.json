@@ -10,6 +10,8 @@
     "edit": "Chỉnh sửa",
     "search": "Tìm kiếm",
     "filter": "Lọc",
+    "startDate": "Từ ngày",
+    "endDate": "Đến ngày",
     "back": "Quay lại",
     "continue": "Tiếp tục",
     "next": "Tiếp theo",
@@ -22,6 +24,7 @@
     "no": "Không",
     "close": "Đóng",
     "refresh": "Làm mới",
+    "retry": "Thử lại",
     "homeButton": "Về trang chủ",
     "backToDashboard": "Về trang tổng quan",
     "total": "Tổng",
@@ -349,12 +352,27 @@
     }
   },
   "worker": {
+    "sidebar": {
+      "profileSetup": "Thiết lập hồ sơ",
+      "myWallet": "Ví của tôi",
+      "messages": "Tin nhắn",
+      "myJobs": "Công việc của tôi"
+    },
     "dashboard": {
       "title": "Worker",
       "availableJobs": "Công việc có sẵn",
       "inProgress": "Đang thực hiện",
       "completed": "Hoàn thành",
-      "totalEarnings": "Tổng thu nhập"
+      "totalEarnings": "Tổng thu nhập",
+      "earningsChart": "Biểu đồ thu nhập",
+      "earnings": "Thu nhập",
+      "escrowsByStatus": "Trạng thái công việc",
+      "status": {
+        "held": "Đang giữ",
+        "released": "Đã giải phóng",
+        "disputed": "Đang tranh chấp",
+        "refunded": "Đã hoàn tiền"
+      }
     },
     "profile": {
       "setupTitle": "Thiết lập hồ sơ Worker của bạn",
@@ -526,12 +544,34 @@
     }
   },
   "client": {
+    "sidebar": {
+      "myWallet": "Ví của tôi",
+      "messages": "Tin nhắn",
+      "postJob": "Đăng công việc",
+      "myJobs": "Công việc của tôi"
+    },
     "dashboard": {
       "title": "Client",
-      "activeJobs": "Công việc đang hoạt động",
+      "welcome": "Chào mừng trở lại!",
+      "subtitle": "Quản lý đặt dịch vụ và khám phá các nhà cung cấp mới.",
+      "bookService": "Đặt dịch vụ",
+      "totalBookings": "Tổng đặt chỗ",
+      "thisMonth": "Tháng này",
+      "activeServices": "Dịch vụ đang thực hiện",
       "inProgress": "Đang thực hiện",
-      "completed": "Hoàn thành",
-      "totalSpent": "Tổng chi tiêu"
+      "totalSpent": "Tổng chi tiêu",
+      "allTime": "Tất cả",
+      "favoriteWorkers": "Worker yêu thích",
+      "savedProfiles": "Hồ sơ đã lưu",
+      "recentActivity": "Hoạt động gần đây",
+      "noActivity": "Không có hoạt động gần đây",
+      "viewAllActivity": "Xem tất cả hoạt động",
+      "bookingsChart": "Đặt chỗ theo thời gian",
+      "spendingChart": "Chi tiêu theo thời gian",
+      "bookingsByStatus": "Đặt chỗ theo trạng thái",
+      "bookings": "Đặt chỗ",
+      "spending": "Chi tiêu",
+      "count": "Số lượng"
     },
     "profile": {
       "title": "Thiết lập thông tin cơ bản",
@@ -594,9 +634,13 @@
         "payment": "Thanh toán",
         "earning": "Thu nhập",
         "platformFee": "Phí nền tảng",
+        "platform_fee": "Phí nền tảng",
+        "insurance_fee": "Phí bảo hiểm",
         "refund": "Hoàn tiền",
         "escrowCreate": "Tạo Escrow",
         "escrowRelease": "Giải phóng Escrow",
+        "escrow_hold": "Giữ Escrow",
+        "escrow_release": "Giải phóng Escrow",
         "withdrawalFee": "Phí rút tiền"
       },
       "statuses": {
@@ -605,6 +649,12 @@
         "completed": "Hoàn thành",
         "failed": "Thất bại",
         "cancelled": "Đã hủy"
+      },
+      "paymentMethods": {
+        "paypal": "PayPal",
+        "bank_transfer": "Chuyển khoản ngân hàng",
+        "escrow": "Escrow",
+        "internal": "Nội bộ"
       }
     },
     "deposit": {
@@ -908,8 +958,48 @@
     "viewProfile": "Xem hồ sơ",
     "pagination": "Hiển thị {start} - {end} trên tổng {total} worker"
   },
+  "notification": {
+    "booking_request": {
+      "title": "Yêu cầu đặt chỗ mới",
+      "message": "Bạn đã nhận được một yêu cầu đặt chỗ mới"
+    },
+    "booking_confirmed": {
+      "title": "Đặt chỗ đã được xác nhận",
+      "message": "Đặt chỗ của bạn đã được worker xác nhận"
+    },
+    "booking_declined": {
+      "title": "Đặt chỗ bị từ chối",
+      "message": "Worker đã từ chối yêu cầu đặt chỗ của bạn"
+    },
+    "booking_cancelled": {
+      "title": "Đặt chỗ đã bị hủy",
+      "message": "Đặt chỗ của bạn đã bị hủy"
+    },
+    "booking_completed": {
+      "title": "Đặt chỗ đã hoàn thành",
+      "message": "Client đã xác nhận hoàn thành. Thanh toán sẽ được giải phóng."
+    },
+    "payment_received": {
+      "title": "Đã nhận thanh toán",
+      "message": "Thanh toán đã được nhận"
+    },
+    "payment_released": {
+      "title": "Thanh toán đã được giải phóng",
+      "message": "Thanh toán đã được giải phóng từ escrow"
+    },
+    "escrow_released": {
+      "title": "Escrow đã được giải phóng",
+      "message": "Escrow đã được giải phóng"
+    },
+    "system_announcement": {
+      "title": "Thông báo hệ thống",
+      "message": "Thông báo hệ thống"
+    }
+  },
   "booking": {
     "title": "Đặt dịch vụ",
+    "myBookings": "Đặt chỗ của tôi",
+    "favoriteWorkers": "Worker yêu thích",
     "service": "Dịch vụ",
     "create": "Tạo đặt chỗ",
     "calculate": "Tính toán giá",
@@ -967,6 +1057,11 @@
     "duration": "Thời lượng",
     "createdAt": "Tạo lúc",
     "filterByStatus": "Lọc theo trạng thái",
+    "filterDateFrom": "Từ ngày",
+    "filterDateTo": "Đến ngày",
+    "dateFromAfterDateTo": "Ngày bắt đầu không thể sau ngày kết thúc",
+    "dateToBeforeDateFrom": "Ngày kết thúc không thể trước ngày bắt đầu",
+    "loadError": "Không thể tải danh sách đặt chỗ. Vui lòng thử lại.",
     "noBookings": "Không có đặt chỗ nào",
     "all": "Tất cả",
     "active": "Đang hoạt động",
@@ -1067,6 +1162,14 @@
     "complaint": "Có khiếu nại",
     "complaintYes": "Có khiếu nại",
     "complaintNo": "Không khiếu nại"
+  },
+  "favorites": {
+    "added": "Đã thêm vào danh sách yêu thích",
+    "removed": "Đã xóa khỏi danh sách yêu thích",
+    "loginRequired": "Vui lòng đăng nhập để thêm vào danh sách yêu thích",
+    "error": "Có lỗi xảy ra khi cập nhật danh sách yêu thích",
+    "fetchError": "Không thể tải danh sách worker yêu thích",
+    "empty": "Bạn chưa thêm worker nào vào danh sách yêu thích"
   },
   "mockdata": {
     "workers": {

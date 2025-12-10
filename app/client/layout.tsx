@@ -3,14 +3,13 @@
 import { Layout, Menu, Button, Space, ConfigProvider, theme } from "antd";
 import {
   DashboardOutlined,
-  PlusOutlined,
-  UnorderedListOutlined,
   UserOutlined,
   WalletOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
   CalendarOutlined,
   MessageOutlined,
+  HomeOutlined,
 } from "@ant-design/icons";
 import { usePathname, useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
@@ -55,19 +54,30 @@ function ClientLayoutContent({
 
   const menuItems: MenuItem[] = [
     getItem(
+      t("nav.home") || "Home",
+      "/",
+      <HomeOutlined />
+    ),
+    getItem(
       t("nav.home") || "Dashboard",
       "/client/dashboard",
       <DashboardOutlined />
     ),
-    getItem("My Wallet", "/client/wallet", <WalletOutlined />),
+    getItem(
+      t("client.sidebar.myWallet") || "My Wallet",
+      "/client/wallet",
+      <WalletOutlined />
+    ),
     getItem(
       t("booking.title") || "My Bookings",
       "/client/bookings",
       <CalendarOutlined />
     ),
-    getItem("Messages", "/client/chat", <MessageOutlined />),
-    getItem("Post Job", "/client/post-job", <PlusOutlined />),
-    getItem("My Jobs", "/client/my-jobs", <UnorderedListOutlined />),
+    getItem(
+      t("client.sidebar.messages") || "Messages",
+      "/client/chat",
+      <MessageOutlined />
+    ),
     getItem(t("nav.profile") || "Profile", "/client/profile", <UserOutlined />),
   ];
 
@@ -122,6 +132,7 @@ function ClientLayoutContent({
         </div>
         <Menu
           mode="inline"
+          theme={currentTheme === "dark" ? "dark" : "light"}
           selectedKeys={[pathname]}
           items={menuItems}
           onClick={handleMenuClick}

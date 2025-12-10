@@ -314,11 +314,15 @@ export default function UserManagementPage() {
       const response = await adminUserAPI.getAllUsers();
       if (response.error) {
         message.error(response.error);
+        setUsers([]);
       } else if (response.data) {
-        setUsers(response.data.users);
+        setUsers(response.data.users || []);
+      } else {
+        setUsers([]);
       }
     } catch (error) {
       message.error("Failed to load users");
+      setUsers([]);
     } finally {
       setLoading(false);
     }
@@ -330,11 +334,15 @@ export default function UserManagementPage() {
       const response = await adminUserAPI.getPendingWorkers();
       if (response.error) {
         message.error(`Failed to load pending workers: ${response.error}`);
+        setPendingWorkers([]);
       } else if (response.data) {
-        setPendingWorkers(response.data.workers);
+        setPendingWorkers(response.data.workers || []);
+      } else {
+        setPendingWorkers([]);
       }
     } catch (error) {
       message.error("Failed to load pending workers");
+      setPendingWorkers([]);
     } finally {
       setPendingLoading(false);
     }
@@ -626,7 +634,7 @@ export default function UserManagementPage() {
     },
   ];
 
-  const filteredUsers = users.filter((user) => {
+  const filteredUsers = (users || []).filter((user) => {
     const matchesSearch =
       user.email.toLowerCase().includes(searchText.toLowerCase()) ||
       (user.user_metadata?.full_name || "")
@@ -643,82 +651,96 @@ export default function UserManagementPage() {
       <Title level={2}>{t("admin.users.title") || "User Management"}</Title>
 
       <Card style={{ marginTop: 24 }}>
-        <Tabs activeKey={activeTab} onChange={setActiveTab}>
-          <Tabs.TabPane
-            tab={`${t("admin.users.allUsers") || "All Users"} (${
-              users.length
-            })`}
-            key="users"
-          >
-            <Space style={{ marginBottom: 16, width: "100%" }} wrap>
-              <Input
-                placeholder={t("admin.users.searchUsers") || "Search users..."}
-                prefix={<SearchOutlined />}
-                style={{ width: 300 }}
-                value={searchText}
-                onChange={(e) => setSearchText(e.target.value)}
-                allowClear
-              />
-              <Select
-                style={{ width: 250 }}
-                value={roleFilter}
-                onChange={setRoleFilter}
-              >
-                <Select.Option value="all">
-                  {t("admin.users.allRoles") || "All Roles"}
-                </Select.Option>
-                <Select.Option value="admin">Admin</Select.Option>
-                <Select.Option value="worker">Worker</Select.Option>
-                <Select.Option value="client">Client</Select.Option>
-              </Select>
-              <Button icon={<ReloadOutlined />} onClick={fetchUsers}>
-                {t("common.refresh") || "Refresh"}
-              </Button>
-            </Space>
+        <Tabs
+          activeKey={activeTab}
+          onChange={setActiveTab}
+          items={[
+            {
+              key: "users",
+              label: `${t("admin.users.allUsers") || "All Users"} (${
+                users.length
+              })`,
+              children: (
+                <>
+                  <Space style={{ marginBottom: 16, width: "100%" }} wrap>
+                    <Input
+                      placeholder={
+                        t("admin.users.searchUsers") || "Search users..."
+                      }
+                      prefix={<SearchOutlined />}
+                      style={{ width: 300 }}
+                      value={searchText}
+                      onChange={(e) => setSearchText(e.target.value)}
+                      allowClear
+                    />
+                    <Select
+                      style={{ width: 250 }}
+                      value={roleFilter}
+                      onChange={setRoleFilter}
+                    >
+                      <Select.Option value="all">
+                        {t("admin.users.allRoles") || "All Roles"}
+                      </Select.Option>
+                      <Select.Option value="admin">Admin</Select.Option>
+                      <Select.Option value="worker">Worker</Select.Option>
+                      <Select.Option value="client">Client</Select.Option>
+                    </Select>
+                    <Button icon={<ReloadOutlined />} onClick={fetchUsers}>
+                      {t("common.refresh") || "Refresh"}
+                    </Button>
+                  </Space>
 
-            <Table
-              columns={userColumns}
-              dataSource={filteredUsers}
-              loading={loading}
-              rowKey="id"
-              pagination={{
-                pageSize: 10,
-                showTotal: (total) =>
-                  `${t("admin.users.total") || "Total"} ${total} ${
-                    t("admin.users.users") || "users"
-                  }`,
-              }}
-            />
-          </Tabs.TabPane>
+                  <Table
+                    columns={userColumns}
+                    dataSource={filteredUsers}
+                    loading={loading}
+                    rowKey="id"
+                    pagination={{
+                      pageSize: 10,
+                      showTotal: (total) =>
+                        `${t("admin.users.total") || "Total"} ${total} ${
+                          t("admin.users.users") || "users"
+                        }`,
+                    }}
+                  />
+                </>
+              ),
+            },
+            {
+              key: "pending-workers",
+              label: `${t("admin.users.pendingWorkers") || "Pending Workers"} (${
+                pendingWorkers.length
+              })`,
+              children: (
+                <>
+                  <Space style={{ marginBottom: 16, width: "100%" }} wrap>
+                    <Button
+                      icon={<ReloadOutlined />}
+                      onClick={fetchPendingWorkers}
+                    >
+                      {t("common.refresh") || "Refresh"}
+                    </Button>
+                  </Space>
 
-          <Tabs.TabPane
-            tab={`${t("admin.users.pendingWorkers") || "Pending Workers"} (${
-              pendingWorkers.length
-            })`}
-            key="pending-workers"
-          >
-            <Space style={{ marginBottom: 16, width: "100%" }} wrap>
-              <Button icon={<ReloadOutlined />} onClick={fetchPendingWorkers}>
-                {t("common.refresh") || "Refresh"}
-              </Button>
-            </Space>
-
-            <Table
-              columns={pendingWorkerColumns}
-              dataSource={pendingWorkers}
-              loading={pendingLoading}
-              rowKey="id"
-              pagination={{
-                pageSize: 10,
-                showTotal: (total) =>
-                  `${t("admin.users.total") || "Total"} ${total} ${
-                    t("admin.users.pendingApplications") ||
-                    "pending applications"
-                  }`,
-              }}
-            />
-          </Tabs.TabPane>
-        </Tabs>
+                  <Table
+                    columns={pendingWorkerColumns}
+                    dataSource={pendingWorkers}
+                    loading={pendingLoading}
+                    rowKey="id"
+                    pagination={{
+                      pageSize: 10,
+                      showTotal: (total) =>
+                        `${t("admin.users.total") || "Total"} ${total} ${
+                          t("admin.users.pendingApplications") ||
+                          "pending applications"
+                        }`,
+                    }}
+                  />
+                </>
+              ),
+            },
+          ]}
+        />
       </Card>
 
       {/* Worker Details Modal */}

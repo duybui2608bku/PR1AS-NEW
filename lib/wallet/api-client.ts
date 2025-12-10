@@ -39,11 +39,15 @@ export const walletAPI = {
    */
   async getBalance(): Promise<{ wallet: Wallet; summary: WalletSummary }> {
     const { data } = await axiosClient.get<{
-      wallet: Wallet;
-      summary: WalletSummary;
+      success: boolean;
+      data: {
+        wallet: Wallet;
+        summary: WalletSummary;
+      };
     }>("/wallet/balance");
 
-    return data;
+    // Extract data from API response wrapper
+    return data.data;
   },
 
   // ===========================================================================
@@ -212,11 +216,27 @@ export const walletAPI = {
       if (filters.limit) params.set("limit", filters.limit.toString());
     }
 
-    const { data } = await axiosClient.get<TransactionsListResponse>(
-      `/wallet/transactions?${params.toString()}`
-    );
+    const { data } = await axiosClient.get<{
+      success: boolean;
+      data: {
+        transactions: Transaction[];
+        pagination: {
+          total: number;
+          page: number;
+          limit: number;
+          pages: number;
+        };
+      };
+    }>(`/wallet/transactions?${params.toString()}`);
 
-    return data;
+    // Transform API response to match TransactionsListResponse interface
+    return {
+      success: data.success,
+      transactions: data.data.transactions,
+      total: data.data.pagination.total,
+      page: data.data.pagination.page,
+      limit: data.data.pagination.limit,
+    };
   },
 
   // ===========================================================================

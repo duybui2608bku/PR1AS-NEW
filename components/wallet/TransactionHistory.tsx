@@ -90,19 +90,37 @@ export default function TransactionHistory() {
       title: t("wallet.transaction.type"),
       dataIndex: "type",
       key: "type",
-      render: (type: TransactionType) => (
-        <Tag
-          color={
-            type.includes("fee")
-              ? "orange"
-              : type === "earning"
-              ? "green"
-              : "blue"
-          }
-        >
-          {walletHelpers.getTransactionTypeLabel(type)}
-        </Tag>
-      ),
+      render: (type: TransactionType) => {
+        // Map transaction type to translation key
+        const typeKeyMap: Record<string, string> = {
+          deposit: "deposit",
+          withdrawal: "withdrawal",
+          payment: "payment",
+          earning: "earning",
+          platform_fee: "platform_fee",
+          insurance_fee: "insurance_fee",
+          refund: "refund",
+          escrow_hold: "escrow_hold",
+          escrow_release: "escrow_release",
+        };
+        
+        const translationKey = typeKeyMap[type] || type;
+        const typeLabel = t(`wallet.transaction.types.${translationKey}`, type);
+        
+        return (
+          <Tag
+            color={
+              type.includes("fee")
+                ? "orange"
+                : type === "earning"
+                ? "green"
+                : "blue"
+            }
+          >
+            {typeLabel}
+          </Tag>
+        );
+      },
       width: 150,
     },
     {
@@ -134,19 +152,26 @@ export default function TransactionHistory() {
       title: t("wallet.transaction.status"),
       dataIndex: "status",
       key: "status",
-      render: (status: TransactionStatus) => (
-        <Tag color={walletHelpers.getTransactionStatusColor(status)}>
-          {status.toUpperCase()}
-        </Tag>
-      ),
+      render: (status: TransactionStatus) => {
+        const statusLabel = t(`wallet.transaction.statuses.${status}`, status);
+        return (
+          <Tag color={walletHelpers.getTransactionStatusColor(status)}>
+            {statusLabel}
+          </Tag>
+        );
+      },
       width: 120,
     },
     {
       title: t("wallet.transaction.paymentMethod"),
       dataIndex: "payment_method",
       key: "payment_method",
-      render: (method?: string) =>
-        method ? <Tag>{method.replace("_", " ").toUpperCase()}</Tag> : "-",
+      render: (method?: string) => {
+        if (!method) return "-";
+        const translationKey = `wallet.transaction.paymentMethods.${method}`;
+        const translatedMethod = t(translationKey, method);
+        return <Tag>{translatedMethod}</Tag>;
+      },
       width: 220,
     },
     {

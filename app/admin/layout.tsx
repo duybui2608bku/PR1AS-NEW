@@ -14,6 +14,7 @@ import {
   GlobalOutlined,
   TagsOutlined,
   DollarOutlined,
+  HomeOutlined,
 } from "@ant-design/icons";
 import { useRouter, usePathname } from "next/navigation";
 import { useTranslation } from "react-i18next";
@@ -67,6 +68,7 @@ function AdminLayoutContent({
     useMobileSidebar();
 
   const menuItems: MenuItem[] = [
+    getItem(t("nav.home") || "Home", "/", <HomeOutlined />),
     getItem(t("admin.sidebar.dashboard"), "/admin", <DashboardOutlined />),
     getItem(t("admin.sidebar.seo"), "/admin/seo", <GlobalOutlined />),
     getItem(

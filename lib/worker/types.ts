@@ -102,6 +102,9 @@ export interface WorkerProfile {
   profile_status: WorkerProfileStatus;
   profile_completed_steps: number; // Bitmask (1=step1, 2=step2, 3=both)
 
+  // Optimistic locking
+  version?: number; // Version number for optimistic locking
+
   // Admin review
   reviewed_by?: string;
   reviewed_at?: string;

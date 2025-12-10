@@ -14,6 +14,11 @@ import { successResponse } from "@/lib/http/response";
 import { withErrorHandling, ApiError, ErrorCode } from "@/lib/http/errors";
 import { ERROR_MESSAGES, getErrorMessage } from "@/lib/constants/errors";
 import { HttpStatus } from "@/lib/utils/enums";
+import { checkRateLimit, RATE_LIMIT_CONFIGS } from "@/lib/auth/rate-limit";
+import { validateWorkerProfileStep1OrThrow } from "@/lib/worker/validation";
+import { sanitizeWorkerProfileStep1 } from "@/lib/worker/security";
+import { withCSRFProtection } from "@/lib/http/csrf-middleware";
+import { applySecurityHeaders } from "@/lib/http/security-headers";
 
 /**
  * GET /api/worker/profile
@@ -33,37 +38,47 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
     );
   }
 
-  return successResponse(profile);
+  const response = successResponse(profile);
+  return applySecurityHeaders(response);
 });
 
 /**
  * POST /api/worker/profile
  * Create or update worker profile (Step 1)
+ * Protected with CSRF and input sanitization
  */
-export const POST = withErrorHandling(async (request: NextRequest) => {
-  const { user, supabase } = await requireWorker(request);
+export const POST = withErrorHandling(
+  withCSRFProtection(async (request: NextRequest) => {
+    const { user, supabase } = await requireWorker(request);
 
-  const body: WorkerProfileStep1Request = await request.json();
-
-  // Validation
-  if (!body.full_name || !body.age) {
-    throw new ApiError(
-      "Full name and age are required",
-      HttpStatus.BAD_REQUEST,
-      ErrorCode.MISSING_REQUIRED_FIELDS
+    // Rate limiting
+    const rateLimitResult = checkRateLimit(
+      `worker-profile:${user.id}`,
+      RATE_LIMIT_CONFIGS.WORKER_PROFILE
     );
-  }
 
-  if (body.age < 18 || body.age > 100) {
-    throw new ApiError(
-      "Age must be between 18 and 100",
-      HttpStatus.BAD_REQUEST,
-      ErrorCode.VALIDATION_ERROR
-    );
-  }
+    if (!rateLimitResult.allowed) {
+      throw new ApiError(
+        `Too many requests. Please wait ${
+          rateLimitResult.retryAfter || 60
+        } seconds.`,
+        HttpStatus.TOO_MANY_REQUESTS,
+        ErrorCode.RATE_LIMIT_EXCEEDED
+      );
+    }
 
-  const service = new WorkerProfileService(supabase);
-  const profile = await service.saveWorkerProfile(user.id, body);
+    const body: WorkerProfileStep1Request = await request.json();
 
-  return successResponse(profile, "Profile saved successfully");
-});
+    // Sanitize input to prevent XSS attacks
+    const sanitizedBody = sanitizeWorkerProfileStep1(body);
+
+    // Comprehensive validation
+    validateWorkerProfileStep1OrThrow(sanitizedBody);
+
+    const service = new WorkerProfileService(supabase);
+    const profile = await service.saveWorkerProfile(user.id, sanitizedBody);
+
+    const response = successResponse(profile, "Profile saved successfully");
+    return applySecurityHeaders(response);
+  })
+);

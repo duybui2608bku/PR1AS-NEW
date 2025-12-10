@@ -41,11 +41,11 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
     // Continue even if profile update fails
   }
 
-  // Update worker profile status
+  // Update worker profile status to published (approved and live)
   const { error: workerError } = await supabase
     .from("worker_profiles")
     .update({
-      profile_status: "approved",
+      profile_status: "published",
       reviewed_at: new Date().toISOString(),
     })
     .eq("user_id", userId);

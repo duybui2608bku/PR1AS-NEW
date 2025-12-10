@@ -11,6 +11,7 @@ import {
   MenuUnfoldOutlined,
   CalendarOutlined,
   MessageOutlined,
+  HomeOutlined,
 } from "@ant-design/icons";
 import { usePathname, useRouter } from "next/navigation";
 import { useMobileSidebar } from "@/hooks/useMobileSidebar";
@@ -56,19 +57,40 @@ function WorkerLayoutContent({
 
   const menuItems: MenuItem[] = [
     getItem(
+      t("nav.home") || "Home",
+      "/",
+      <HomeOutlined />
+    ),
+    getItem(
       t("worker.dashboard.title") || "Dashboard",
       "/worker/dashboard",
       <DashboardOutlined />
     ),
-    getItem("Profile Setup", "/worker/profile/setup", <UserOutlined />),
-    getItem("My Wallet", "/worker/wallet", <WalletOutlined />),
+    getItem(
+      t("worker.sidebar.profileSetup") || "Profile Setup",
+      "/worker/profile/setup",
+      <UserOutlined />
+    ),
+    getItem(
+      t("worker.sidebar.myWallet") || "My Wallet",
+      "/worker/wallet",
+      <WalletOutlined />
+    ),
     getItem(
       t("booking.title") || "My Bookings",
       "/worker/bookings",
       <CalendarOutlined />
     ),
-    getItem("Messages", "/worker/chat", <MessageOutlined />),
-    getItem("My Jobs", "/worker/my-jobs", <UnorderedListOutlined />),
+    getItem(
+      t("worker.sidebar.messages") || "Messages",
+      "/worker/chat",
+      <MessageOutlined />
+    ),
+    getItem(
+      t("worker.sidebar.myJobs") || "My Jobs",
+      "/worker/my-jobs",
+      <UnorderedListOutlined />
+    ),
     getItem(t("nav.profile") || "Profile", "/worker/profile", <UserOutlined />),
   ];
 
