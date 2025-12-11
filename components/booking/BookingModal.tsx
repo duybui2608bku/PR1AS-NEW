@@ -35,6 +35,7 @@ import {
   useCalculatePrice,
   useCreateBooking,
 } from "@/hooks/booking/useBooking";
+import { useTheme } from "@/components/providers/ThemeProvider";
 
 const { Text } = Typography;
 const { TextArea } = Input;
@@ -73,6 +74,7 @@ export default function BookingModal({
   availableServices,
 }: BookingModalProps) {
   const { t } = useTranslation();
+  const { theme } = useTheme();
   const [form] = Form.useForm();
   const [bookingType, setBookingType] = useState<
     "hourly" | "daily" | "weekly" | "monthly"
@@ -186,6 +188,10 @@ export default function BookingModal({
 
   useEffect(() => {
     const triggerCalculation = () => {
+      if (!open) {
+        return;
+      }
+
       if (!selectedWorkerServiceId) {
         calculatePrice.reset();
         return;
@@ -213,8 +219,16 @@ export default function BookingModal({
       });
     };
 
-    if (open && durationHours > 0) {
-      triggerCalculation();
+    // Trigger calculation when modal is open and all required values are set
+    // Use setTimeout to ensure state updates from the first useEffect have been applied
+    if (open) {
+      const timer = setTimeout(() => {
+        if (selectedWorkerServiceId && durationHours > 0) {
+          triggerCalculation();
+        }
+      }, 0);
+
+      return () => clearTimeout(timer);
     }
   }, [open, bookingType, durationHours, selectedWorkerServiceId]);
 
@@ -289,7 +303,7 @@ export default function BookingModal({
       width={800}
       bodyStyle={{
         padding: 24,
-        background: "#fafafa",
+        background: theme === "dark" ? "#141414" : "#fafafa",
       }}
       destroyOnClose
     >
@@ -533,7 +547,9 @@ export default function BookingModal({
         </Row>
 
         {/* Row 5: Price Calculation (full width at bottom) */}
-        {calculatePrice.isPending || calculatePrice.isError || calculatePrice.data ? (
+        {calculatePrice.isPending ||
+        calculatePrice.isError ||
+        calculatePrice.data ? (
           <Row gutter={[16, 16]}>
             <Col xs={24}>
               {calculatePrice.isPending ? (
@@ -543,7 +559,9 @@ export default function BookingModal({
               ) : calculatePrice.isError ? (
                 <Alert
                   message={t("booking.calculationError") || "Lỗi tính giá"}
-                  description={calculatePrice.error?.message || "Không thể tính giá"}
+                  description={
+                    calculatePrice.error?.message || "Không thể tính giá"
+                  }
                   type="error"
                   showIcon
                 />
@@ -604,13 +622,19 @@ export default function BookingModal({
                               <Text>
                                 {t("booking.requiredAmount")}:{" "}
                                 <Text strong>
-                                  ${calculatePrice.data.required_amount.toFixed(2)}
+                                  $
+                                  {calculatePrice.data.required_amount.toFixed(
+                                    2
+                                  )}
                                 </Text>
                               </Text>
                               <Text>
                                 {t("booking.availableBalance")}:{" "}
                                 <Text strong>
-                                  ${calculatePrice.data.client_balance.toFixed(2)}
+                                  $
+                                  {calculatePrice.data.client_balance.toFixed(
+                                    2
+                                  )}
                                 </Text>
                               </Text>
                             </Space>
@@ -624,7 +648,9 @@ export default function BookingModal({
                           message={t("booking.sufficientBalance") || "Số dư đủ"}
                           description={`${t(
                             "booking.availableBalance"
-                          )}: $${calculatePrice.data.client_balance.toFixed(2)}`}
+                          )}: $${calculatePrice.data.client_balance.toFixed(
+                            2
+                          )}`}
                           type="success"
                           showIcon
                           style={{ marginTop: 12 }}

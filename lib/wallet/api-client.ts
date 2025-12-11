@@ -4,7 +4,6 @@
  */
 
 import { axiosClient } from "@/lib/http/axios-client";
-import { getAccessToken } from "@/lib/auth/client-helpers";
 import {
   Wallet,
   Transaction,
@@ -245,14 +244,14 @@ export const walletAPI = {
 
   /**
    * Make payment to worker (employer only)
+   * Uses cookies for authentication (via withCredentials: true in axios config)
    */
   async makePayment(payment: PaymentRequest): Promise<PaymentResponse> {
-    const accessToken = await getAccessToken();
-    const config = { accessToken } as any;
+    // Note: Authentication is handled via cookies (withCredentials: true)
+    // The API route uses requireClient() middleware which reads from cookies
     const { data } = await axiosClient.post<PaymentResponse>(
       "/wallet/payment",
-      payment,
-      config
+      payment
     );
 
     return data;
@@ -260,12 +259,14 @@ export const walletAPI = {
 
   /**
    * Get escrows (as employer or worker)
+   * Uses cookies for authentication (via withCredentials: true in axios config)
    */
   async getEscrows(filters?: EscrowFilters): Promise<{
     escrows: EscrowHold[];
     pagination: Record<string, unknown>;
   }> {
-    const accessToken = await getAccessToken();
+    // Note: Authentication is handled via cookies (withCredentials: true)
+    // The API route uses requireAuth() middleware which reads from cookies
     const params = new URLSearchParams();
 
     if (filters) {
@@ -276,31 +277,27 @@ export const walletAPI = {
       if (filters.limit) params.set("limit", filters.limit.toString());
     }
 
-    const config = { accessToken } as any;
     const { data } = await axiosClient.get<{
       escrows: EscrowHold[];
       pagination: Record<string, unknown>;
-    }>(`/wallet/escrow?${params.toString()}`, config);
+    }>(`/wallet/escrow?${params.toString()}`);
 
     return data;
   },
 
   /**
    * File complaint for escrow
+   * Uses cookies for authentication (via withCredentials: true in axios config)
    */
   async fileComplaint(
     escrowId: string,
     description: string
   ): Promise<EscrowHold> {
-    const accessToken = await getAccessToken();
-    const config = { accessToken } as any;
+    // Note: Authentication is handled via cookies (withCredentials: true)
+    // The API route uses requireAuth() middleware which reads from cookies
     const { data } = await axiosClient.post<{
       escrow: EscrowHold;
-    }>(
-      "/wallet/escrow/complaint",
-      { escrow_id: escrowId, description },
-      config
-    );
+    }>("/wallet/escrow/complaint", { escrow_id: escrowId, description });
 
     return data.escrow;
   },
@@ -339,17 +336,18 @@ export const walletAPI = {
 
 /**
  * Admin Wallet API Client
+ * Uses cookies for authentication (via withCredentials: true in axios config)
  */
 export const adminWalletAPI = {
   /**
    * Get platform wallet statistics
+   * Uses cookies for authentication (via withCredentials: true in axios config)
    */
   async getStats(): Promise<AdminWalletStats> {
-    const accessToken = await getAccessToken();
-    const config = { accessToken } as any;
+    // Note: Authentication is handled via cookies (withCredentials: true)
+    // The API route uses requireAdmin() middleware which reads from cookies
     const { data } = await axiosClient.get<{ stats: AdminWalletStats }>(
-      "/admin/wallet/stats",
-      config
+      "/admin/wallet/stats"
     );
 
     return data.stats;
@@ -357,13 +355,13 @@ export const adminWalletAPI = {
 
   /**
    * Get platform settings
+   * Uses cookies for authentication (via withCredentials: true in axios config)
    */
   async getSettings(): Promise<PlatformSettings> {
-    const accessToken = await getAccessToken();
-    const config = { accessToken } as any;
+    // Note: Authentication is handled via cookies (withCredentials: true)
+    // The API route uses requireAdmin() middleware which reads from cookies
     const { data } = await axiosClient.get<{ settings: PlatformSettings }>(
-      "/admin/wallet/settings",
-      config
+      "/admin/wallet/settings"
     );
 
     return data.settings;
@@ -371,14 +369,14 @@ export const adminWalletAPI = {
 
   /**
    * Update platform setting
+   * Uses cookies for authentication (via withCredentials: true in axios config)
    */
   async updateSetting(key: string, value: unknown): Promise<PlatformSettings> {
-    const accessToken = await getAccessToken();
-    const config = { accessToken } as any;
+    // Note: Authentication is handled via cookies (withCredentials: true)
+    // The API route uses requireAdmin() middleware which reads from cookies
     const { data } = await axiosClient.put<{ settings: PlatformSettings }>(
       "/admin/wallet/settings",
-      { key, value },
-      config
+      { key, value }
     );
 
     return data.settings;
@@ -386,14 +384,14 @@ export const adminWalletAPI = {
 
   /**
    * Manually release escrow
+   * Uses cookies for authentication (via withCredentials: true in axios config)
    */
   async releaseEscrow(escrowId: string): Promise<Transaction> {
-    const accessToken = await getAccessToken();
-    const config = { accessToken } as any;
+    // Note: Authentication is handled via cookies (withCredentials: true)
+    // The API route uses requireAdmin() middleware which reads from cookies
     const { data } = await axiosClient.post<{ transaction: Transaction }>(
       "/admin/wallet/escrow/release",
-      { escrow_id: escrowId },
-      config
+      { escrow_id: escrowId }
     );
 
     return data.transaction;
@@ -401,14 +399,14 @@ export const adminWalletAPI = {
 
   /**
    * Resolve complaint
+   * Uses cookies for authentication (via withCredentials: true in axios config)
    */
   async resolveComplaint(resolution: ComplaintResolution): Promise<EscrowHold> {
-    const accessToken = await getAccessToken();
-    const config = { accessToken } as any;
+    // Note: Authentication is handled via cookies (withCredentials: true)
+    // The API route uses requireAdmin() middleware which reads from cookies
     const { data } = await axiosClient.post<{ escrow: EscrowHold }>(
       "/admin/wallet/escrow/resolve",
-      resolution,
-      config
+      resolution
     );
 
     return data.escrow;

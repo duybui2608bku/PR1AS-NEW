@@ -38,6 +38,11 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
     filters.date_to = dateTo;
   }
 
+  const search = searchParams.get("search");
+  if (search) {
+    filters.search = search;
+  }
+
   // Get transactions (list + total count)
   const walletService = new WalletService(supabase);
   const { transactions, total } = await walletService.getTransactions(filters);

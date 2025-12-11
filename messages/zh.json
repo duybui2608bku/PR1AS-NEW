@@ -31,7 +31,11 @@
     "hours": "小时",
     "days": "天",
     "weeks": "周",
-    "months": "个月"
+    "months": "个月",
+    "actions": "操作",
+    "export": "导出CSV",
+    "exportSuccess": "导出成功",
+    "noData": "无数据"
   },
   "nav": {
     "home": "首页",
@@ -792,7 +796,11 @@
     "complaintPlaceholder": "请输入您的投诉内容...",
     "defaultComplaintReason": "服务已超过约定时间且工作者尚未完成工作",
     "complaintSuccess": "投诉已提交，付款将被冻结，等待管理员审核。",
-    "complaintError": "无法提交投诉，请稍后重试。"
+    "complaintError": "无法提交投诉，请稍后重试。",
+    "alreadyComplained": "已投诉",
+    "complaintResolved": "投诉已解决",
+    "resolutionAction": "解决方案",
+    "resolutionNotes": "原因"
   },
   "chat": {
     "title": "消息",
@@ -857,6 +865,76 @@
     "more": "更多",
     "viewProfile": "查看资料",
     "pagination": "显示 {start} - {end}，共 {total} 名工作者"
+  },
+  "escrow": {
+    "table": {
+      "id": "ID",
+      "jobId": "预订 / 工作",
+      "employer": "客户",
+      "worker": "工作者",
+      "amount": "总金额",
+      "workerAmount": "工作者收到",
+      "status": "状态",
+      "hasComplaint": "投诉",
+      "holdUntil": "保留至",
+      "createdAt": "创建时间",
+      "resolution": "解决信息",
+      "records": "条记录"
+    },
+    "status": {
+      "held": "已保留",
+      "released": "已释放",
+      "refunded": "已退款",
+      "disputed": "争议中",
+      "cancelled": "已取消"
+    },
+    "filters": {
+      "status": "托管状态",
+      "complaint": "投诉"
+    },
+    "stats": {
+      "totalHeld": "总保留金额",
+      "totalReleased": "总释放金额",
+      "totalDisputed": "总争议金额",
+      "totalCount": "总托管数"
+    },
+    "complaint": "有投诉",
+    "complaintYes": "有投诉",
+    "complaintNo": "无投诉",
+    "release": "释放",
+    "resolve": "解决",
+    "releaseEscrow": "释放托管",
+    "resolveComplaint": "解决投诉",
+    "releaseConfirm": "您确定要释放此托管吗？",
+    "id": "托管ID",
+    "workerAmount": "工作者金额",
+    "totalAmount": "总金额",
+    "released": "已释放",
+    "releasedSuccess": "托管已成功释放",
+    "releaseError": "释放失败",
+    "releaseErrorMsg": "无法释放托管",
+    "resolved": "已解决",
+    "resolvedSuccess": "投诉已成功解决",
+    "resolveError": "解决失败",
+    "resolveErrorMsg": "无法解决托管",
+    "resolutionAction": "解决方案",
+    "selectAction": "请选择解决方案",
+    "releaseToWorker": "释放给工作者",
+    "refundToEmployer": "退还给客户",
+    "partialRefund": "部分退款",
+    "workerAmountRequired": "工作者金额为必填项",
+    "amountMustBePositive": "金额必须大于0",
+    "employerRefund": "客户退款 (USD)",
+    "employerRefundRequired": "客户退款为必填项",
+    "resolutionNotes": "解决说明",
+    "notesRequired": "解决说明为必填项",
+    "notesMinLength": "说明至少需要10个字符",
+    "notesPlaceholder": "输入解决详情和理由...",
+    "complaintDescription": "投诉描述",
+    "noEscrowsToExport": "没有可导出的托管",
+    "exported": "托管导出成功",
+    "resolvedBy": "解决人",
+    "resolvedAt": "解决时间"
   },
   "favorites": {
     "added": "已添加到收藏",

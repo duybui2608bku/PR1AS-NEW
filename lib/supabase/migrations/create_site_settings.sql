@@ -13,6 +13,10 @@ CREATE INDEX IF NOT EXISTS idx_site_settings_key ON site_settings(key);
 -- Enable RLS
 ALTER TABLE site_settings ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies if they exist (for idempotency)
+DROP POLICY IF EXISTS "Public can read site settings" ON site_settings;
+DROP POLICY IF EXISTS "Only admins can modify site settings" ON site_settings;
+
 -- Create policy: Only authenticated users can read
 CREATE POLICY "Public can read site settings"
   ON site_settings FOR SELECT
@@ -20,18 +24,21 @@ CREATE POLICY "Public can read site settings"
   USING (true);
 
 -- Create policy: Only admins can insert/update/delete
+-- Uses subquery to check role from user_profiles table (single source of truth)
 CREATE POLICY "Only admins can modify site settings"
   ON site_settings FOR ALL
   TO authenticated
   USING (
-    auth.jwt() ->> 'email' = 'admin@pr1as.com'
-    OR 
-    (auth.jwt() -> 'user_metadata' ->> 'role') = 'admin'
+    EXISTS (
+      SELECT 1 FROM user_profiles
+      WHERE id = auth.uid() AND role = 'admin'
+    )
   )
   WITH CHECK (
-    auth.jwt() ->> 'email' = 'admin@pr1as.com'
-    OR 
-    (auth.jwt() -> 'user_metadata' ->> 'role') = 'admin'
+    EXISTS (
+      SELECT 1 FROM user_profiles
+      WHERE id = auth.uid() AND role = 'admin'
+    )
   );
 
 -- Insert default SEO settings

@@ -17,6 +17,7 @@ import { useMobileSidebar } from "@/hooks/useMobileSidebar";
 import UserMenu from "@/components/common/UserMenu";
 import LanguageSwitcher from "@/components/common/LanguageSwitcher";
 import ThemeToggle from "@/components/common/ThemeToggle";
+import NavigationLoadingBar from "@/components/common/NavigationLoadingBar";
 import { ThemeProvider, useTheme } from "@/components/providers/ThemeProvider";
 import type { MenuProps } from "antd";
 import "../globals-layout.css";
@@ -53,11 +54,7 @@ function ClientLayoutContent({
     useMobileSidebar();
 
   const menuItems: MenuItem[] = [
-    getItem(
-      t("nav.home") || "Home",
-      "/",
-      <HomeOutlined />
-    ),
+    getItem(t("nav.home") || "Home", "/", <HomeOutlined />),
     getItem(
       t("nav.home") || "Dashboard",
       "/client/dashboard",
@@ -88,6 +85,7 @@ function ClientLayoutContent({
 
   return (
     <Layout style={{ minHeight: "100vh" }}>
+      <NavigationLoadingBar />
       {/* Mobile backdrop */}
       {isMobile && mobileOpen && (
         <div
@@ -182,11 +180,7 @@ function ClientLayoutContent({
   );
 }
 
-function ClientLayoutWithConfig({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+function ClientLayoutWithConfig({ children }: { children: React.ReactNode }) {
   const { theme: currentTheme } = useTheme();
   const { defaultAlgorithm, darkAlgorithm } = theme;
 

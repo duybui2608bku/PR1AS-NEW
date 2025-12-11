@@ -133,6 +133,47 @@ export function handleApiError(
     return errorResponse(error.message, error.statusCode, error.code);
   }
 
+  // Handle WalletError (convert to ApiError)
+  if (
+    error instanceof Error &&
+    error.name === "WalletError" &&
+    "code" in error &&
+    "statusCode" in error
+  ) {
+    const walletError = error as {
+      code: string;
+      statusCode: number;
+      message: string;
+    };
+    // Map wallet error codes to API error codes
+    const errorCodeMap: Record<string, ErrorCode> = {
+      INSUFFICIENT_BALANCE: ErrorCode.INSUFFICIENT_BALANCE,
+      ESCROW_NOT_FOUND: ErrorCode.ESCROW_NOT_FOUND,
+      ESCROW_ALREADY_RELEASED: ErrorCode.OPERATION_FAILED,
+      TRANSACTION_FAILED: ErrorCode.TRANSACTION_FAILED,
+      UNAUTHORIZED: ErrorCode.UNAUTHORIZED,
+      INVALID_PAYMENT_METHOD: ErrorCode.INVALID_PAYMENT_METHOD,
+      RESOLUTION_ERROR: ErrorCode.OPERATION_FAILED,
+      ESCROW_RELEASE_ERROR: ErrorCode.OPERATION_FAILED,
+      WALLET_UPDATE_ERROR: ErrorCode.OPERATION_FAILED,
+      INVALID_RESOLUTION: ErrorCode.VALIDATION_ERROR,
+    };
+    const errorCode =
+      errorCodeMap[walletError.code] || ErrorCode.INTERNAL_ERROR;
+    const apiError = new ApiError(
+      walletError.message,
+      walletError.statusCode,
+      errorCode
+    );
+    errorTracker.trackApiError(
+      apiError,
+      context?.endpoint || "unknown",
+      apiError.statusCode,
+      context?.userId
+    );
+    return errorResponse(apiError.message, apiError.statusCode, apiError.code);
+  }
+
   // Handle WorkerServiceError (convert to ApiError)
   // Check for WorkerServiceError by name and properties
   if (

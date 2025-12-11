@@ -5,6 +5,16 @@ export interface ApiResponse<T> {
   message?: string;
 }
 
+export interface UserProfile {
+  id: string;
+  email: string;
+  role: string;
+  status: string;
+  full_name?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
 export interface User {
   id: string;
   email: string;
@@ -15,8 +25,9 @@ export interface User {
   user_metadata: {
     role?: string;
     full_name?: string;
+    banned_until?: string;
   };
-  profile?: any;
+  profile?: UserProfile | null;
 }
 
 export interface WorkerImage {
@@ -103,18 +114,56 @@ class AdminUserAPI {
     }
   }
 
-  // Get all users
-  async getAllUsers(): Promise<ApiResponse<{ users: User[]; total: number }>> {
-    return this.makeRequest<{ users: User[]; total: number }>(
-      "/api/admin/users"
-    );
+  // Get all users with filters and pagination
+  async getAllUsers(filters?: {
+    search?: string;
+    role?: string;
+    status?: string;
+    date_from?: string;
+    date_to?: string;
+    page?: number;
+    limit?: number;
+  }): Promise<
+    ApiResponse<{
+      users: User[];
+      total: number;
+      pagination: {
+        page: number;
+        limit: number;
+        total_pages: number;
+      };
+    }>
+  > {
+    const params = new URLSearchParams();
+    if (filters?.search) params.append("search", filters.search);
+    if (filters?.role) params.append("role", filters.role);
+    if (filters?.status) params.append("status", filters.status);
+    if (filters?.date_from) params.append("date_from", filters.date_from);
+    if (filters?.date_to) params.append("date_to", filters.date_to);
+    if (filters?.page) params.append("page", String(filters.page));
+    if (filters?.limit) params.append("limit", String(filters.limit));
+
+    const queryString = params.toString();
+    return this.makeRequest<{
+      users: User[];
+      total: number;
+      pagination: {
+        page: number;
+        limit: number;
+        total_pages: number;
+      };
+    }>(`/api/admin/users${queryString ? `?${queryString}` : ""}`);
   }
 
   // Ban user
-  async banUser(userId: string, duration?: string): Promise<ApiResponse<any>> {
+  async banUser(
+    userId: string,
+    duration?: string,
+    reason?: string
+  ): Promise<ApiResponse<any>> {
     return this.makeRequest("/api/admin/users/ban", {
       method: "POST",
-      body: JSON.stringify({ userId, duration }),
+      body: JSON.stringify({ userId, duration, reason }),
     });
   }
 
@@ -139,6 +188,17 @@ class AdminUserAPI {
     return this.makeRequest("/api/admin/users/approve-worker", {
       method: "POST",
       body: JSON.stringify({ userId }),
+    });
+  }
+
+  // Reject worker
+  async rejectWorker(
+    userId: string,
+    reason?: string
+  ): Promise<ApiResponse<any>> {
+    return this.makeRequest("/api/admin/users/reject-worker", {
+      method: "POST",
+      body: JSON.stringify({ userId, reason }),
     });
   }
 

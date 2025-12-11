@@ -416,6 +416,14 @@ export class WalletService {
       query = query.lte("amount_usd", filters.max_amount);
     }
 
+    // Search functionality - search in ID, description, escrow_id, job_id
+    if (filters.search && filters.search.trim()) {
+      const searchTerm = filters.search.trim();
+      query = query.or(
+        `id.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,escrow_id.ilike.%${searchTerm}%,job_id.ilike.%${searchTerm}%`
+      );
+    }
+
     // Pagination
     const page = filters.page || 1;
     const limit = filters.limit || 20;
@@ -692,10 +700,7 @@ export class WalletService {
     }
 
     // If escrow is already disputed or processed, prevent duplicate/late complaints
-    if (
-      escrowHold.status !== "held" &&
-      escrowHold.status !== "disputed"
-    ) {
+    if (escrowHold.status !== "held" && escrowHold.status !== "disputed") {
       throw new WalletError(
         "Complaint window expired",
         WalletErrorCodes.COMPLAINT_WINDOW_EXPIRED,
@@ -815,24 +820,68 @@ export class WalletService {
 
     try {
       if (action === "release_to_worker") {
-        // Release full amount to worker
-        await this.releaseEscrow(escrow_id, adminId);
+        // Release full amount to worker (handle disputed escrows)
+        // Note: Don't use releaseEscrow() here as it only works with "held" status
+        // We need to handle "disputed" status escrows directly
 
+        // 1. Get worker wallet to get balance_before
+        const workerWallet = await this.getWallet(escrowHold.worker_id);
+        const balanceBefore = workerWallet.balance_usd;
+
+        // 2. Create release transaction for worker (before updating balance)
+        const releaseTransaction = await this.createTransaction({
+          user_id: escrowHold.worker_id,
+          type: "escrow_release",
+          amount_usd: escrowHold.worker_amount_usd,
+          payment_method: "escrow",
+          status: "completed",
+          escrow_id,
+          job_id: escrowHold.job_id,
+          related_user_id: escrowHold.employer_id,
+          description: `Payment received for job ${escrowHold.job_id} (complaint resolved)`,
+          metadata: {
+            released_by: adminId,
+            resolution_notes,
+            resolution_action: "release_to_worker",
+            recipient: "worker",
+            recipient_id: escrowHold.worker_id,
+            complaint_resolved: true,
+          },
+        });
+
+        // 3. Add money to worker wallet
+        const updatedWorkerWallet = await this.updateWalletBalance(
+          escrowHold.worker_id,
+          escrowHold.worker_amount_usd
+        );
+
+        // 4. Update transaction with correct balance_after
+        await this.supabase
+          .from("transactions")
+          .update({
+            balance_before_usd: balanceBefore,
+            balance_after_usd: updatedWorkerWallet.balance_usd,
+          })
+          .eq("id", releaseTransaction.id);
+
+        // 3. Update escrow status
         await this.supabase
           .from("escrow_holds")
           .update({
             status: "released",
+            release_transaction_id: releaseTransaction.id,
             resolution_notes,
             resolved_by: adminId,
+            released_at: new Date().toISOString(),
           })
           .eq("id", escrow_id);
       } else if (action === "refund_to_employer") {
         // Refund full amount to employer
-        await this.updateWalletBalance(
-          escrowHold.employer_id,
-          escrowHold.total_amount_usd
-        );
+        // 1. Get employer wallet to get balance_before
+        const employerWallet = await this.getWallet(escrowHold.employer_id);
+        const balanceBefore = employerWallet.balance_usd;
 
+        // 2. Create refund transaction (before updating balance)
         const refundTransaction = await this.createTransaction({
           user_id: escrowHold.employer_id,
           type: "refund",
@@ -846,8 +895,27 @@ export class WalletService {
           metadata: {
             resolved_by: adminId,
             resolution_notes,
+            resolution_action: "refund_to_employer",
+            recipient: "employer",
+            recipient_id: escrowHold.employer_id,
+            complaint_resolved: true,
           },
         });
+
+        // 3. Add money to employer wallet
+        const updatedEmployerWallet = await this.updateWalletBalance(
+          escrowHold.employer_id,
+          escrowHold.total_amount_usd
+        );
+
+        // 4. Update transaction with correct balance_after
+        await this.supabase
+          .from("transactions")
+          .update({
+            balance_before_usd: balanceBefore,
+            balance_after_usd: updatedEmployerWallet.balance_usd,
+          })
+          .eq("id", refundTransaction.id);
 
         await this.supabase
           .from("escrow_holds")
@@ -870,7 +938,11 @@ export class WalletService {
         }
 
         // Pay worker
-        await this.updateWalletBalance(escrowHold.worker_id, worker_amount);
+        // 1. Get worker wallet to get balance_before
+        const workerWallet = await this.getWallet(escrowHold.worker_id);
+        const workerBalanceBefore = workerWallet.balance_usd;
+
+        // 2. Create worker transaction (before updating balance)
         const workerTransaction = await this.createTransaction({
           user_id: escrowHold.worker_id,
           type: "escrow_release",
@@ -881,12 +953,39 @@ export class WalletService {
           job_id: escrowHold.job_id,
           related_user_id: escrowHold.employer_id,
           description: "Partial payment (complaint resolution)",
-          metadata: { resolved_by: adminId },
+          metadata: {
+            resolved_by: adminId,
+            resolution_notes,
+            resolution_action: "partial_refund",
+            recipient: "worker",
+            recipient_id: escrowHold.worker_id,
+            complaint_resolved: true,
+            partial_amount: worker_amount,
+          },
         });
 
+        // 3. Add money to worker wallet
+        const updatedWorkerWallet = await this.updateWalletBalance(
+          escrowHold.worker_id,
+          worker_amount
+        );
+
+        // 4. Update worker transaction with correct balance_after
+        await this.supabase
+          .from("transactions")
+          .update({
+            balance_before_usd: workerBalanceBefore,
+            balance_after_usd: updatedWorkerWallet.balance_usd,
+          })
+          .eq("id", workerTransaction.id);
+
         // Refund employer
-        await this.updateWalletBalance(escrowHold.employer_id, employer_refund);
-        await this.createTransaction({
+        // 1. Get employer wallet to get balance_before
+        const employerWallet = await this.getWallet(escrowHold.employer_id);
+        const employerBalanceBefore = employerWallet.balance_usd;
+
+        // 2. Create employer refund transaction (before updating balance)
+        const employerRefundTransaction = await this.createTransaction({
           user_id: escrowHold.employer_id,
           type: "refund",
           amount_usd: employer_refund,
@@ -896,8 +995,31 @@ export class WalletService {
           job_id: escrowHold.job_id,
           related_user_id: escrowHold.worker_id,
           description: "Partial refund (complaint resolution)",
-          metadata: { resolved_by: adminId },
+          metadata: {
+            resolved_by: adminId,
+            resolution_notes,
+            resolution_action: "partial_refund",
+            recipient: "employer",
+            recipient_id: escrowHold.employer_id,
+            complaint_resolved: true,
+            partial_amount: employer_refund,
+          },
         });
+
+        // 3. Add money to employer wallet
+        const updatedEmployerWallet = await this.updateWalletBalance(
+          escrowHold.employer_id,
+          employer_refund
+        );
+
+        // 4. Update employer transaction with correct balance_after
+        await this.supabase
+          .from("transactions")
+          .update({
+            balance_before_usd: employerBalanceBefore,
+            balance_after_usd: updatedEmployerWallet.balance_usd,
+          })
+          .eq("id", employerRefundTransaction.id);
 
         await this.supabase
           .from("escrow_holds")
@@ -918,10 +1040,107 @@ export class WalletService {
         .eq("id", escrow_id)
         .single();
 
-      return updated as EscrowHold;
+      const updatedEscrow = updated as EscrowHold;
+
+      // Create notifications for worker and employer
+      const actionLabels: Record<string, { worker: string; employer: string }> =
+        {
+          release_to_worker: {
+            worker:
+              "Your complaint has been resolved. Payment has been released to you.",
+            employer:
+              "The complaint has been resolved. Payment has been released to the worker.",
+          },
+          refund_to_employer: {
+            worker:
+              "The complaint has been resolved. Payment has been refunded to the client.",
+            employer:
+              "Your complaint has been resolved. Payment has been refunded to you.",
+          },
+          partial_refund: {
+            worker:
+              "The complaint has been resolved. Partial payment has been released to you.",
+            employer:
+              "Your complaint has been resolved. Partial refund has been processed.",
+          },
+        };
+
+      const labels = actionLabels[action] || {
+        worker: "The complaint has been resolved.",
+        employer: "The complaint has been resolved.",
+      };
+
+      // Notify worker
+      await this.supabase.from("notifications").insert({
+        user_id: escrowHold.worker_id,
+        type: "escrow_released",
+        title: "Complaint Resolved",
+        message: labels.worker,
+        data: {
+          escrow_id,
+          job_id: escrowHold.job_id,
+          resolution_action: action,
+          resolution_notes,
+          amount:
+            action === "release_to_worker"
+              ? escrowHold.worker_amount_usd
+              : action === "partial_refund"
+              ? worker_amount
+              : 0,
+        },
+        related_escrow_id: escrow_id,
+        related_booking_id: escrowHold.job_id,
+      });
+
+      // Notify employer
+      await this.supabase.from("notifications").insert({
+        user_id: escrowHold.employer_id,
+        type: "escrow_released",
+        title: "Complaint Resolved",
+        message: labels.employer,
+        data: {
+          escrow_id,
+          job_id: escrowHold.job_id,
+          resolution_action: action,
+          resolution_notes,
+          amount:
+            action === "refund_to_employer"
+              ? escrowHold.total_amount_usd
+              : action === "partial_refund"
+              ? employer_refund
+              : 0,
+        },
+        related_escrow_id: escrow_id,
+        related_booking_id: escrowHold.job_id,
+      });
+
+      // Update booking metadata to reflect complaint resolution
+      if (escrowHold.job_id) {
+        await this.supabase
+          .from("bookings")
+          .update({
+            metadata: {
+              escrow_has_complaint: false,
+              escrow_complaint_resolved: true,
+              escrow_resolution_action: action,
+              escrow_resolution_notes: resolution_notes,
+              escrow_resolved_at: new Date().toISOString(),
+            },
+          })
+          .eq("id", escrowHold.job_id);
+      }
+
+      return updatedEscrow;
     } catch (error) {
+      // Preserve original error message if it's a WalletError
+      if (error instanceof WalletError) {
+        throw error;
+      }
+      // For other errors, include the original message
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
       throw new WalletError(
-        "Failed to resolve complaint",
+        `Failed to resolve complaint: ${errorMessage}`,
         "RESOLUTION_ERROR",
         500
       );

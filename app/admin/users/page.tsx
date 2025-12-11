@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, Fragment } from "react";
+import { useState, useEffect, useCallback, Fragment, useMemo } from "react";
 import {
   Table,
   Card,
@@ -17,7 +17,11 @@ import {
   Descriptions,
   Image,
   Divider,
+  DatePicker,
+  Row,
+  Col,
 } from "antd";
+import dayjs, { Dayjs } from "dayjs";
 import {
   UserOutlined,
   ReloadOutlined,
@@ -35,264 +39,18 @@ import {
 } from "@/lib/admin/user-api";
 import type { ColumnsType } from "antd/es/table";
 import { useTranslation } from "react-i18next";
+import {
+  SERVICE_MAPPING,
+  getServiceName,
+  getServiceDescription,
+} from "@/lib/admin/constants";
+import { showNotification } from "@/lib/utils/toast";
 
 const { Title, Text } = Typography;
 const { confirm } = Modal;
 
-// Mapping service keys to Vietnamese names and descriptions
-const SERVICE_MAPPING: Record<string, { name: string; description: string }> = {
-  // Homecare services
-  "homecare-organizing": {
-    name: "Dọn dẹp nhà cửa",
-    description: "Dịch vụ sắp xếp và dọn dẹp nhà cửa ngăn nắp",
-  },
-  "homecare-cooking": {
-    name: "Nấu ăn",
-    description: "Dịch vụ nấu ăn với nhiều loại món ăn khác nhau",
-  },
-  "homecare-shopping": {
-    name: "Đi chợ mua sắm",
-    description: "Dịch vụ đi chợ và mua sắm hộ",
-  },
-  "homecare-laundry": {
-    name: "Giặt giũ",
-    description: "Dịch vụ giặt là và chăm sóc quần áo",
-  },
-  "homecare-cleaning": {
-    name: "Vệ sinh nhà cửa",
-    description: "Dịch vụ vệ sinh và làm sạch nhà cửa",
-  },
 
-  // Grooming services
-  "grooming-hair": {
-    name: "Làm tóc",
-    description: "Dịch vụ làm tóc và chăm sóc tóc",
-  },
-  "grooming-makeup": {
-    name: "Trang điểm",
-    description: "Dịch vụ trang điểm chuyên nghiệp",
-  },
-  "grooming-nails": {
-    name: "Làm móng",
-    description: "Dịch vụ chăm sóc và làm đẹp móng tay, móng chân",
-  },
-  "grooming-nail": {
-    name: "Làm móng",
-    description: "Dịch vụ chăm sóc móng tay",
-  },
-  "grooming-facial": {
-    name: "Chăm sóc da mặt",
-    description: "Dịch vụ chăm sóc và làm đẹp da mặt",
-  },
-  "grooming-skincare": {
-    name: "Chăm sóc da",
-    description: "Dịch vụ chăm sóc và điều trị da",
-  },
-  "grooming-massage": {
-    name: "Massage",
-    description: "Dịch vụ massage thư giãn và trị liệu",
-  },
-
-  // Assistance services
-  "assistance-interpreter": {
-    name: "Phiên dịch",
-    description: "Dịch vụ phiên dịch ngôn ngữ",
-  },
-  "assistance-personal": {
-    name: "Trợ lý cá nhân",
-    description: "Dịch vụ trợ lý cá nhân",
-  },
-  "assistance-onsite": {
-    name: "Hỗ trợ tại chỗ",
-    description: "Dịch vụ hỗ trợ chuyên nghiệp tại chỗ",
-  },
-  "assistance-virtual": {
-    name: "Trợ lý ảo",
-    description: "Dịch vụ trợ lý ảo từ xa",
-  },
-  "assistance-tour-guide": {
-    name: "Hướng dẫn viên du lịch",
-    description: "Dịch vụ hướng dẫn viên du lịch",
-  },
-  "assistance-tutor": {
-    name: "Gia sư",
-    description: "Dịch vụ gia sư và dạy kèm",
-  },
-  "assistance-driver": {
-    name: "Tài xế",
-    description: "Dịch vụ lái xe và đưa đón",
-  },
-
-  // Interpreter language pairs
-  vi_to_en: {
-    name: "Phiên dịch Việt - Anh",
-    description: "Phiên dịch từ tiếng Việt sang tiếng Anh",
-  },
-  vi_to_ko: {
-    name: "Phiên dịch Việt - Hàn",
-    description: "Phiên dịch từ tiếng Việt sang tiếng Hàn",
-  },
-  vi_to_ja: {
-    name: "Phiên dịch Việt - Nhật",
-    description: "Phiên dịch từ tiếng Việt sang tiếng Nhật",
-  },
-  vi_to_zh: {
-    name: "Phiên dịch Việt - Trung",
-    description: "Phiên dịch từ tiếng Việt sang tiếng Trung",
-  },
-  en_to_vi: {
-    name: "Phiên dịch Anh - Việt",
-    description: "Phiên dịch từ tiếng Anh sang tiếng Việt",
-  },
-  en_to_ko: {
-    name: "Phiên dịch Anh - Hàn",
-    description: "Phiên dịch từ tiếng Anh sang tiếng Hàn",
-  },
-  en_to_ja: {
-    name: "Phiên dịch Anh - Nhật",
-    description: "Phiên dịch từ tiếng Anh sang tiếng Nhật",
-  },
-  en_to_zh: {
-    name: "Phiên dịch Anh - Trung",
-    description: "Phiên dịch từ tiếng Anh sang tiếng Trung",
-  },
-  ko_to_vi: {
-    name: "Phiên dịch Hàn - Việt",
-    description: "Phiên dịch từ tiếng Hàn sang tiếng Việt",
-  },
-  ko_to_en: {
-    name: "Phiên dịch Hàn - Anh",
-    description: "Phiên dịch từ tiếng Hàn sang tiếng Anh",
-  },
-  ko_to_ja: {
-    name: "Phiên dịch Hàn - Nhật",
-    description: "Phiên dịch từ tiếng Hàn sang tiếng Nhật",
-  },
-  ko_to_zh: {
-    name: "Phiên dịch Hàn - Trung",
-    description: "Phiên dịch từ tiếng Hàn sang tiếng Trung",
-  },
-  ja_to_vi: {
-    name: "Phiên dịch Nhật - Việt",
-    description: "Phiên dịch từ tiếng Nhật sang tiếng Việt",
-  },
-  ja_to_en: {
-    name: "Phiên dịch Nhật - Anh",
-    description: "Phiên dịch từ tiếng Nhật sang tiếng Anh",
-  },
-  ja_to_ko: {
-    name: "Phiên dịch Nhật - Hàn",
-    description: "Phiên dịch từ tiếng Nhật sang tiếng Hàn",
-  },
-  ja_to_zh: {
-    name: "Phiên dịch Nhật - Trung",
-    description: "Phiên dịch từ tiếng Nhật sang tiếng Trung",
-  },
-  zh_to_vi: {
-    name: "Phiên dịch Trung - Việt",
-    description: "Phiên dịch từ tiếng Trung sang tiếng Việt",
-  },
-  zh_to_en: {
-    name: "Phiên dịch Trung - Anh",
-    description: "Phiên dịch từ tiếng Trung sang tiếng Anh",
-  },
-  zh_to_ko: {
-    name: "Phiên dịch Trung - Hàn",
-    description: "Phiên dịch từ tiếng Trung sang tiếng Hàn",
-  },
-  zh_to_ja: {
-    name: "Phiên dịch Trung - Nhật",
-    description: "Phiên dịch từ tiếng Trung sang tiếng Nhật",
-  },
-
-  // Companionship services
-  "companionship-level-1": {
-    name: "Đồng hành Cấp 1",
-    description:
-      "Không tiếp xúc thể chất, trò chuyện thông thường, trang phục thoải mái",
-  },
-  "companionship-level-2": {
-    name: "Đồng hành Cấp 2",
-    description:
-      "Không tiếp xúc thể chất, trò chuyện trí tuệ, trang phục bán chính thức",
-  },
-  "companionship-level-3": {
-    name: "Đồng hành Cấp 3",
-    description:
-      "Cho phép tiếp xúc thể chất không thân mật, trò chuyện trí tuệ, trang phục chính thức",
-  },
-  "companionship-basic": {
-    name: "Đồng hành cơ bản",
-    description: "Dịch vụ đồng hành cơ bản",
-  },
-  "companionship-standard": {
-    name: "Đồng hành tiêu chuẩn",
-    description: "Dịch vụ đồng hành tiêu chuẩn",
-  },
-  "companionship-premium": {
-    name: "Đồng hành cao cấp",
-    description: "Dịch vụ đồng hành cao cấp",
-  },
-  "companionship-luxury": {
-    name: "Đồng hành sang trọng",
-    description: "Dịch vụ đồng hành sang trọng",
-  },
-};
-
-// Helper function to get Vietnamese service name
-const getServiceName = (nameKey?: string, slug?: string): string => {
-  if (!nameKey && !slug) return "Dịch vụ không xác định";
-
-  // Try to get from mapping first
-  if (slug && SERVICE_MAPPING[slug]) {
-    return SERVICE_MAPPING[slug].name;
-  }
-
-  // Try with name_key (convert to slug format)
-  if (nameKey) {
-    const slugFromKey = nameKey
-      .replace(/^SERVICE_/, "")
-      .toLowerCase()
-      .replace(/_/g, "-");
-    if (SERVICE_MAPPING[slugFromKey]) {
-      return SERVICE_MAPPING[slugFromKey].name;
-    }
-  }
-
-  // Fallback: format the text nicely
-  const text = slug || nameKey || "";
-  return text
-    .replace(/^SERVICE_/, "")
-    .split(/[-_]/)
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join(" ");
-};
-
-// Helper function to get Vietnamese service description
-const getServiceDescription = (
-  nameKey?: string,
-  slug?: string,
-  fallbackDescription?: string
-): string => {
-  // Try to get from mapping first
-  if (slug && SERVICE_MAPPING[slug]) {
-    return SERVICE_MAPPING[slug].description;
-  }
-
-  // Try with name_key (convert to slug format)
-  if (nameKey) {
-    const slugFromKey = nameKey
-      .replace(/^SERVICE_/, "")
-      .toLowerCase()
-      .replace(/_/g, "-");
-    if (SERVICE_MAPPING[slugFromKey]) {
-      return SERVICE_MAPPING[slugFromKey].description;
-    }
-  }
-
-  // Return fallback description if provided
-  return fallbackDescription || "";
-};
+const { RangePicker } = DatePicker;
 
 export default function UserManagementPage() {
   const [users, setUsers] = useState<ApiUser[]>([]);
@@ -301,32 +59,105 @@ export default function UserManagementPage() {
   const [pendingLoading, setPendingLoading] = useState(true);
   const [searchText, setSearchText] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [dateRange, setDateRange] = useState<[Dayjs | null, Dayjs | null]>([
+    null,
+    null,
+  ]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  const [totalUsers, setTotalUsers] = useState(0);
   const [activeTab, setActiveTab] = useState("users");
   const [selectedWorker, setSelectedWorker] = useState<PendingWorker | null>(
     null
   );
   const [workerModalVisible, setWorkerModalVisible] = useState(false);
+  const [banModalVisible, setBanModalVisible] = useState(false);
+  const [banUserId, setBanUserId] = useState<string | null>(null);
+  const [banUserEmail, setBanUserEmail] = useState<string>("");
+  const [banDuration, setBanDuration] = useState<string>("1y");
+  const [banReason, setBanReason] = useState<string>("");
+  const [rejectModalVisible, setRejectModalVisible] = useState(false);
+  const [rejectUserId, setRejectUserId] = useState<string | null>(null);
+  const [rejectUserEmail, setRejectUserEmail] = useState<string>("");
+  const [rejectReason, setRejectReason] = useState<string>("");
+  const [actionLoading, setActionLoading] = useState<string | null>(null); // Track which action is loading
+  const [debouncedSearchText, setDebouncedSearchText] = useState("");
   const { t } = useTranslation();
 
-  const fetchUsers = useCallback(async () => {
+  const fetchUsers = useCallback(async (page: number) => {
     setLoading(true);
     try {
-      const response = await adminUserAPI.getAllUsers();
+      const filters: {
+        search?: string;
+        role?: string;
+        status?: string;
+        date_from?: string;
+        date_to?: string;
+        page?: number;
+        limit?: number;
+      } = {
+        page,
+        limit: pageSize,
+      };
+
+      if (searchText.trim()) {
+        filters.search = searchText.trim();
+      }
+      if (roleFilter && roleFilter !== "all") {
+        filters.role = roleFilter;
+      }
+      if (statusFilter && statusFilter !== "all") {
+        filters.status = statusFilter;
+      }
+      if (dateRange[0]) {
+        filters.date_from = dateRange[0].format("YYYY-MM-DD");
+      }
+      if (dateRange[1]) {
+        filters.date_to = dateRange[1].format("YYYY-MM-DD");
+      }
+
+      const response = await adminUserAPI.getAllUsers(filters);
       if (response.error) {
         message.error(response.error);
         setUsers([]);
+        setTotalUsers(0);
       } else if (response.data) {
         setUsers(response.data.users || []);
+        setTotalUsers(response.data.total || 0);
       } else {
         setUsers([]);
+        setTotalUsers(0);
       }
     } catch (error) {
       message.error("Failed to load users");
       setUsers([]);
+      setTotalUsers(0);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [debouncedSearchText, roleFilter, statusFilter, dateRange, pageSize]);
+
+  // Debounce search input - properly debounce the search text
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchText(searchText);
+      setCurrentPage(1); // Reset to first page when search changes
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchText]);
+
+  // Reset page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [roleFilter, statusFilter, dateRange]);
+
+  // Fetch when page, pageSize, or filters change
+  useEffect(() => {
+    fetchUsers(currentPage);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentPage, pageSize, debouncedSearchText, roleFilter, statusFilter, dateRange]);
 
   const fetchPendingWorkers = useCallback(async () => {
     setPendingLoading(true);
@@ -349,110 +180,281 @@ export default function UserManagementPage() {
   }, []);
 
   useEffect(() => {
-    fetchUsers();
+    fetchUsers(1);
     fetchPendingWorkers();
-  }, [fetchUsers, fetchPendingWorkers]);
+  }, []); // Only run once on mount
 
   const handleBanUser = (userId: string, email: string) => {
-    confirm({
-      title: t("admin.users.banUser") || "Ban User",
-      icon: <ExclamationCircleOutlined />,
-      content: `${
-        t("admin.users.banUserConfirm") || "Are you sure you want to ban"
-      } ${email}?`,
-      okText: t("admin.users.yesBan") || "Yes, Ban",
-      okType: "danger",
-      cancelText: t("common.cancel") || "Cancel",
-      onOk: async () => {
-        try {
-          const response = await adminUserAPI.banUser(userId);
-          if (response.error) {
-            message.error(response.error);
-          } else {
-            message.success(response.message || "User banned successfully");
-            fetchUsers();
-          }
-        } catch (error) {
-          message.error("Failed to ban user");
-        }
-      },
-    });
+    setBanUserId(userId);
+    setBanUserEmail(email);
+    setBanDuration("1y");
+    setBanReason("");
+    setBanModalVisible(true);
+  };
+
+  const handleConfirmBan = async () => {
+    if (!banUserId) return;
+
+    setActionLoading("ban");
+    try {
+      const response = await adminUserAPI.banUser(
+        banUserId,
+        banDuration,
+        banReason
+      );
+      if (response.error) {
+        showNotification.error(
+          "Failed to ban user",
+          response.error
+        );
+      } else {
+        showNotification.success(
+          "User banned successfully",
+          response.message || `User ${banUserEmail} has been banned`
+        );
+        setBanModalVisible(false);
+        setBanUserId(null);
+        setBanUserEmail("");
+        setBanReason("");
+        fetchUsers(currentPage);
+      }
+    } catch (error: any) {
+      showNotification.error(
+        "Failed to ban user",
+        error.message || "An unexpected error occurred"
+      );
+    } finally {
+      setActionLoading(null);
+    }
   };
 
   const handleUnbanUser = async (userId: string) => {
-    try {
-      const response = await adminUserAPI.unbanUser(userId);
-      if (response.error) {
-        message.error(response.error);
-      } else {
-        message.success(response.message || "User unbanned successfully");
-        fetchUsers();
-      }
-    } catch (error) {
-      message.error("Failed to unban user");
-    }
+    const user = users.find((u) => u.id === userId);
+    const userEmail = user?.email || userId;
+
+    confirm({
+      title: t("admin.users.unbanUser") || "Unban User",
+      icon: <ExclamationCircleOutlined />,
+      content: (
+        <div>
+          <p>
+            {t("admin.users.unbanUserConfirm") ||
+              "Are you sure you want to unban"}{" "}
+            <Text strong>{userEmail}</Text>?
+          </p>
+        </div>
+      ),
+      okText: t("admin.users.yesUnban") || "Yes, Unban",
+      okType: "primary",
+      cancelText: t("common.cancel") || "Cancel",
+      onOk: async () => {
+        setActionLoading(`unban-${userId}`);
+        try {
+          const response = await adminUserAPI.unbanUser(userId);
+          if (response.error) {
+            showNotification.error(
+              "Failed to unban user",
+              response.error
+            );
+          } else {
+            showNotification.success(
+              "User unbanned successfully",
+              response.message || `User ${userEmail} has been unbanned`
+            );
+            fetchUsers(currentPage);
+          }
+        } catch (error: any) {
+          showNotification.error(
+            "Failed to unban user",
+            error.message || "An unexpected error occurred"
+          );
+        } finally {
+          setActionLoading(null);
+        }
+      },
+    });
   };
 
   const handleDeleteUser = (userId: string, email: string) => {
     confirm({
       title: t("admin.users.deleteUser") || "Delete User",
       icon: <ExclamationCircleOutlined />,
-      content: `${
-        t("admin.users.deleteUserConfirm") ||
-        "Are you sure you want to permanently delete"
-      } ${email}? ${
-        t("admin.users.deleteUserWarning") || "This action cannot be undone."
-      }`,
+      width: 600,
+      content: (
+        <div>
+          <p style={{ marginBottom: 16 }}>
+            <Text strong>
+              {t("admin.users.deleteUserConfirm") ||
+                "Are you sure you want to permanently delete"}{" "}
+              {email}?
+            </Text>
+          </p>
+          <div style={{ marginBottom: 16 }}>
+            <Text type="warning" strong>
+              {t("admin.users.deleteUserWarning") ||
+                "This action cannot be undone."}
+            </Text>
+          </div>
+          <div style={{ marginTop: 16 }}>
+            <Text strong>
+              {t("admin.users.deleteCascadeWarning") ||
+                "The following data will also be deleted:"}
+            </Text>
+            <ul style={{ marginTop: 8, marginLeft: 20 }}>
+              <li>
+                {t("admin.users.deleteCascadeBookings") ||
+                  "All bookings associated with this user"}
+              </li>
+              <li>
+                {t("admin.users.deleteCascadeTransactions") ||
+                  "All transactions and payment records"}
+              </li>
+              <li>
+                {t("admin.users.deleteCascadeWorkerProfile") ||
+                  "Worker profile (if applicable)"}
+              </li>
+              <li>
+                {t("admin.users.deleteCascadeReviews") ||
+                  "All reviews and ratings"}
+              </li>
+              <li>
+                {t("admin.users.deleteCascadeMessages") ||
+                  "All messages and conversations"}
+              </li>
+            </ul>
+          </div>
+        </div>
+      ),
       okText: t("admin.users.yesDelete") || "Yes, Delete",
       okType: "danger",
       cancelText: t("common.cancel") || "Cancel",
+      okButtonProps: {
+        loading: actionLoading === `delete-${userId}`,
+      },
       onOk: async () => {
+        setActionLoading(`delete-${userId}`);
         try {
           const response = await adminUserAPI.deleteUser(userId);
           if (response.error) {
-            message.error(response.error);
+            showNotification.error(
+              "Failed to delete user",
+              response.error
+            );
           } else {
-            message.success(response.message || "User deleted successfully");
-            fetchUsers();
+            showNotification.success(
+              "User deleted successfully",
+              response.message || `User ${email} has been permanently deleted`
+            );
+            fetchUsers(currentPage);
           }
-        } catch (error) {
-          message.error("Failed to delete user");
+        } catch (error: any) {
+          showNotification.error(
+            "Failed to delete user",
+            error.message || "An unexpected error occurred"
+          );
+        } finally {
+          setActionLoading(null);
         }
       },
     });
   };
 
   const handleApproveWorker = async (userId: string) => {
-    try {
-      const response = await adminUserAPI.approveWorker(userId);
-      if (response.error) {
-        message.error(response.error);
-      } else {
-        message.success(response.message || "Worker approved successfully");
-        fetchPendingWorkers();
-        fetchUsers();
-      }
-    } catch (error) {
-      message.error("Failed to approve worker");
-    }
-  };
+    const worker = pendingWorkers.find((w) => w.user_id === userId);
+    const workerEmail = worker?.user?.email || userId;
 
-  const handleRejectWorker = (workerId: string, email: string) => {
     confirm({
-      title: t("admin.users.rejectWorker") || "Reject Worker Application",
+      title: t("admin.users.approveWorker") || "Approve Worker",
       icon: <ExclamationCircleOutlined />,
-      content: `${
-        t("admin.users.rejectWorkerConfirm") ||
-        "Are you sure you want to reject"
-      } ${email}'s worker application?`,
-      okText: t("admin.users.yesReject") || "Yes, Reject",
-      okType: "danger",
+      content: (
+        <div>
+          <p>
+            {t("admin.users.approveWorkerConfirm") ||
+              "Are you sure you want to approve worker application for"}{" "}
+            <Text strong>{workerEmail}</Text>?
+          </p>
+          <Text type="secondary" style={{ fontSize: 12, display: "block", marginTop: 8 }}>
+            {t("admin.users.approveWorkerHint") ||
+              "This will publish the worker profile and make it visible to clients."}
+          </Text>
+        </div>
+      ),
+      okText: t("admin.users.yesApprove") || "Yes, Approve",
+      okType: "primary",
       cancelText: t("common.cancel") || "Cancel",
+      okButtonProps: {
+        loading: actionLoading === `approve-${userId}`,
+      },
       onOk: async () => {
-        message.success("Worker application rejected");
-        fetchPendingWorkers();
+        setActionLoading(`approve-${userId}`);
+        try {
+          const response = await adminUserAPI.approveWorker(userId);
+          if (response.error) {
+            showNotification.error(
+              "Failed to approve worker",
+              response.error
+            );
+          } else {
+            showNotification.success(
+              "Worker approved successfully",
+              response.message || `Worker ${workerEmail} has been approved and published`
+            );
+            fetchPendingWorkers();
+            fetchUsers(currentPage);
+          }
+        } catch (error: any) {
+          showNotification.error(
+            "Failed to approve worker",
+            error.message || "An unexpected error occurred"
+          );
+        } finally {
+          setActionLoading(null);
+        }
       },
     });
+  };
+
+  const handleRejectWorker = (userId: string, email: string) => {
+    setRejectUserId(userId);
+    setRejectUserEmail(email);
+    setRejectReason("");
+    setRejectModalVisible(true);
+  };
+
+  const handleConfirmReject = async () => {
+    if (!rejectUserId) return;
+
+    setActionLoading(`reject-${rejectUserId}`);
+    try {
+      const response = await adminUserAPI.rejectWorker(
+        rejectUserId,
+        rejectReason
+      );
+      if (response.error) {
+        showNotification.error(
+          "Failed to reject worker",
+          response.error
+        );
+      } else {
+        showNotification.success(
+          "Worker application rejected",
+          response.message || `Worker ${rejectUserEmail} application has been rejected`
+        );
+        setRejectModalVisible(false);
+        setRejectUserId(null);
+        setRejectUserEmail("");
+        setRejectReason("");
+        fetchPendingWorkers();
+        fetchUsers(currentPage);
+      }
+    } catch (error: any) {
+      showNotification.error(
+        "Failed to reject worker",
+        error.message || "An unexpected error occurred"
+      );
+    } finally {
+      setActionLoading(null);
+    }
   };
 
   const showWorkerDetails = (worker: PendingWorker) => {
@@ -529,24 +531,29 @@ export default function UserManagementPage() {
       render: (_, record: ApiUser) => {
         const isBanned =
           record.banned_until && new Date(record.banned_until) > new Date();
-        const isAdmin = record.user_metadata?.role === "admin";
+        // Check role from user_profiles (single source of truth)
+        const isAdmin =
+          record.profile?.role === "admin" ||
+          record.user_metadata?.role === "admin";
 
         return (
           <Space>
             {!isAdmin && (
               <Fragment>
                 {isBanned ? (
-                  <Button
-                    type="link"
-                    onClick={() => handleUnbanUser(record.id)}
-                  >
-                    {t("admin.users.unban") || "Unban"}
-                  </Button>
+                <Button
+                  type="link"
+                  onClick={() => handleUnbanUser(record.id)}
+                  loading={actionLoading === `unban-${record.id}`}
+                >
+                  {t("admin.users.unban") || "Unban"}
+                </Button>
                 ) : (
                   <Button
                     type="link"
                     danger
                     onClick={() => handleBanUser(record.id, record.email)}
+                    loading={actionLoading === `ban-${record.id}`}
                   >
                     {t("admin.users.ban") || "Ban"}
                   </Button>
@@ -556,6 +563,7 @@ export default function UserManagementPage() {
                   danger
                   icon={<DeleteOutlined />}
                   onClick={() => handleDeleteUser(record.id, record.email)}
+                  loading={actionLoading === `delete-${record.id}`}
                 >
                   {t("admin.users.delete") || "Delete"}
                 </Button>
@@ -619,6 +627,7 @@ export default function UserManagementPage() {
             type="primary"
             icon={<CheckOutlined />}
             onClick={() => handleApproveWorker(record.user_id)}
+            loading={actionLoading === `approve-${record.user_id}`}
           >
             {t("admin.users.approve") || "Approve"}
           </Button>
@@ -626,6 +635,7 @@ export default function UserManagementPage() {
             danger
             icon={<CloseOutlined />}
             onClick={() => handleRejectWorker(record.id, record.user?.email)}
+            loading={actionLoading === `reject-${record.id}`}
           >
             {t("admin.users.reject") || "Reject"}
           </Button>
@@ -634,17 +644,7 @@ export default function UserManagementPage() {
     },
   ];
 
-  const filteredUsers = (users || []).filter((user) => {
-    const matchesSearch =
-      user.email.toLowerCase().includes(searchText.toLowerCase()) ||
-      (user.user_metadata?.full_name || "")
-        .toLowerCase()
-        .includes(searchText.toLowerCase());
-    const matchesRole =
-      roleFilter === "all" ||
-      (user.user_metadata?.role || "client") === roleFilter;
-    return matchesSearch && matchesRole;
-  });
+  // Remove client-side filtering since we're using server-side now
 
   return (
     <div>
@@ -658,49 +658,111 @@ export default function UserManagementPage() {
             {
               key: "users",
               label: `${t("admin.users.allUsers") || "All Users"} (${
-                users.length
+                totalUsers
               })`,
               children: (
                 <>
-                  <Space style={{ marginBottom: 16, width: "100%" }} wrap>
-                    <Input
-                      placeholder={
-                        t("admin.users.searchUsers") || "Search users..."
-                      }
-                      prefix={<SearchOutlined />}
-                      style={{ width: 300 }}
-                      value={searchText}
-                      onChange={(e) => setSearchText(e.target.value)}
-                      allowClear
-                    />
-                    <Select
-                      style={{ width: 250 }}
-                      value={roleFilter}
-                      onChange={setRoleFilter}
-                    >
-                      <Select.Option value="all">
-                        {t("admin.users.allRoles") || "All Roles"}
-                      </Select.Option>
-                      <Select.Option value="admin">Admin</Select.Option>
-                      <Select.Option value="worker">Worker</Select.Option>
-                      <Select.Option value="client">Client</Select.Option>
-                    </Select>
-                    <Button icon={<ReloadOutlined />} onClick={fetchUsers}>
-                      {t("common.refresh") || "Refresh"}
-                    </Button>
-                  </Space>
+                  <Card
+                    size="small"
+                    style={{ marginBottom: 16, backgroundColor: "#fafafa" }}
+                  >
+                    <Row gutter={[16, 16]}>
+                      <Col xs={24} sm={12} md={8} lg={6}>
+                        <Input
+                          placeholder={
+                            t("admin.users.searchUsers") || "Search users..."
+                          }
+                          prefix={<SearchOutlined />}
+                          value={searchText}
+                          onChange={(e) => setSearchText(e.target.value)}
+                          allowClear
+                        />
+                      </Col>
+                      <Col xs={24} sm={12} md={8} lg={4}>
+                        <Select
+                          style={{ width: "100%" }}
+                          value={roleFilter}
+                          onChange={setRoleFilter}
+                          placeholder={t("admin.users.filterByRole") || "Role"}
+                        >
+                          <Select.Option value="all">
+                            {t("admin.users.allRoles") || "All Roles"}
+                          </Select.Option>
+                          <Select.Option value="admin">Admin</Select.Option>
+                          <Select.Option value="worker">Worker</Select.Option>
+                          <Select.Option value="client">Client</Select.Option>
+                        </Select>
+                      </Col>
+                      <Col xs={24} sm={12} md={8} lg={4}>
+                        <Select
+                          style={{ width: "100%" }}
+                          value={statusFilter}
+                          onChange={setStatusFilter}
+                          placeholder={
+                            t("admin.users.filterByStatus") || "Status"
+                          }
+                        >
+                          <Select.Option value="all">
+                            {t("admin.users.allStatuses") || "All Statuses"}
+                          </Select.Option>
+                          <Select.Option value="active">
+                            {t("admin.users.active") || "Active"}
+                          </Select.Option>
+                          <Select.Option value="banned">
+                            {t("admin.users.banned") || "Banned"}
+                          </Select.Option>
+                        </Select>
+                      </Col>
+                      <Col xs={24} sm={12} md={8} lg={8}>
+                        <RangePicker
+                          style={{ width: "100%" }}
+                          value={dateRange}
+                          onChange={(dates) =>
+                            setDateRange(
+                              dates as [Dayjs | null, Dayjs | null]
+                            )
+                          }
+                          placeholder={[
+                            t("admin.users.dateFrom") || "From",
+                            t("admin.users.dateTo") || "To",
+                          ]}
+                          format="YYYY-MM-DD"
+                        />
+                      </Col>
+                      <Col xs={24} sm={12} md={8} lg={2}>
+                        <Button
+                          icon={<ReloadOutlined />}
+                          onClick={() => fetchUsers(1)}
+                          style={{ width: "100%" }}
+                        >
+                          {t("common.refresh") || "Refresh"}
+                        </Button>
+                      </Col>
+                    </Row>
+                  </Card>
 
                   <Table
                     columns={userColumns}
-                    dataSource={filteredUsers}
+                    dataSource={users}
                     loading={loading}
                     rowKey="id"
+                    scroll={{ x: "max-content" }}
                     pagination={{
-                      pageSize: 10,
-                      showTotal: (total) =>
-                        `${t("admin.users.total") || "Total"} ${total} ${
-                          t("admin.users.users") || "users"
-                        }`,
+                      current: currentPage,
+                      pageSize: pageSize,
+                      total: totalUsers,
+                      showTotal: (total, range) =>
+                        `${range[0]}-${range[1]} ${t("admin.users.of") || "of"} ${total} ${t("admin.users.users") || "users"}`,
+                      showSizeChanger: true,
+                      pageSizeOptions: ["10", "20", "50", "100"],
+                      onChange: (page, size) => {
+                        setCurrentPage(page);
+                        setPageSize(size || 20);
+                      },
+                      onShowSizeChange: (current, size) => {
+                        setCurrentPage(1);
+                        setPageSize(size);
+                      },
                     }}
                   />
                 </>
@@ -727,6 +789,7 @@ export default function UserManagementPage() {
                     dataSource={pendingWorkers}
                     loading={pendingLoading}
                     rowKey="id"
+                    scroll={{ x: "max-content" }}
                     pagination={{
                       pageSize: 10,
                       showTotal: (total) =>
@@ -743,12 +806,135 @@ export default function UserManagementPage() {
         />
       </Card>
 
+      {/* Ban User Modal */}
+      <Modal
+        title={t("admin.users.banUser") || "Ban User"}
+        open={banModalVisible}
+        onOk={handleConfirmBan}
+        onCancel={() => {
+          setBanModalVisible(false);
+          setBanUserId(null);
+          setBanUserEmail("");
+          setBanReason("");
+        }}
+        okText={t("admin.users.yesBan") || "Yes, Ban"}
+        okType="danger"
+        cancelText={t("common.cancel") || "Cancel"}
+        width="90%"
+        style={{ maxWidth: 600 }}
+        okButtonProps={{
+          loading: actionLoading === "ban",
+        }}
+      >
+        <Space direction="vertical" style={{ width: "100%" }} size="middle">
+          <div>
+            <Text strong>
+              {t("admin.users.banUserConfirm") || "Ban user"}: {banUserEmail}
+            </Text>
+          </div>
+          <div>
+            <Text strong>
+              {t("admin.users.banDuration") || "Ban Duration"}:
+            </Text>
+            <Select
+              value={banDuration}
+              onChange={setBanDuration}
+              style={{ width: "100%", marginTop: 8 }}
+            >
+              <Select.Option value="1d">
+                {t("admin.users.banDuration1Day") || "1 Day"}
+              </Select.Option>
+              <Select.Option value="1w">
+                {t("admin.users.banDuration1Week") || "1 Week"}
+              </Select.Option>
+              <Select.Option value="1m">
+                {t("admin.users.banDuration1Month") || "1 Month"}
+              </Select.Option>
+              <Select.Option value="1y">
+                {t("admin.users.banDuration1Year") || "1 Year"}
+              </Select.Option>
+              <Select.Option value="permanent">
+                {t("admin.users.banDurationPermanent") || "Permanent"}
+              </Select.Option>
+            </Select>
+          </div>
+          <div>
+            <Text strong>
+              {t("admin.users.banReason") || "Reason"} (
+              {t("common.optional") || "Optional"}):
+            </Text>
+            <Input.TextArea
+              value={banReason}
+              onChange={(e) => setBanReason(e.target.value)}
+              placeholder={
+                t("admin.users.banReasonPlaceholder") ||
+                "Enter reason for banning this user..."
+              }
+              rows={3}
+              style={{ marginTop: 8 }}
+            />
+          </div>
+        </Space>
+      </Modal>
+
+      {/* Reject Worker Modal */}
+      <Modal
+        title={t("admin.users.rejectWorker") || "Reject Worker Application"}
+        open={rejectModalVisible}
+        onOk={handleConfirmReject}
+        onCancel={() => {
+          setRejectModalVisible(false);
+          setRejectUserId(null);
+          setRejectUserEmail("");
+          setRejectReason("");
+        }}
+        okText={t("admin.users.yesReject") || "Yes, Reject"}
+        okType="danger"
+        cancelText={t("common.cancel") || "Cancel"}
+        width="90%"
+        style={{ maxWidth: 600 }}
+        okButtonProps={{
+          loading: actionLoading === `reject-${rejectUserId}`,
+        }}
+      >
+        <Space direction="vertical" style={{ width: "100%" }} size="middle">
+          <div>
+            <Text strong>
+              {t("admin.users.rejectWorkerConfirm") ||
+                "Reject worker application for"}{" "}
+              {rejectUserEmail}?
+            </Text>
+          </div>
+          <div>
+            <Text strong>
+              {t("admin.users.rejectionReason") || "Rejection Reason"} (
+              {t("common.optional") || "Optional"}):
+            </Text>
+            <Input.TextArea
+              value={rejectReason}
+              onChange={(e) => setRejectReason(e.target.value)}
+              placeholder={
+                t("admin.users.rejectionReasonPlaceholder") ||
+                "Enter reason for rejecting this worker application..."
+              }
+              rows={4}
+              style={{ marginTop: 8 }}
+            />
+            <Text type="secondary" style={{ fontSize: 12, display: "block", marginTop: 4 }}>
+              {t("admin.users.rejectionReasonHint") ||
+                "This reason will be saved and can be viewed by the worker."}
+            </Text>
+          </div>
+        </Space>
+      </Modal>
+
       {/* Worker Details Modal */}
       <Modal
         title={t("admin.users.workerDetails") || "Worker Profile Details"}
         open={workerModalVisible}
         onCancel={() => setWorkerModalVisible(false)}
-        width={800}
+        width="95%"
+        style={{ maxWidth: 800 }}
         bodyStyle={{ maxHeight: "90vh", overflowY: "auto" }}
         footer={[
           <Button key="close" onClick={() => setWorkerModalVisible(false)}>
@@ -761,7 +947,7 @@ export default function UserManagementPage() {
             onClick={() => {
               if (selectedWorker) {
                 handleRejectWorker(
-                  selectedWorker.id,
+                  selectedWorker.user_id,
                   selectedWorker.user?.email
                 );
                 setWorkerModalVisible(false);
@@ -953,14 +1139,14 @@ export default function UserManagementPage() {
                             >
                               <Text strong>
                                 {getServiceName(
-                                  service?.name_key,
-                                  service?.slug
+                                  service?.slug,
+                                  service?.name_key
                                 )}
                               </Text>
                               <Text type="secondary" style={{ fontSize: 12 }}>
                                 {getServiceDescription(
-                                  service?.name_key,
                                   service?.slug,
+                                  service?.name_key,
                                   service?.description
                                 )}
                               </Text>

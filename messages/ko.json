@@ -31,7 +31,11 @@
     "hours": "시간",
     "days": "일",
     "weeks": "주",
-    "months": "개월"
+    "months": "개월",
+    "actions": "작업",
+    "export": "CSV 내보내기",
+    "exportSuccess": "내보내기 성공",
+    "noData": "데이터 없음"
   },
   "nav": {
     "home": "홈",
@@ -829,7 +833,11 @@
     "complaintPlaceholder": "분쟁 내용을 입력해 주세요...",
     "defaultComplaintReason": "서비스가 약속된 시간보다 지연되었고 워커가 작업을 완료하지 않았습니다",
     "complaintSuccess": "분쟁이 접수되었습니다. 결제 금액은 관리자의 검토가 끝날 때까지 보류됩니다.",
-    "complaintError": "분쟁을 제출할 수 없습니다. 잠시 후 다시 시도해 주세요."
+    "complaintError": "분쟁을 제출할 수 없습니다. 잠시 후 다시 시도해 주세요.",
+    "alreadyComplained": "이미 분쟁 제기됨",
+    "complaintResolved": "분쟁 해결됨",
+    "resolutionAction": "해결 조치",
+    "resolutionNotes": "사유"
   },
   "chat": {
     "title": "메시지",
@@ -894,6 +902,76 @@
     "more": "더보기",
     "viewProfile": "프로필 보기",
     "pagination": "{total}명 중 {start} - {end} 표시"
+  },
+  "escrow": {
+    "table": {
+      "id": "ID",
+      "jobId": "예약 / 작업",
+      "employer": "클라이언트",
+      "worker": "워커",
+      "amount": "총 금액",
+      "workerAmount": "워커 수령액",
+      "status": "상태",
+      "hasComplaint": "불만",
+      "holdUntil": "보유 기한",
+      "createdAt": "생성일",
+      "resolution": "해결 정보",
+      "records": "건"
+    },
+    "status": {
+      "held": "보유 중",
+      "released": "해제됨",
+      "refunded": "환불됨",
+      "disputed": "분쟁 중",
+      "cancelled": "취소됨"
+    },
+    "filters": {
+      "status": "에스크로 상태",
+      "complaint": "불만"
+    },
+    "stats": {
+      "totalHeld": "총 보유 금액",
+      "totalReleased": "총 해제 금액",
+      "totalDisputed": "총 분쟁 금액",
+      "totalCount": "총 에스크로 수"
+    },
+    "complaint": "불만 있음",
+    "complaintYes": "불만 있음",
+    "complaintNo": "불만 없음",
+    "release": "해제",
+    "resolve": "해결",
+    "releaseEscrow": "에스크로 해제",
+    "resolveComplaint": "불만 해결",
+    "releaseConfirm": "이 에스크로를 해제하시겠습니까?",
+    "id": "에스크로 ID",
+    "workerAmount": "워커 금액",
+    "totalAmount": "총 금액",
+    "released": "해제됨",
+    "releasedSuccess": "에스크로가 성공적으로 해제되었습니다",
+    "releaseError": "해제 실패",
+    "releaseErrorMsg": "에스크로를 해제할 수 없습니다",
+    "resolved": "해결됨",
+    "resolvedSuccess": "불만이 성공적으로 해결되었습니다",
+    "resolveError": "해결 실패",
+    "resolveErrorMsg": "에스크로를 해결할 수 없습니다",
+    "resolutionAction": "해결 조치",
+    "selectAction": "해결 조치를 선택해주세요",
+    "releaseToWorker": "워커에게 해제",
+    "refundToEmployer": "고용주에게 환불",
+    "partialRefund": "부분 환불",
+    "workerAmountRequired": "워커 금액은 필수입니다",
+    "amountMustBePositive": "금액은 0보다 커야 합니다",
+    "employerRefund": "고용주 환불 (USD)",
+    "employerRefundRequired": "고용주 환불은 필수입니다",
+    "resolutionNotes": "해결 메모",
+    "notesRequired": "해결 메모는 필수입니다",
+    "notesMinLength": "메모는 최소 10자 이상이어야 합니다",
+    "notesPlaceholder": "해결 세부사항 및 이유를 입력하세요...",
+    "complaintDescription": "불만 설명",
+    "noEscrowsToExport": "내보낼 에스크로가 없습니다",
+    "exported": "에스크로가 성공적으로 내보내졌습니다",
+    "resolvedBy": "해결자",
+    "resolvedAt": "해결 시간"
   },
   "favorites": {
     "added": "즐겨찾기에 추가됨",

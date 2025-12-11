@@ -572,9 +572,59 @@ export class BookingService {
       );
     }
 
-    // Release escrow
+    // Check escrow status before releasing
     const walletService = new WalletService(this.supabase);
-    await walletService.releaseEscrow(booking.escrow_id);
+    const { data: escrow, error: escrowError } = await this.supabase
+      .from("escrow_holds")
+      .select("status")
+      .eq("id", booking.escrow_id)
+      .single();
+
+    if (escrowError || !escrow) {
+      throw new BookingError(
+        "Escrow not found",
+        BookingErrorCodes.BOOKING_NOT_FOUND,
+        404
+      );
+    }
+
+    // Only release escrow if it's still held
+    // If already released, we still allow booking completion (escrow was auto-released)
+    if (escrow.status === "held") {
+      try {
+        await walletService.releaseEscrow(booking.escrow_id);
+      } catch (error: any) {
+        // If escrow was released between check and release (race condition),
+        // check if it's now released - if so, continue with booking update
+        const { data: recheckEscrow } = await this.supabase
+          .from("escrow_holds")
+          .select("status")
+          .eq("id", booking.escrow_id)
+          .single();
+
+        if (recheckEscrow?.status !== "released") {
+          // Escrow is in a different state (refunded, disputed, etc.)
+          throw new BookingError(
+            `Cannot complete booking. Escrow status: ${
+              recheckEscrow?.status || "unknown"
+            }`,
+            BookingErrorCodes.INVALID_BOOKING_STATUS,
+            400
+          );
+        }
+        // Escrow is now released, continue with booking update
+      }
+    } else if (escrow.status === "released") {
+      // Escrow already released (e.g., by cron job or admin), allow booking completion
+      // No need to release again
+    } else {
+      // Escrow is in invalid state (refunded, disputed, cancelled)
+      throw new BookingError(
+        `Cannot complete booking. Escrow has been ${escrow.status}`,
+        BookingErrorCodes.INVALID_BOOKING_STATUS,
+        400
+      );
+    }
 
     // Update booking
     const { data: updatedBooking, error: updateError } = await this.supabase
@@ -705,10 +755,13 @@ export class BookingService {
    */
   async getBookings(filters: BookingFilters = {}): Promise<Booking[]> {
     // Join with services table to get service name_key for better UI display
-    // Result shape: { ..., service: { name_key } }
+    // Also join with escrow_holds to get complaint status
+    // Result shape: { ..., service: { name_key }, escrow: { has_complaint } }
     let query = this.supabase
       .from("bookings")
-      .select("*, service:services(name_key)");
+      .select(
+        "*, service:services(name_key), escrow:escrow_holds(has_complaint, status)"
+      );
 
     if (filters.client_id) {
       query = query.eq("client_id", filters.client_id);
@@ -819,6 +872,9 @@ export class BookingService {
     // Map joined info into booking.metadata for frontend (non-breaking)
     return rows.map((row) => {
       const serviceNameKey = row.service?.name_key as string | undefined;
+      const escrowData = row.escrow as
+        | { has_complaint?: boolean; status?: string }
+        | undefined;
 
       const existingMetadata = (row.metadata || {}) as Record<string, unknown>;
 
@@ -828,6 +884,11 @@ export class BookingService {
 
       if (serviceNameKey && !metadata.service_name_key) {
         metadata.service_name_key = serviceNameKey;
+      }
+
+      // Add escrow complaint status to metadata
+      if (escrowData && escrowData.has_complaint !== undefined) {
+        metadata.escrow_has_complaint = escrowData.has_complaint;
       }
 
       // For client side, backfill client info into existing bookings

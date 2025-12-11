@@ -5,9 +5,11 @@ import { Layout, Button, Avatar, Drawer } from "antd";
 import { UserOutlined, MenuOutlined } from "@ant-design/icons";
 import Link from "next/link";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import LanguageSwitcher from "@/components/common/LanguageSwitcher";
 import UserMenu from "@/components/common/UserMenu";
+import ThemeToggle from "@/components/common/ThemeToggle";
+import NavigationLoadingBar from "@/components/common/NavigationLoadingBar";
 import { useTranslation } from "react-i18next";
 import { authAPI } from "@/lib/auth/api-client";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
@@ -23,6 +25,7 @@ export default function Header() {
   const { t } = useTranslation();
   const { settings } = useSiteSettings();
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     let mounted = true;
@@ -51,14 +54,14 @@ export default function Header() {
 
   return (
     <Fragment>
+      <NavigationLoadingBar />
       <AntHeader
+        className="layout-header"
         style={{
           position: "sticky",
           top: 0,
           zIndex: 1000,
           width: "100%",
-          backgroundColor: "#fff",
-          borderBottom: "1px solid #f0f0f0",
           padding: "0 24px",
           display: "flex",
           alignItems: "center",
@@ -137,6 +140,7 @@ export default function Header() {
               </Button>
             )}
 
+            <ThemeToggle />
             <LanguageSwitcher />
           </div>
 
@@ -179,6 +183,7 @@ export default function Header() {
 
           {/* Mobile Menu Button */}
           <div className="flex md:hidden items-center gap-3">
+            <ThemeToggle />
             <LanguageSwitcher />
             <Button
               type="text"

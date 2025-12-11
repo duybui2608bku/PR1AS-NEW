@@ -23,13 +23,14 @@ export default function ClientBookingsPage() {
   ];
 
   return (
-    <div className="dark:text-white [&_.ant-tabs-tab]:dark:text-gray-300 [&_.ant-tabs-tab-active]:dark:text-white [&_.ant-typography]:dark:text-white">
-      <Title level={2} className="dark:text-white">
+    <div className="min-h-screen dark:bg-black dark:text-white [&_.ant-tabs-tab]:dark:text-gray-300 [&_.ant-tabs-tab-active]:dark:text-white [&_.ant-typography]:dark:text-white [&_.ant-tabs-content-holder]:dark:bg-black [&_.ant-tabs-nav]:dark:bg-black [&_.ant-tabs-tab-btn]:dark:text-gray-300 [&_.ant-tabs-tab-active_.ant-tabs-tab-btn]:dark:text-white">
+      <Title level={2} className="dark:text-white mb-4">
         {t("booking.title") || "Quản lý đặt chỗ"}
       </Title>
-      <Tabs 
-        items={tabItems} 
+      <Tabs
+        items={tabItems}
         defaultActiveKey="bookings"
+        className="dark:[&_.ant-tabs-content-holder]:bg-black"
       />
     </div>
   );

@@ -38,6 +38,7 @@ import {
   useClientCompleteBooking,
 } from "@/hooks/booking/useBooking";
 import { useFileComplaint } from "@/hooks/wallet/useWallet";
+import { useTheme } from "@/components/providers/ThemeProvider";
 
 const { Text, Title } = Typography;
 
@@ -53,6 +54,7 @@ export default function BookingCard({
   onUpdate,
 }: BookingCardProps) {
   const { t } = useTranslation();
+  const { theme } = useTheme();
   const [complaintModalVisible, setComplaintModalVisible] = useState(false);
   const [complaintText, setComplaintText] = useState("");
 
@@ -62,6 +64,16 @@ export default function BookingCard({
   const workerCompleteBooking = useWorkerCompleteBooking();
   const clientCompleteBooking = useClientCompleteBooking();
   const fileComplaint = useFileComplaint();
+
+  // Get escrow complaint status from booking metadata
+  const hasComplaint = (booking.metadata as any)?.escrow_has_complaint === true;
+  const complaintResolved =
+    (booking.metadata as any)?.escrow_complaint_resolved === true;
+  const resolutionAction = (booking.metadata as any)
+    ?.escrow_resolution_action as string | undefined;
+  const resolutionNotes = (booking.metadata as any)?.escrow_resolution_notes as
+    | string
+    | undefined;
 
   // Extract service name from booking metadata (set in backend via service.name_key)
   const serviceNameKey = (booking.metadata as any)?.service_name_key as
@@ -153,6 +165,10 @@ export default function BookingCard({
   };
 
   const canClientComplete = () => {
+    // Disable completion if complaint has been resolved
+    if (userRole === "client" && complaintResolved) {
+      return false;
+    }
     return userRole === "client" && booking.status === "worker_completed";
   };
 
@@ -195,6 +211,12 @@ export default function BookingCard({
         ? workerCompletedAt
         : expectedEnd;
 
+    // If worker has completed, allow complaint even if not overdue
+    if (booking.status === "worker_completed" && workerCompletedAt) {
+      const hoursDiff = now.diff(workerCompletedAt, "hour");
+      return hoursDiff <= 72;
+    }
+
     // If job is not yet overdue and worker hasn't completed, cannot complain
     if (!now.isAfter(expectedEnd) && !workerCompletedAt) {
       return false;
@@ -205,15 +227,32 @@ export default function BookingCard({
   };
 
   const canClientComplain = () => {
-    return (
-      userRole === "client" &&
-      !!booking.escrow_id &&
-      isOverdue() &&
-      isWithinComplaintWindow() &&
-      booking.status !== "client_completed" &&
-      booking.status !== "cancelled" &&
-      booking.status !== "disputed"
-    );
+    // Cannot complain if already complained
+    if (hasComplaint) {
+      return false;
+    }
+
+    // Must be client with escrow
+    if (userRole !== "client" || !booking.escrow_id) {
+      return false;
+    }
+
+    // Cannot complain if booking is completed, cancelled, or disputed
+    if (
+      booking.status === "client_completed" ||
+      booking.status === "cancelled" ||
+      booking.status === "disputed"
+    ) {
+      return false;
+    }
+
+    // Allow complaint when worker has completed (even if not overdue)
+    if (booking.status === "worker_completed") {
+      return isWithinComplaintWindow();
+    }
+
+    // For other statuses, require overdue and within complaint window
+    return isOverdue() && isWithinComplaintWindow();
   };
 
   const handleOpenComplaintModal = () => {
@@ -316,6 +355,40 @@ export default function BookingCard({
                   {t("booking.complain") || "Khiếu nại"}
                 </Button>
               ),
+              // Show "Complaint Resolved" button if complaint was resolved
+              userRole === "client" &&
+                booking.escrow_id &&
+                hasComplaint &&
+                complaintResolved &&
+                booking.status !== "client_completed" &&
+                booking.status !== "cancelled" && (
+                  <Button
+                    key="complaint-resolved"
+                    type="primary"
+                    icon={<CheckCircleOutlined />}
+                    disabled
+                    block
+                  >
+                    {t("booking.complaintResolved") || "Khiếu nại hoàn tất"}
+                  </Button>
+                ),
+              // Show disabled button if already complained but not resolved
+              userRole === "client" &&
+                booking.escrow_id &&
+                hasComplaint &&
+                !complaintResolved &&
+                booking.status !== "client_completed" &&
+                booking.status !== "cancelled" && (
+                  <Button
+                    key="complaint-disabled"
+                    danger
+                    icon={<ExclamationCircleOutlined />}
+                    disabled
+                    block
+                  >
+                    {t("booking.alreadyComplained")}
+                  </Button>
+                ),
             ].filter(Boolean)
           : undefined
       }
@@ -437,6 +510,55 @@ export default function BookingCard({
             {dayjs(booking.created_at).format("YYYY-MM-DD HH:mm")}
           </Text>
         )}
+
+        {/* Complaint Resolution Info */}
+        {complaintResolved && resolutionAction && (
+          <Card
+            size="small"
+            style={{
+              marginTop: 16,
+              backgroundColor: theme === "dark" ? "#1f2937" : "#f6ffed",
+              borderColor: theme === "dark" ? "#166534" : "#b7eb8f",
+            }}
+          >
+            <Space direction="vertical" style={{ width: "100%" }} size={8}>
+              <Text
+                strong
+                style={{
+                  color: theme === "dark" ? "#4ade80" : "#52c41a",
+                }}
+              >
+                {t("booking.complaintResolved") ||
+                  "Khiếu nại đã được giải quyết"}
+              </Text>
+              <Text
+                type="secondary"
+                style={{
+                  fontSize: 12,
+                  color: theme === "dark" ? "#9ca3af" : undefined,
+                }}
+              >
+                {t("booking.resolutionAction") || "Hành động giải quyết"}:{" "}
+                {resolutionAction === "release_to_worker"
+                  ? t("escrow.releaseToWorker") || "Giải ngân cho Worker"
+                  : resolutionAction === "refund_to_employer"
+                  ? t("escrow.refundToEmployer") || "Hoàn tiền cho Client"
+                  : t("escrow.partialRefund") || "Hoàn tiền một phần"}
+              </Text>
+              {resolutionNotes && (
+                <Text
+                  type="secondary"
+                  style={{
+                    fontSize: 12,
+                    color: theme === "dark" ? "#9ca3af" : undefined,
+                  }}
+                >
+                  {t("booking.resolutionNotes") || "Lý do"}: {resolutionNotes}
+                </Text>
+              )}
+            </Space>
+          </Card>
+        )}
       </Space>
       <Modal
         title={t("booking.complaintTitle") || "Khiếu nại đơn đặt chỗ"}
@@ -464,4 +586,3 @@ export default function BookingCard({
     </Card>
   );
 }
-

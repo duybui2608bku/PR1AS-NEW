@@ -10,6 +10,7 @@ import {
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
+import ThemeToggle from "@/components/common/ThemeToggle";
 
 const { Footer: AntFooter } = Layout;
 
@@ -18,9 +19,8 @@ export default function Footer() {
   const { settings } = useSiteSettings();
   return (
     <AntFooter
+      className="site-footer"
       style={{
-        backgroundColor: "#f7f7f7",
-        borderTop: "1px solid #e4e4e4",
         marginTop: "48px",
       }}
     >
@@ -212,7 +212,8 @@ export default function Footer() {
           </Col>
 
           <Col xs={24} md={12}>
-            <div className="flex gap-4 sm:gap-6 justify-center md:justify-end">
+            <div className="flex gap-4 sm:gap-6 justify-center md:justify-end items-center">
+              <ThemeToggle />
               {settings?.facebookUrl && (
                 <a
                   href={settings.facebookUrl}

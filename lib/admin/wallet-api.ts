@@ -21,6 +21,7 @@ interface AdminTransactionsFilters {
   status?: TransactionStatus[];
   date_from?: string;
   date_to?: string;
+  search?: string;
 }
 
 interface AdminEscrowsFilters {
@@ -57,6 +58,9 @@ const adminWalletAPI = {
     }
     if (filters.date_to) {
       params.append("date_to", filters.date_to);
+    }
+    if (filters.search) {
+      params.append("search", filters.search);
     }
 
     const headers = await getAuthHeaders();
@@ -96,6 +100,12 @@ const adminWalletAPI = {
       limit: number;
       pages: number;
     };
+    stats?: {
+      total_held: number;
+      total_released: number;
+      total_disputed: number;
+      total_count: number;
+    };
   }> {
     const params = new URLSearchParams();
 
@@ -122,6 +132,12 @@ const adminWalletAPI = {
         limit: number;
         pages: number;
       };
+      stats?: {
+        total_held: number;
+        total_released: number;
+        total_disputed: number;
+        total_count: number;
+      };
     }>(
       `/api/admin/escrows?${params.toString()}`,
       {
@@ -134,7 +150,52 @@ const adminWalletAPI = {
     return {
       escrows: result.escrows || [],
       pagination: result.pagination,
+      stats: result.stats,
     };
+  },
+
+  /**
+   * Release an escrow (admin only)
+   */
+  async releaseEscrow(escrowId: string): Promise<void> {
+    const headers = await getAuthHeaders();
+    await httpRequestJson<{ transaction: unknown }>(
+      "/api/admin/wallet/escrow/release",
+      {
+        method: "POST",
+        headers,
+        credentials: "include",
+        body: { escrow_id: escrowId },
+      }
+    );
+  },
+
+  /**
+   * Resolve a disputed escrow (admin only)
+   */
+  async resolveEscrow(
+    escrowId: string,
+    action: "release_to_worker" | "refund_to_employer" | "partial_refund",
+    resolutionNotes: string,
+    workerAmount?: number,
+    employerRefund?: number
+  ): Promise<void> {
+    const headers = await getAuthHeaders();
+    await httpRequestJson<{ escrow: unknown }>(
+      "/api/admin/wallet/escrow/resolve",
+      {
+        method: "POST",
+        headers,
+        credentials: "include",
+        body: {
+          escrow_id: escrowId,
+          action,
+          resolution_notes: resolutionNotes,
+          worker_amount: workerAmount,
+          employer_refund: employerRefund,
+        },
+      }
+    );
   },
 };
 

@@ -14,6 +14,8 @@ import {
   Statistic,
   Row,
   Col,
+  Modal,
+  Descriptions,
 } from "antd";
 import {
   ReloadOutlined,
@@ -22,6 +24,7 @@ import {
   TransactionOutlined,
   ArrowUpOutlined,
   ArrowDownOutlined,
+  EyeOutlined,
 } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import { useTranslation } from "react-i18next";
@@ -33,6 +36,7 @@ import {
 } from "@/lib/wallet/types";
 import { adminWalletAPI } from "@/lib/admin/wallet-api";
 import { showNotification } from "@/lib/utils/toast";
+import { getTransactionStatusColor } from "@/lib/admin/utils";
 
 const { Title, Text } = Typography;
 const { RangePicker } = DatePicker;
@@ -57,12 +61,18 @@ export default function TransactionsManagementPage() {
     total_withdrawals: 0,
     total_payments: 0,
   });
+  const [detailModalVisible, setDetailModalVisible] = useState(false);
+  const [selectedTransaction, setSelectedTransaction] =
+    useState<Transaction | null>(null);
 
   const fetchTransactions = async () => {
     setLoading(true);
     try {
       const { transactions, stats: newStats } =
-        await adminWalletAPI.getTransactions(filters);
+        await adminWalletAPI.getTransactions({
+          ...filters,
+          search: filters.search?.trim() || undefined,
+        });
       setTransactions(transactions);
       setStats(newStats || stats);
     } catch {
@@ -80,16 +90,6 @@ export default function TransactionsManagementPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters]);
 
-  const getStatusColor = (status: TransactionStatus) => {
-    const colors: Record<TransactionStatus, string> = {
-      pending: "orange",
-      processing: "blue",
-      completed: "green",
-      failed: "red",
-      cancelled: "default",
-    };
-    return colors[status] || "default";
-  };
 
   const getTypeLabel = (type: TransactionType) => {
     const labels: Record<TransactionType, string> = {
@@ -152,7 +152,7 @@ export default function TransactionsManagementPage() {
       key: "status",
       width: 100,
       render: (status: TransactionStatus) => (
-        <Tag color={getStatusColor(status)}>
+        <Tag color={getTransactionStatusColor(status)}>
           {t(`transactions.status.${status}`) || status}
         </Tag>
       ),
@@ -176,6 +176,25 @@ export default function TransactionsManagementPage() {
       key: "created_at",
       width: 180,
       render: (date: string) => dayjs(date).format("YYYY-MM-DD HH:mm"),
+    },
+    {
+      title: t("common.actions") || "Actions",
+      key: "actions",
+      width: 100,
+      fixed: "right" as const,
+      render: (_: unknown, record: Transaction) => (
+        <Button
+          type="link"
+          size="small"
+          icon={<EyeOutlined />}
+          onClick={() => {
+            setSelectedTransaction(record);
+            setDetailModalVisible(true);
+          }}
+        >
+          {t("common.view") || "View"}
+        </Button>
+      ),
     },
   ];
 
@@ -345,6 +364,149 @@ export default function TransactionsManagementPage() {
           }}
         />
       </Card>
+
+      {/* Transaction Detail Modal */}
+      <Modal
+        title={t("transactions.detail") || "Transaction Details"}
+        open={detailModalVisible}
+        onCancel={() => {
+          setDetailModalVisible(false);
+          setSelectedTransaction(null);
+        }}
+        footer={[
+          <Button
+            key="close"
+            onClick={() => {
+              setDetailModalVisible(false);
+              setSelectedTransaction(null);
+            }}
+          >
+            {t("common.close") || "Close"}
+          </Button>,
+        ]}
+        width="95%"
+        style={{ maxWidth: 700 }}
+      >
+        {selectedTransaction && (
+          <Descriptions bordered column={1}>
+            <Descriptions.Item label={t("transactions.table.id") || "ID"}>
+              <Text code>{selectedTransaction.id}</Text>
+            </Descriptions.Item>
+            <Descriptions.Item label={t("transactions.table.user") || "User ID"}>
+              <Text code>{selectedTransaction.user_id}</Text>
+            </Descriptions.Item>
+            <Descriptions.Item label={t("transactions.table.wallet") || "Wallet ID"}>
+              <Text code>{selectedTransaction.wallet_id}</Text>
+            </Descriptions.Item>
+            <Descriptions.Item label={t("transactions.table.type") || "Type"}>
+              <Tag
+                color={
+                  selectedTransaction.type === "deposit" ||
+                  selectedTransaction.type === "earning"
+                    ? "green"
+                    : "blue"
+                }
+              >
+                {getTypeLabel(selectedTransaction.type)}
+              </Tag>
+            </Descriptions.Item>
+            <Descriptions.Item label={t("transactions.table.amount") || "Amount"}>
+              <Text
+                strong
+                style={{
+                  color: selectedTransaction.amount_usd >= 0 ? "#3f8600" : "#cf1322",
+                  fontSize: 16,
+                }}
+              >
+                {selectedTransaction.amount_usd >= 0 ? "+" : ""}$
+                {selectedTransaction.amount_usd.toFixed(2)}
+              </Text>
+            </Descriptions.Item>
+            <Descriptions.Item label={t("transactions.table.status") || "Status"}>
+              <Tag color={getTransactionStatusColor(selectedTransaction.status)}>
+                {t(`transactions.status.${selectedTransaction.status}`) ||
+                  selectedTransaction.status}
+              </Tag>
+            </Descriptions.Item>
+            <Descriptions.Item
+              label={t("transactions.balanceBefore") || "Balance Before"}
+            >
+              ${selectedTransaction.balance_before_usd.toFixed(2)}
+            </Descriptions.Item>
+            <Descriptions.Item
+              label={t("transactions.balanceAfter") || "Balance After"}
+            >
+              <Text strong>
+                ${selectedTransaction.balance_after_usd.toFixed(2)}
+              </Text>
+            </Descriptions.Item>
+            {selectedTransaction.payment_method && (
+              <Descriptions.Item
+                label={t("transactions.table.paymentMethod") || "Payment Method"}
+              >
+                {selectedTransaction.payment_method}
+              </Descriptions.Item>
+            )}
+            {selectedTransaction.payment_gateway_id && (
+              <Descriptions.Item
+                label={t("transactions.gatewayId") || "Gateway ID"}
+              >
+                <Text code>{selectedTransaction.payment_gateway_id}</Text>
+              </Descriptions.Item>
+            )}
+            {selectedTransaction.escrow_id && (
+              <Descriptions.Item label={t("transactions.escrowId") || "Escrow ID"}>
+                <Text code>{selectedTransaction.escrow_id}</Text>
+              </Descriptions.Item>
+            )}
+            {selectedTransaction.job_id && (
+              <Descriptions.Item label={t("transactions.jobId") || "Job ID"}>
+                <Text code>{selectedTransaction.job_id}</Text>
+              </Descriptions.Item>
+            )}
+            {selectedTransaction.related_user_id && (
+              <Descriptions.Item
+                label={t("transactions.relatedUserId") || "Related User ID"}
+              >
+                <Text code>{selectedTransaction.related_user_id}</Text>
+              </Descriptions.Item>
+            )}
+            {selectedTransaction.description && (
+              <Descriptions.Item
+                label={t("transactions.table.description") || "Description"}
+              >
+                {selectedTransaction.description}
+              </Descriptions.Item>
+            )}
+            {selectedTransaction.metadata && (
+              <Descriptions.Item label={t("transactions.metadata") || "Metadata"}>
+                <pre style={{ margin: 0, maxHeight: 200, overflow: "auto" }}>
+                  {JSON.stringify(selectedTransaction.metadata, null, 2)}
+                </pre>
+              </Descriptions.Item>
+            )}
+            <Descriptions.Item label={t("transactions.table.createdAt") || "Created At"}>
+              {dayjs(selectedTransaction.created_at).format(
+                "YYYY-MM-DD HH:mm:ss"
+              )}
+            </Descriptions.Item>
+            {selectedTransaction.completed_at && (
+              <Descriptions.Item
+                label={t("transactions.completedAt") || "Completed At"}
+              >
+                {dayjs(selectedTransaction.completed_at).format(
+                  "YYYY-MM-DD HH:mm:ss"
+                )}
+              </Descriptions.Item>
+            )}
+            {selectedTransaction.failed_at && (
+              <Descriptions.Item label={t("transactions.failedAt") || "Failed At"}>
+                {dayjs(selectedTransaction.failed_at).format("YYYY-MM-DD HH:mm:ss")}
+              </Descriptions.Item>
+            )}
+          </Descriptions>
+        )}
+      </Modal>
     </div>
   );
 }

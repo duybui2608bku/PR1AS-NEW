@@ -310,6 +310,7 @@ export interface TransactionFilters {
   max_amount?: number;
   page?: number;
   limit?: number;
+  search?: string; // Search in transaction ID, description, or related IDs
 }
 
 export interface EscrowFilters {

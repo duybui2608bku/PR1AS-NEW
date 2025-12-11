@@ -12,8 +12,12 @@ import {
   Statistic,
   Row,
   Col,
-  notification,
   Avatar,
+  Modal,
+  Input,
+  Form,
+  InputNumber,
+  Radio,
 } from "antd";
 import {
   ReloadOutlined,
@@ -21,14 +25,17 @@ import {
   DollarOutlined,
   LockOutlined,
   UnlockOutlined,
+  CheckCircleOutlined,
+  ExportOutlined,
+  UserOutlined,
 } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import { useTranslation } from "react-i18next";
-import { useRouter } from "next/navigation";
 import dayjs from "dayjs";
 import type { EscrowHold, EscrowStatus } from "@/lib/wallet/types";
 import { adminWalletAPI } from "@/lib/admin/wallet-api";
 import { showNotification } from "@/lib/utils/toast";
+import { getEscrowStatusColor } from "@/lib/admin/utils";
 
 const { Title, Text } = Typography;
 
@@ -39,7 +46,6 @@ interface EscrowFiltersState {
 
 export default function AdminEscrowsPage() {
   const { t } = useTranslation();
-  const router = useRouter();
   const [escrows, setEscrows] = useState<EscrowHold[]>([]);
   const [loading, setLoading] = useState(false);
   const [filters, setFilters] = useState<EscrowFiltersState>({});
@@ -49,30 +55,38 @@ export default function AdminEscrowsPage() {
     total_disputed: 0,
     total_count: 0,
   });
+  const [releaseModalVisible, setReleaseModalVisible] = useState(false);
+  const [resolveModalVisible, setResolveModalVisible] = useState(false);
+  const [selectedEscrow, setSelectedEscrow] = useState<EscrowHold | null>(null);
+  const [actionLoading, setActionLoading] = useState(false);
+  const [resolveForm] = Form.useForm();
 
   const fetchEscrows = async () => {
     setLoading(true);
     try {
-      const { escrows: list, pagination } = await adminWalletAPI.getEscrows(
-        filters
-      );
-      setEscrows(list);
-      const total_count = pagination?.total || list.length;
-      const total_held = list
-        .filter((e) => e.status === "held")
-        .reduce((sum, e) => sum + Number(e.total_amount_usd), 0);
-      const total_released = list
-        .filter((e) => e.status === "released")
-        .reduce((sum, e) => sum + Number(e.total_amount_usd), 0);
-      const total_disputed = list
-        .filter((e) => e.status === "disputed")
-        .reduce((sum, e) => sum + Number(e.total_amount_usd), 0);
-      setStats({
-        total_held,
-        total_released,
-        total_disputed,
-        total_count,
-      });
+      const result = await adminWalletAPI.getEscrows(filters);
+      setEscrows(result.escrows);
+      // Use stats from backend if available, otherwise calculate from current page
+      if (result.stats) {
+        setStats(result.stats);
+      } else {
+        const total_count = result.pagination?.total || result.escrows.length;
+        const total_held = result.escrows
+          .filter((e) => e.status === "held")
+          .reduce((sum, e) => sum + Number(e.total_amount_usd || 0), 0);
+        const total_released = result.escrows
+          .filter((e) => e.status === "released")
+          .reduce((sum, e) => sum + Number(e.total_amount_usd || 0), 0);
+        const total_disputed = result.escrows
+          .filter((e) => e.status === "disputed")
+          .reduce((sum, e) => sum + Number(e.total_amount_usd || 0), 0);
+        setStats({
+          total_held,
+          total_released,
+          total_disputed,
+          total_count,
+        });
+      }
     } catch (error: any) {
       showNotification.error(
         "Error fetching escrows",
@@ -87,17 +101,6 @@ export default function AdminEscrowsPage() {
     fetchEscrows();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters]);
-
-  const getStatusColor = (status: EscrowStatus) => {
-    const colors: Record<EscrowStatus, string> = {
-      held: "blue",
-      released: "green",
-      refunded: "purple",
-      disputed: "volcano",
-      cancelled: "default",
-    };
-    return colors[status] || "default";
-  };
 
   const columns: ColumnsType<EscrowHold> = [
     {
@@ -171,18 +174,18 @@ export default function AdminEscrowsPage() {
       title: t("escrow.table.worker") || "Worker",
       dataIndex: "worker",
       key: "worker_id",
-      width: 200,
+      width: 250,
       render: (worker: EscrowHold["worker"], record: EscrowHold) => {
         if (worker) {
           return (
             <Space>
-              {worker.avatar_url && (
-                <Avatar size="small" src={worker.avatar_url} />
-              )}
+              <Avatar
+                size="small"
+                src={worker.avatar_url}
+                icon={!worker.avatar_url ? <UserOutlined /> : undefined}
+              />
               <Space direction="vertical" size={0}>
-                <Text strong>
-                  {worker.full_name || worker.email || "N/A"}
-                </Text>
+                <Text strong>{worker.full_name || worker.email || "N/A"}</Text>
                 {worker.email && worker.full_name && (
                   <Text type="secondary" style={{ fontSize: 12 }}>
                     {worker.email}
@@ -221,7 +224,7 @@ export default function AdminEscrowsPage() {
       key: "status",
       width: 120,
       render: (status: EscrowStatus) => (
-        <Tag color={getStatusColor(status)}>
+        <Tag color={getEscrowStatusColor(status)}>
           {t(`escrow.status.${status}`) || status}
         </Tag>
       ),
@@ -230,7 +233,7 @@ export default function AdminEscrowsPage() {
       title: t("escrow.table.hasComplaint") || "Complaint",
       dataIndex: "has_complaint",
       key: "has_complaint",
-      width: 110,
+      width: 150,
       render: (hasComplaint: boolean) =>
         hasComplaint ? (
           <Tag color="volcano" icon={<AlertOutlined />}>
@@ -255,7 +258,251 @@ export default function AdminEscrowsPage() {
       width: 180,
       render: (date: string) => dayjs(date).format("YYYY-MM-DD HH:mm"),
     },
+    {
+      title: t("escrow.table.resolution") || "Resolution Info",
+      key: "resolution",
+      width: 300,
+      render: (_: unknown, record: EscrowHold) => {
+        if (!record.resolution_notes && !record.resolved_by) {
+          return <Text type="secondary">-</Text>;
+        }
+        return (
+          <Space direction="vertical" size={4} style={{ fontSize: 12 }}>
+            {record.resolved_by && (
+              <Text type="secondary">
+                {t("escrow.resolvedBy") || "Resolved by"}:{" "}
+                <Text code>{record.resolved_by.slice(0, 8)}...</Text>
+              </Text>
+            )}
+            {record.released_at && (
+              <Text type="secondary">
+                {t("escrow.resolvedAt") || "Resolved at"}:{" "}
+                {dayjs(record.released_at).format("YYYY-MM-DD HH:mm")}
+              </Text>
+            )}
+            {record.resolution_notes && (
+              <Text
+                ellipsis={{ tooltip: record.resolution_notes }}
+                style={{ maxWidth: 200 }}
+              >
+                {record.resolution_notes}
+              </Text>
+            )}
+          </Space>
+        );
+      },
+    },
+    {
+      title: t("common.actions") || "Actions",
+      key: "actions",
+      width: 200,
+      fixed: "right" as const,
+      render: (_: unknown, record: EscrowHold) => {
+        const canRelease = record.status === "held" && !record.has_complaint;
+        const canResolve =
+          (record.status === "disputed" || record.has_complaint) &&
+          !record.resolution_notes &&
+          !record.resolved_by;
+        const isResolved = !!record.resolution_notes || !!record.resolved_by;
+
+        return (
+          <Space>
+            {canRelease && (
+              <Button
+                type="primary"
+                size="small"
+                icon={<CheckCircleOutlined />}
+                onClick={() => {
+                  setSelectedEscrow(record);
+                  setReleaseModalVisible(true);
+                }}
+              >
+                {t("escrow.release") || "Release"}
+              </Button>
+            )}
+            {canResolve && (
+              <Button
+                type="default"
+                size="small"
+                icon={<AlertOutlined />}
+                onClick={() => {
+                  setSelectedEscrow(record);
+                  setResolveModalVisible(true);
+                }}
+              >
+                {t("escrow.resolve") || "Resolve"}
+              </Button>
+            )}
+            {isResolved && (
+              <Button
+                type="default"
+                size="small"
+                icon={<CheckCircleOutlined />}
+                disabled
+              >
+                {t("escrow.resolved") || "Resolved"}
+              </Button>
+            )}
+          </Space>
+        );
+      },
+    },
   ];
+
+  const handleRelease = async () => {
+    if (!selectedEscrow) return;
+
+    setActionLoading(true);
+    try {
+      await adminWalletAPI.releaseEscrow(selectedEscrow.id);
+      showNotification.success(
+        t("escrow.released") || "Escrow Released",
+        t("escrow.releasedSuccess") || "Escrow has been released successfully"
+      );
+      setReleaseModalVisible(false);
+      setSelectedEscrow(null);
+      fetchEscrows();
+    } catch (error: any) {
+      showNotification.error(
+        t("escrow.releaseError") || "Release Failed",
+        error.message ||
+          t("escrow.releaseErrorMsg") ||
+          "Failed to release escrow"
+      );
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleResolve = async () => {
+    if (!selectedEscrow) return;
+
+    try {
+      const values = await resolveForm.validateFields();
+      setActionLoading(true);
+
+      await adminWalletAPI.resolveEscrow(
+        selectedEscrow.id,
+        values.action,
+        values.resolution_notes,
+        values.worker_amount,
+        values.employer_refund
+      );
+
+      showNotification.success(
+        t("escrow.resolved") || "Escrow Resolved",
+        t("escrow.resolvedSuccess") ||
+          "Complaint has been resolved successfully"
+      );
+      setResolveModalVisible(false);
+      setSelectedEscrow(null);
+      resolveForm.resetFields();
+      fetchEscrows();
+    } catch (error: any) {
+      if (error.errorFields) {
+        // Form validation error
+        return;
+      }
+      showNotification.error(
+        t("escrow.resolveError") || "Resolution Failed",
+        error.message ||
+          t("escrow.resolveErrorMsg") ||
+          "Failed to resolve escrow"
+      );
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleExportEscrows = () => {
+    if (escrows.length === 0) {
+      showNotification.warning(
+        t("common.noData") || "No Data",
+        t("escrow.noEscrowsToExport") || "No escrows to export"
+      );
+      return;
+    }
+
+    // Create CSV headers
+    const headers = [
+      "ID",
+      "Job ID",
+      "Employer ID",
+      "Worker ID",
+      "Total Amount (USD)",
+      "Platform Fee (USD)",
+      "Insurance Fee (USD)",
+      "Worker Amount (USD)",
+      "Status",
+      "Has Complaint",
+      "Complaint Description",
+      "Hold Until",
+      "Created At",
+      "Released At",
+    ];
+
+    // Create CSV rows
+    const rows = escrows.map((escrow) => [
+      escrow.id,
+      escrow.job_id || "",
+      escrow.employer_id,
+      escrow.worker_id,
+      Number(escrow.total_amount_usd).toFixed(2),
+      Number(escrow.platform_fee_usd || 0).toFixed(2),
+      Number(escrow.insurance_fee_usd || 0).toFixed(2),
+      Number(escrow.worker_amount_usd).toFixed(2),
+      escrow.status,
+      escrow.has_complaint ? "Yes" : "No",
+      escrow.complaint_description || "",
+      escrow.hold_until
+        ? dayjs(escrow.hold_until).format("YYYY-MM-DD HH:mm:ss")
+        : "",
+      dayjs(escrow.created_at).format("YYYY-MM-DD HH:mm:ss"),
+      escrow.released_at
+        ? dayjs(escrow.released_at).format("YYYY-MM-DD HH:mm:ss")
+        : "",
+    ]);
+
+    // Combine headers and rows
+    const csvContent = [headers, ...rows]
+      .map((row) =>
+        row
+          .map((cell) => {
+            // Escape quotes and wrap in quotes if contains comma, quote, or newline
+            const cellStr = String(cell || "");
+            if (
+              cellStr.includes(",") ||
+              cellStr.includes('"') ||
+              cellStr.includes("\n")
+            ) {
+              return `"${cellStr.replace(/"/g, '""')}"`;
+            }
+            return cellStr;
+          })
+          .join(",")
+      )
+      .join("\n");
+
+    // Create blob and download
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute(
+      "download",
+      `escrows_export_${dayjs().format("YYYY-MM-DD_HH-mm-ss")}.csv`
+    );
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    showNotification.success(
+      t("common.exportSuccess") || "Export Successful",
+      t("escrow.exported") || "Escrows exported successfully"
+    );
+  };
 
   return (
     <div>
@@ -358,6 +605,13 @@ export default function AdminEscrowsPage() {
           <Button icon={<ReloadOutlined />} onClick={fetchEscrows}>
             {t("common.refresh") || "Refresh"}
           </Button>
+          <Button
+            icon={<ExportOutlined />}
+            onClick={handleExportEscrows}
+            disabled={loading || escrows.length === 0}
+          >
+            {t("common.export") || "Export CSV"}
+          </Button>
         </Space>
       </Card>
 
@@ -378,6 +632,218 @@ export default function AdminEscrowsPage() {
           }}
         />
       </Card>
+
+      {/* Release Confirmation Modal */}
+      <Modal
+        title={t("escrow.releaseEscrow") || "Release Escrow"}
+        open={releaseModalVisible}
+        onOk={handleRelease}
+        onCancel={() => {
+          setReleaseModalVisible(false);
+          setSelectedEscrow(null);
+        }}
+        confirmLoading={actionLoading}
+        okText={t("escrow.release") || "Release"}
+        cancelText={t("common.cancel") || "Cancel"}
+        width="90%"
+        style={{ maxWidth: 600 }}
+      >
+        {selectedEscrow && (
+          <div>
+            <p>
+              {t("escrow.releaseConfirm") ||
+                "Are you sure you want to release this escrow?"}
+            </p>
+            <Space direction="vertical" style={{ width: "100%" }}>
+              <Text>
+                <strong>{t("escrow.id") || "Escrow ID"}:</strong>{" "}
+                {selectedEscrow.id}
+              </Text>
+              <Text>
+                <strong>{t("escrow.workerAmount") || "Worker Amount"}:</strong>{" "}
+                ${Number(selectedEscrow.worker_amount_usd).toFixed(2)}
+              </Text>
+              <Text>
+                <strong>{t("escrow.totalAmount") || "Total Amount"}:</strong> $
+                {Number(selectedEscrow.total_amount_usd).toFixed(2)}
+              </Text>
+            </Space>
+          </div>
+        )}
+      </Modal>
+
+      {/* Resolve Complaint Modal */}
+      <Modal
+        title={t("escrow.resolveComplaint") || "Resolve Complaint"}
+        open={resolveModalVisible}
+        onOk={handleResolve}
+        onCancel={() => {
+          setResolveModalVisible(false);
+          setSelectedEscrow(null);
+          resolveForm.resetFields();
+        }}
+        confirmLoading={actionLoading}
+        okText={t("escrow.resolve") || "Resolve"}
+        cancelText={t("common.cancel") || "Cancel"}
+        width={600}
+        style={{ maxWidth: 700 }}
+      >
+        {selectedEscrow && (
+          <Form
+            form={resolveForm}
+            layout="vertical"
+            initialValues={{
+              action: "release_to_worker",
+            }}
+          >
+            <Form.Item
+              name="action"
+              label={t("escrow.resolutionAction") || "Resolution Action"}
+              rules={[
+                {
+                  required: true,
+                  message:
+                    t("escrow.selectAction") ||
+                    "Please select a resolution action",
+                },
+              ]}
+            >
+              <Radio.Group>
+                <Radio value="release_to_worker">
+                  {t("escrow.releaseToWorker") || "Release to Worker"}
+                </Radio>
+                <Radio value="refund_to_employer">
+                  {t("escrow.refundToEmployer") || "Refund to Employer"}
+                </Radio>
+                <Radio value="partial_refund">
+                  {t("escrow.partialRefund") || "Partial Refund"}
+                </Radio>
+              </Radio.Group>
+            </Form.Item>
+
+            <Form.Item
+              noStyle
+              shouldUpdate={(prevValues, currentValues) =>
+                prevValues.action !== currentValues.action
+              }
+            >
+              {({ getFieldValue }) => {
+                const action = getFieldValue("action");
+                if (action === "partial_refund") {
+                  return (
+                    <>
+                      <Form.Item
+                        name="worker_amount"
+                        label={
+                          t("escrow.workerAmount") || "Worker Amount (USD)"
+                        }
+                        rules={[
+                          {
+                            required: true,
+                            message:
+                              t("escrow.workerAmountRequired") ||
+                              "Worker amount is required",
+                          },
+                          {
+                            type: "number",
+                            min: 0,
+                            message:
+                              t("escrow.amountMustBePositive") ||
+                              "Amount must be positive",
+                          },
+                        ]}
+                      >
+                        <InputNumber
+                          style={{ width: "100%" }}
+                          prefix="$"
+                          precision={2}
+                          min={0}
+                          max={Number(selectedEscrow.total_amount_usd)}
+                        />
+                      </Form.Item>
+                      <Form.Item
+                        name="employer_refund"
+                        label={
+                          t("escrow.employerRefund") || "Employer Refund (USD)"
+                        }
+                        rules={[
+                          {
+                            required: true,
+                            message:
+                              t("escrow.employerRefundRequired") ||
+                              "Employer refund is required",
+                          },
+                          {
+                            type: "number",
+                            min: 0,
+                            message:
+                              t("escrow.amountMustBePositive") ||
+                              "Amount must be positive",
+                          },
+                        ]}
+                      >
+                        <InputNumber
+                          style={{ width: "100%" }}
+                          prefix="$"
+                          precision={2}
+                          min={0}
+                          max={Number(selectedEscrow.total_amount_usd)}
+                        />
+                      </Form.Item>
+                    </>
+                  );
+                }
+                return null;
+              }}
+            </Form.Item>
+
+            <Form.Item
+              name="resolution_notes"
+              label={t("escrow.resolutionNotes") || "Resolution Notes"}
+              rules={[
+                {
+                  required: true,
+                  message:
+                    t("escrow.notesRequired") ||
+                    "Resolution notes are required",
+                },
+                {
+                  min: 10,
+                  message:
+                    t("escrow.notesMinLength") ||
+                    "Notes must be at least 10 characters",
+                },
+              ]}
+            >
+              <Input.TextArea
+                rows={4}
+                placeholder={
+                  t("escrow.notesPlaceholder") ||
+                  "Enter resolution details and reasoning..."
+                }
+              />
+            </Form.Item>
+
+            {selectedEscrow.complaint_description && (
+              <div style={{ marginBottom: 16 }}>
+                <Text strong>
+                  {t("escrow.complaintDescription") || "Complaint Description"}:
+                </Text>
+                <div
+                  className="complaint-description-box"
+                  style={{
+                    marginTop: 8,
+                    padding: 12,
+                    borderRadius: 8,
+                  }}
+                >
+                  <Text>{selectedEscrow.complaint_description}</Text>
+                </div>
+              </div>
+            )}
+          </Form>
+        )}
+      </Modal>
     </div>
   );
 }

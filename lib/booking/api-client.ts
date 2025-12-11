@@ -4,13 +4,8 @@
  */
 
 import { axiosClient } from "@/lib/http/axios-client";
-import { getAccessToken } from "@/lib/auth/client-helpers";
 import { ERROR_MESSAGES, getErrorMessage } from "@/lib/constants/errors";
-import {
-  Booking,
-  CreateBookingRequest,
-  BookingCalculation,
-} from "./types";
+import { Booking, CreateBookingRequest, BookingCalculation } from "./types";
 
 interface ApiResponse<T> {
   success: boolean;
@@ -25,6 +20,7 @@ interface ApiResponse<T> {
 export const bookingAPI = {
   /**
    * Calculate booking price before creating
+   * Uses cookies for authentication (via withCredentials: true in axios config)
    */
   async calculatePrice(
     workerServiceId: string,
@@ -32,23 +28,20 @@ export const bookingAPI = {
     durationHours: number
   ): Promise<BookingCalculation> {
     try {
-      const accessToken = await getAccessToken();
-      const { data } = await axiosClient.post<ApiResponse<{ calculation: BookingCalculation }>>(
-        "/booking/calculate",
-        {
-          worker_service_id: workerServiceId,
-          booking_type: bookingType,
-          duration_hours: durationHours,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
+      // Note: Authentication is handled via cookies (withCredentials: true)
+      // The API route uses requireAuth() middleware which reads from cookies
+      const { data } = await axiosClient.post<
+        ApiResponse<{ calculation: BookingCalculation }>
+      >("/booking/calculate", {
+        worker_service_id: workerServiceId,
+        booking_type: bookingType,
+        duration_hours: durationHours,
+      });
 
       if (!data.success || !data.data?.calculation) {
-        throw new Error(data.error || getErrorMessage(ERROR_MESSAGES.CALCULATE_PRICE_FAILED));
+        throw new Error(
+          data.error || getErrorMessage(ERROR_MESSAGES.CALCULATE_PRICE_FAILED)
+        );
       }
 
       return data.data.calculation;
@@ -62,22 +55,20 @@ export const bookingAPI = {
 
   /**
    * Create a new booking request
+   * Uses cookies for authentication (via withCredentials: true in axios config)
    */
   async createBooking(request: CreateBookingRequest): Promise<Booking> {
     try {
-      const accessToken = await getAccessToken();
-      const { data } = await axiosClient.post<ApiResponse<{ booking: Booking }>>(
-        "/booking/create",
-        request,
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
+      // Note: Authentication is handled via cookies (withCredentials: true)
+      // The API route uses requireClient() middleware which reads from cookies
+      const { data } = await axiosClient.post<
+        ApiResponse<{ booking: Booking }>
+      >("/booking/create", request);
 
       if (!data.success || !data.data?.booking) {
-        throw new Error(data.error || getErrorMessage(ERROR_MESSAGES.CREATE_BOOKING_FAILED));
+        throw new Error(
+          data.error || getErrorMessage(ERROR_MESSAGES.CREATE_BOOKING_FAILED)
+        );
       }
 
       return data.data.booking;
@@ -101,8 +92,11 @@ export const bookingAPI = {
     date_to?: string;
   }): Promise<Booking[]> {
     try {
-      console.log("[bookingAPI.getBookings] Starting request with filters:", filters);
-      
+      console.log(
+        "[bookingAPI.getBookings] Starting request with filters:",
+        filters
+      );
+
       const params: Record<string, string> = {};
 
       if (filters?.status && filters.status.length > 0) {
@@ -121,26 +115,32 @@ export const bookingAPI = {
         params.date_to = filters.date_to;
       }
 
-      console.log("[bookingAPI.getBookings] Making request to /booking/list with params:", params);
+      console.log(
+        "[bookingAPI.getBookings] Making request to /booking/list with params:",
+        params
+      );
       // Note: Authentication is handled via cookies (withCredentials: true)
       // The API route uses requireAuth() middleware which reads from cookies
-      const { data } = await axiosClient.get<ApiResponse<{ bookings: Booking[] }>>(
-        "/booking/list",
-        {
-          params,
-        }
-      );
+      const { data } = await axiosClient.get<
+        ApiResponse<{ bookings: Booking[] }>
+      >("/booking/list", {
+        params,
+      });
 
       console.log("[bookingAPI.getBookings] Received response:", data);
 
       if (!data.success) {
-        const errorMsg = data.error || getErrorMessage(ERROR_MESSAGES.FETCH_BOOKINGS_FAILED);
+        const errorMsg =
+          data.error || getErrorMessage(ERROR_MESSAGES.FETCH_BOOKINGS_FAILED);
         console.error("[bookingAPI.getBookings] API returned error:", errorMsg);
         throw new Error(errorMsg);
       }
 
       const bookings = data.data?.bookings || [];
-      console.log("[bookingAPI.getBookings] Returning bookings:", bookings.length);
+      console.log(
+        "[bookingAPI.getBookings] Returning bookings:",
+        bookings.length
+      );
       return bookings;
     } catch (error) {
       console.error("[bookingAPI.getBookings] Error caught:", error);
@@ -153,22 +153,20 @@ export const bookingAPI = {
 
   /**
    * Worker confirms booking
+   * Uses cookies for authentication (via withCredentials: true in axios config)
    */
   async confirmBooking(bookingId: string): Promise<Booking> {
     try {
-      const accessToken = await getAccessToken();
-      const { data } = await axiosClient.post<ApiResponse<{ booking: Booking }>>(
-        `/booking/${bookingId}/confirm`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
+      // Note: Authentication is handled via cookies (withCredentials: true)
+      // The API route uses requireWorker() middleware which reads from cookies
+      const { data } = await axiosClient.post<
+        ApiResponse<{ booking: Booking }>
+      >(`/booking/${bookingId}/confirm`, {});
 
       if (!data.success || !data.data?.booking) {
-        throw new Error(data.error || getErrorMessage(ERROR_MESSAGES.CONFIRM_BOOKING_FAILED));
+        throw new Error(
+          data.error || getErrorMessage(ERROR_MESSAGES.CONFIRM_BOOKING_FAILED)
+        );
       }
 
       return data.data.booking;
@@ -182,22 +180,20 @@ export const bookingAPI = {
 
   /**
    * Worker declines booking
+   * Uses cookies for authentication (via withCredentials: true in axios config)
    */
   async declineBooking(bookingId: string): Promise<Booking> {
     try {
-      const accessToken = await getAccessToken();
-      const { data } = await axiosClient.post<ApiResponse<{ booking: Booking }>>(
-        `/booking/${bookingId}/decline`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
+      // Note: Authentication is handled via cookies (withCredentials: true)
+      // The API route uses requireWorker() middleware which reads from cookies
+      const { data } = await axiosClient.post<
+        ApiResponse<{ booking: Booking }>
+      >(`/booking/${bookingId}/decline`, {});
 
       if (!data.success || !data.data?.booking) {
-        throw new Error(data.error || getErrorMessage(ERROR_MESSAGES.DECLINE_BOOKING_FAILED));
+        throw new Error(
+          data.error || getErrorMessage(ERROR_MESSAGES.DECLINE_BOOKING_FAILED)
+        );
       }
 
       return data.data.booking;
@@ -211,22 +207,20 @@ export const bookingAPI = {
 
   /**
    * Worker marks booking as completed
+   * Uses cookies for authentication (via withCredentials: true in axios config)
    */
   async workerCompleteBooking(bookingId: string): Promise<Booking> {
     try {
-      const accessToken = await getAccessToken();
-      const { data } = await axiosClient.post<ApiResponse<{ booking: Booking }>>(
-        `/booking/${bookingId}/complete-worker`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
+      // Note: Authentication is handled via cookies (withCredentials: true)
+      // The API route uses requireWorker() middleware which reads from cookies
+      const { data } = await axiosClient.post<
+        ApiResponse<{ booking: Booking }>
+      >(`/booking/${bookingId}/complete-worker`, {});
 
       if (!data.success || !data.data?.booking) {
-        throw new Error(data.error || getErrorMessage(ERROR_MESSAGES.COMPLETE_BOOKING_FAILED));
+        throw new Error(
+          data.error || getErrorMessage(ERROR_MESSAGES.COMPLETE_BOOKING_FAILED)
+        );
       }
 
       return data.data.booking;
@@ -240,22 +234,20 @@ export const bookingAPI = {
 
   /**
    * Client confirms completion and releases payment
+   * Uses cookies for authentication (via withCredentials: true in axios config)
    */
   async clientCompleteBooking(bookingId: string): Promise<Booking> {
     try {
-      const accessToken = await getAccessToken();
-      const { data } = await axiosClient.post<ApiResponse<{ booking: Booking }>>(
-        `/booking/${bookingId}/complete-client`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
+      // Note: Authentication is handled via cookies (withCredentials: true)
+      // The API route uses requireClient() middleware which reads from cookies
+      const { data } = await axiosClient.post<
+        ApiResponse<{ booking: Booking }>
+      >(`/booking/${bookingId}/complete-client`, {});
 
       if (!data.success || !data.data?.booking) {
-        throw new Error(data.error || getErrorMessage(ERROR_MESSAGES.COMPLETE_BOOKING_FAILED));
+        throw new Error(
+          data.error || getErrorMessage(ERROR_MESSAGES.COMPLETE_BOOKING_FAILED)
+        );
       }
 
       return data.data.booking;

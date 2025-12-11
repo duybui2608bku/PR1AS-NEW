@@ -1,9 +1,10 @@
 "use client";
 
 import React from "react";
-import { Layout, ConfigProvider } from "antd";
+import { Layout, ConfigProvider, theme } from "antd";
 import Header from "./Header";
 import Footer from "./Footer";
+import { ThemeProvider, useTheme } from "@/components/providers/ThemeProvider";
 
 const { Content } = Layout;
 
@@ -11,10 +12,14 @@ interface MainLayoutProps {
   children: React.ReactNode;
 }
 
-export default function MainLayout({ children }: MainLayoutProps) {
+function MainLayoutContent({ children }: MainLayoutProps) {
+  const { theme: currentTheme } = useTheme();
+  const { defaultAlgorithm, darkAlgorithm } = theme;
+
   return (
     <ConfigProvider
       theme={{
+        algorithm: currentTheme === "dark" ? darkAlgorithm : defaultAlgorithm,
         token: {
           colorPrimary: "#FF385C",
           borderRadius: 8,
@@ -50,5 +55,13 @@ export default function MainLayout({ children }: MainLayoutProps) {
         <Footer />
       </Layout>
     </ConfigProvider>
+  );
+}
+
+export default function MainLayout({ children }: MainLayoutProps) {
+  return (
+    <ThemeProvider storageKey="site-theme">
+      <MainLayoutContent>{children}</MainLayoutContent>
+    </ThemeProvider>
   );
 }

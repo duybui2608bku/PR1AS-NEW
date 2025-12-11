@@ -35,6 +35,22 @@
   }
 }
 
+@keyframes loadingProgress {
+  0% {
+    transform: translateX(-100%);
+  }
+  50% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.loading-progress-bar {
+  box-shadow: 0 0 10px rgba(255, 56, 92, 0.5);
+}
+
 .loading-full-page {
   animation: fadeIn 0.3s ease-in;
 }

@@ -557,13 +557,14 @@ export default function WorkerPublicProfilePage() {
                       <Card
                         type="inner"
                         title={t("worker.profile.personalQuote")}
+                        className="personal-quote-card"
                         style={{
                           borderLeft: "4px solid #FF385C",
-                          backgroundColor: "#fff5f7",
                         }}
                       >
                         <Paragraph
                           italic
+                          className="personal-quote-text"
                           style={{ fontSize: 15, lineHeight: 1.8, margin: 0 }}
                         >
                           &quot;{profile.personal_quote}&quot;
@@ -823,7 +824,12 @@ export default function WorkerPublicProfilePage() {
                     <Button type="primary" size="large" block disabled>
                       {t("worker.public.bookServiceButton")}
                     </Button>
-                    <Button size="large" block icon={<MessageOutlined />} disabled>
+                    <Button
+                      size="large"
+                      block
+                      icon={<MessageOutlined />}
+                      disabled
+                    >
                       Nhắn tin
                     </Button>
                   </>
