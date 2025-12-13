@@ -40,7 +40,7 @@ export const favoritesAPI = {
         throw new Error(
           data.error ||
             data.message ||
-            getErrorMessage(ERROR_MESSAGES.FETCH_FAILED)
+            getErrorMessage(ERROR_MESSAGES.OPERATION_FAILED)
         );
       }
 
@@ -49,7 +49,7 @@ export const favoritesAPI = {
       if (error instanceof Error) {
         throw error;
       }
-      throw new Error(getErrorMessage(ERROR_MESSAGES.FETCH_FAILED));
+      throw new Error(getErrorMessage(ERROR_MESSAGES.OPERATION_FAILED));
     }
   },
 
@@ -58,20 +58,19 @@ export const favoritesAPI = {
    */
   async checkFavorites(workerIds: string[]): Promise<string[]> {
     try {
-      const { data } = await axiosClient.get<ApiResponse<CheckFavoritesResponse>>(
-        "/favorites",
-        {
-          params: {
-            worker_ids: workerIds.join(","),
-          },
-        }
-      );
+      const { data } = await axiosClient.get<
+        ApiResponse<CheckFavoritesResponse>
+      >("/favorites", {
+        params: {
+          worker_ids: workerIds.join(","),
+        },
+      });
 
       if (!data.success || !data.data) {
         throw new Error(
           data.error ||
             data.message ||
-            getErrorMessage(ERROR_MESSAGES.FETCH_FAILED)
+            getErrorMessage(ERROR_MESSAGES.OPERATION_FAILED)
         );
       }
 
@@ -80,7 +79,7 @@ export const favoritesAPI = {
       if (error instanceof Error) {
         throw error;
       }
-      throw new Error(getErrorMessage(ERROR_MESSAGES.FETCH_FAILED));
+      throw new Error(getErrorMessage(ERROR_MESSAGES.OPERATION_FAILED));
     }
   },
 
@@ -113,11 +112,14 @@ export const favoritesAPI = {
    */
   async removeFavorite(workerProfileId: string): Promise<void> {
     try {
-      const { data } = await axiosClient.delete<ApiResponse<any>>("/favorites", {
-        params: {
-          worker_profile_id: workerProfileId,
-        },
-      });
+      const { data } = await axiosClient.delete<ApiResponse<any>>(
+        "/favorites",
+        {
+          params: {
+            worker_profile_id: workerProfileId,
+          },
+        }
+      );
 
       if (!data.success) {
         throw new Error(
@@ -134,4 +136,3 @@ export const favoritesAPI = {
     }
   },
 };
-

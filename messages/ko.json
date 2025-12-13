@@ -904,6 +904,7 @@
     "pagination": "{total}명 중 {start} - {end} 표시"
   },
   "escrow": {
+    "name": "에스크로",
     "table": {
       "id": "ID",
       "jobId": "예약 / 작업",

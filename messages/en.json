@@ -1170,6 +1170,7 @@
     "pagination": "Showing {start} - {end} of {total} workers"
   },
   "escrow": {
+    "name": "Escrow",
     "table": {
       "id": "ID",
       "jobId": "Booking / Job",

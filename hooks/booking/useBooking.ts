@@ -46,7 +46,10 @@ export function useBookings(filters?: {
       try {
         console.log("[useBookings] Fetching bookings with filters:", filters);
         const result = await bookingAPI.getBookings(filters);
-        console.log("[useBookings] Successfully fetched bookings:", result.length);
+        console.log(
+          "[useBookings] Successfully fetched bookings:",
+          result.length
+        );
         return result;
       } catch (error) {
         console.error("[useBookings] Error fetching bookings:", error);
@@ -71,7 +74,8 @@ export function useCalculatePrice() {
       workerServiceId: string;
       bookingType: "hourly" | "daily" | "weekly" | "monthly";
       durationHours: number;
-    }) => bookingAPI.calculatePrice(workerServiceId, bookingType, durationHours),
+    }) =>
+      bookingAPI.calculatePrice(workerServiceId, bookingType, durationHours),
     onError: (error: Error) => {
       showMessage.error(error.message || "Failed to calculate price");
     },
@@ -134,6 +138,25 @@ export function useDeclineBooking() {
     },
     onError: (error: Error) => {
       showMessage.error(error.message || "Failed to decline booking");
+    },
+  });
+}
+
+/**
+ * Start booking (Worker action - marks as in_progress)
+ */
+export function useStartBooking() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (bookingId: string) => bookingAPI.startBooking(bookingId),
+    onSuccess: (data) => {
+      queryClient.setQueryData(bookingKeys.detail(data.id), data);
+      queryClient.invalidateQueries({ queryKey: bookingKeys.lists() });
+      showMessage.success("Booking started. Work is now in progress.");
+    },
+    onError: (error: Error) => {
+      showMessage.error(error.message || "Failed to start booking");
     },
   });
 }

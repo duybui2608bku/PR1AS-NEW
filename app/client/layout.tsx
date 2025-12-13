@@ -56,7 +56,7 @@ function ClientLayoutContent({
   const menuItems: MenuItem[] = [
     getItem(t("nav.home") || "Home", "/", <HomeOutlined />),
     getItem(
-      t("nav.home") || "Dashboard",
+      t("client.sidebar.dashboard") || "Bảng điều khiển",
       "/client/dashboard",
       <DashboardOutlined />
     ),

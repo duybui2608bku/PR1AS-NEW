@@ -39,7 +39,7 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
     throw new ApiError(
       "Worker profile is already rejected",
       HttpStatus.BAD_REQUEST,
-      ErrorCode.INVALID_REQUEST
+      ErrorCode.VALIDATION_ERROR
     );
   }
 
@@ -87,4 +87,3 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
       : "Worker application rejected successfully"
   );
 });
-

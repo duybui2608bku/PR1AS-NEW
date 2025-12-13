@@ -44,7 +44,7 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
     RATE_LIMIT_CONFIGS.FORGOT_PASSWORD
   );
 
-  // Use the stricter limit
+  // Use the stricter limit (whichever is more restrictive)
   const rateLimitResult =
     ipRateLimit.lockedUntil && emailRateLimit.lockedUntil
       ? ipRateLimit.lockedUntil < emailRateLimit.lockedUntil
@@ -54,7 +54,11 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
       ? ipRateLimit
       : emailRateLimit.lockedUntil
       ? emailRateLimit
-      : ipRateLimit.count > emailRateLimit.count
+      : !ipRateLimit.allowed
+      ? ipRateLimit
+      : !emailRateLimit.allowed
+      ? emailRateLimit
+      : ipRateLimit.remaining < emailRateLimit.remaining
       ? ipRateLimit
       : emailRateLimit;
 
@@ -63,7 +67,9 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
       throw new ApiError(
         getErrorMessage(ERROR_MESSAGES.ACCOUNT_LOCKED) +
           (rateLimitResult.retryAfter
-            ? ` Please try again in ${Math.ceil(rateLimitResult.retryAfter / 60)} minutes.`
+            ? ` Please try again in ${Math.ceil(
+                rateLimitResult.retryAfter / 60
+              )} minutes.`
             : ""),
         HttpStatus.TOO_MANY_REQUESTS,
         ErrorCode.ACCOUNT_LOCKED
@@ -72,7 +78,9 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
     throw new ApiError(
       getErrorMessage(ERROR_MESSAGES.RATE_LIMIT_EXCEEDED) +
         (rateLimitResult.retryAfter
-          ? ` Please try again in ${Math.ceil(rateLimitResult.retryAfter / 60)} minutes.`
+          ? ` Please try again in ${Math.ceil(
+              rateLimitResult.retryAfter / 60
+            )} minutes.`
           : ""),
       HttpStatus.TOO_MANY_REQUESTS,
       ErrorCode.RATE_LIMIT_EXCEEDED
@@ -81,38 +89,13 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
 
   const supabase = createAdminClient();
 
-  // Check if user exists
-  const { data: userData, error: userError } =
-    await supabase.auth.admin.getUserByEmail(sanitizedEmail);
-
-  // Always return success message (security best practice - don't reveal if email exists)
-  // But still check rate limit to prevent abuse
-  if (userError || !userData?.user) {
-    // User doesn't exist, but we return success anyway
-    return successResponse({
-      message: "If an account with that email exists, a password reset link has been sent.",
-    });
-  }
-
-  // Check if account is banned
-  const { data: profile } = await supabase
-    .from("user_profiles")
-    .select("status")
-    .eq("id", userData.user.id)
-    .single();
-
-  if (profile?.status === "banned") {
-    // Still return success to avoid revealing banned status
-    return successResponse({
-      message: "If an account with that email exists, a password reset link has been sent.",
-    });
-  }
-
   // Get app URL for redirect
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
   const redirectUrl = `${appUrl}/auth/reset-password`;
 
   // Send password reset email using Supabase
+  // Security best practice: Always return success message regardless of whether email exists
+  // This prevents email enumeration attacks
   const { error: resetError } = await supabase.auth.admin.generateLink({
     type: "recovery",
     email: sanitizedEmail,
@@ -122,14 +105,14 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
   });
 
   // Always return success (security best practice)
-  // Even if there's an error, we don't want to reveal information
+  // Even if there's an error or email doesn't exist, we don't want to reveal information
   if (resetError) {
     // Log error for debugging but don't expose to user
     console.error("Password reset email error:", resetError);
   }
 
   return successResponse({
-    message: "If an account with that email exists, a password reset link has been sent.",
+    message:
+      "If an account with that email exists, a password reset link has been sent.",
   });
 });
-

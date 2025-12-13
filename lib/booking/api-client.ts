@@ -206,6 +206,33 @@ export const bookingAPI = {
   },
 
   /**
+   * Worker starts booking (marks as in_progress)
+   * Uses cookies for authentication (via withCredentials: true in axios config)
+   */
+  async startBooking(bookingId: string): Promise<Booking> {
+    try {
+      // Note: Authentication is handled via cookies (withCredentials: true)
+      // The API route uses requireWorker() middleware which reads from cookies
+      const { data } = await axiosClient.post<
+        ApiResponse<{ booking: Booking }>
+      >(`/booking/${bookingId}/start`, {});
+
+      if (!data.success || !data.data?.booking) {
+        throw new Error(
+          data.error || getErrorMessage(ERROR_MESSAGES.START_BOOKING_FAILED)
+        );
+      }
+
+      return data.data.booking;
+    } catch (error) {
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error(getErrorMessage(ERROR_MESSAGES.START_BOOKING_FAILED));
+    }
+  },
+
+  /**
    * Worker marks booking as completed
    * Uses cookies for authentication (via withCredentials: true in axios config)
    */

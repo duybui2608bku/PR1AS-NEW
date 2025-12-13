@@ -15,7 +15,12 @@ import { LoadingOutlined } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
 import type { CSSProperties } from "react";
 
-export type LoadingVariant = "spinner" | "fullPage" | "inline" | "skeleton" | "card";
+export type LoadingVariant =
+  | "spinner"
+  | "fullPage"
+  | "inline"
+  | "skeleton"
+  | "card";
 
 export interface LoadingProps {
   variant?: LoadingVariant;
@@ -204,4 +209,3 @@ export function SkeletonLoading({
 }: Omit<LoadingProps, "variant">) {
   return <Loading variant="skeleton" skeletonRows={skeletonRows} {...props} />;
 }
-

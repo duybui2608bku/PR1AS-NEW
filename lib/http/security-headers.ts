@@ -10,7 +10,9 @@ import { NextResponse } from "next/server";
  * @param response - NextResponse object
  * @returns Response with security headers
  */
-export function applySecurityHeaders(response: NextResponse): NextResponse {
+export function applySecurityHeaders<T = any>(
+  response: NextResponse<T>
+): NextResponse<T> {
   // X-Content-Type-Options: Prevent MIME type sniffing
   response.headers.set("X-Content-Type-Options", "nosniff");
 
@@ -63,4 +65,3 @@ export function applySecurityHeaders(response: NextResponse): NextResponse {
 export function withSecurityHeaders(response: NextResponse): NextResponse {
   return applySecurityHeaders(response);
 }
-

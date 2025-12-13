@@ -42,7 +42,7 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
     throw new ApiError(
       "Worker profile is already approved",
       HttpStatus.BAD_REQUEST,
-      ErrorCode.INVALID_REQUEST
+      ErrorCode.VALIDATION_ERROR
     );
   }
 
@@ -104,7 +104,8 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
       console.error("Failed to approve worker images:", imagesError);
     }
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
     errors.push(`Failed to approve images: ${errorMessage}`);
     console.error("Failed to approve worker images:", error);
   }
@@ -123,7 +124,8 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
       console.error("Failed to activate worker services:", servicesError);
     }
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
     errors.push(`Failed to activate services: ${errorMessage}`);
     console.error("Failed to activate worker services:", error);
   }
@@ -146,7 +148,9 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
   // Return success with warnings if there were partial errors
   const message =
     errors.length > 0
-      ? `Worker approved successfully, but some operations failed: ${errors.join(", ")}`
+      ? `Worker approved successfully, but some operations failed: ${errors.join(
+          ", "
+        )}`
       : "Worker approved successfully";
 
   return successResponse(

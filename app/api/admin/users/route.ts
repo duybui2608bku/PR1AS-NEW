@@ -30,20 +30,15 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
   }
 
   // Get user profiles for additional info
-  const { data: profiles } = await supabase
-    .from("user_profiles")
-    .select("*");
+  const { data: profiles } = await supabase.from("user_profiles").select("*");
 
   // Merge auth users with profile data
   let users = authUsers.users.map((user) => {
     const profile = profiles?.find((p) => p.id === user.id);
     // banned_until is stored in user_metadata, not directly on user object
-    const bannedUntil =
-      (user.user_metadata as Record<string, unknown>)?.banned_until as
-        | string
-        | undefined;
-    const isBanned =
-      bannedUntil && new Date(bannedUntil) > new Date();
+    const bannedUntil = (user.user_metadata as Record<string, unknown>)
+      ?.banned_until as string | undefined;
+    const isBanned = bannedUntil && new Date(bannedUntil) > new Date();
     return {
       id: user.id,
       email: user.email,
@@ -67,7 +62,7 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
     const searchLower = search.toLowerCase();
     users = users.filter(
       (user) =>
-        user.email.toLowerCase().includes(searchLower) ||
+        user.email?.toLowerCase().includes(searchLower) ||
         user.user_metadata?.full_name?.toLowerCase().includes(searchLower)
     );
   }
@@ -91,9 +86,7 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
   // Filter by date range (created_at)
   if (dateFrom) {
     const fromDate = new Date(dateFrom);
-    users = users.filter(
-      (user) => new Date(user.created_at) >= fromDate
-    );
+    users = users.filter((user) => new Date(user.created_at) >= fromDate);
   }
   if (dateTo) {
     const toDate = new Date(dateTo);

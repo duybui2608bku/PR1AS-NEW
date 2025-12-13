@@ -7,17 +7,17 @@
 // BOOKING TYPES
 // =============================================================================
 
-export type BookingType = 'hourly' | 'daily' | 'weekly' | 'monthly';
+export type BookingType = "hourly" | "daily" | "weekly" | "monthly";
 
 export type BookingStatus =
-  | 'pending_worker_confirmation'  // Client created, waiting for worker
-  | 'worker_confirmed'              // Worker accepted, payment deducted
-  | 'worker_declined'               // Worker declined
-  | 'in_progress'                   // Service is being performed
-  | 'worker_completed'              // Worker marked as completed
-  | 'client_completed'              // Client confirmed completion, payment released
-  | 'cancelled'                     // Cancelled by either party
-  | 'disputed';                     // Dispute filed
+  | "pending_worker_confirmation" // Client created, waiting for worker
+  | "worker_confirmed" // Worker accepted, payment deducted
+  | "worker_declined" // Worker declined
+  | "in_progress" // Service is being performed
+  | "worker_completed" // Worker marked as completed
+  | "client_completed" // Client confirmed completion, payment released
+  | "cancelled" // Cancelled by either party
+  | "disputed"; // Dispute filed
 
 export interface Booking {
   id: string;
@@ -78,15 +78,15 @@ export interface BookingCalculation {
 // =============================================================================
 
 export type NotificationType =
-  | 'booking_request'
-  | 'booking_confirmed'
-  | 'booking_declined'
-  | 'booking_cancelled'
-  | 'booking_completed'
-  | 'payment_received'
-  | 'payment_released'
-  | 'escrow_released'
-  | 'system_announcement';
+  | "booking_request"
+  | "booking_confirmed"
+  | "booking_declined"
+  | "booking_cancelled"
+  | "booking_completed"
+  | "payment_received"
+  | "payment_released"
+  | "escrow_released"
+  | "system_announcement";
 
 export interface Notification {
   id: string;
@@ -172,22 +172,22 @@ export class BookingError extends Error {
     public statusCode: number = 400
   ) {
     super(message);
-    this.name = 'BookingError';
+    this.name = "BookingError";
   }
 }
 
 export const BookingErrorCodes = {
-  INSUFFICIENT_BALANCE: 'INSUFFICIENT_BALANCE',
-  BOOKING_NOT_FOUND: 'BOOKING_NOT_FOUND',
-  INVALID_BOOKING_STATUS: 'INVALID_BOOKING_STATUS',
-  BOOKING_ALREADY_CONFIRMED: 'BOOKING_ALREADY_CONFIRMED',
-  BOOKING_ALREADY_DECLINED: 'BOOKING_ALREADY_DECLINED',
-  BOOKING_ALREADY_CANCELLED: 'BOOKING_ALREADY_CANCELLED',
-  INVALID_DURATION: 'INVALID_DURATION',
-  INVALID_DATE: 'INVALID_DATE',
-  WORKER_SERVICE_NOT_FOUND: 'WORKER_SERVICE_NOT_FOUND',
-  WORKER_NOT_FOUND: 'WORKER_NOT_FOUND',
-  UNAUTHORIZED: 'UNAUTHORIZED',
-  BOOKING_CREATION_FAILED: 'BOOKING_CREATION_FAILED',
+  INSUFFICIENT_BALANCE: "INSUFFICIENT_BALANCE",
+  BOOKING_NOT_FOUND: "BOOKING_NOT_FOUND",
+  INVALID_BOOKING_STATUS: "INVALID_BOOKING_STATUS",
+  BOOKING_ALREADY_CONFIRMED: "BOOKING_ALREADY_CONFIRMED",
+  BOOKING_ALREADY_DECLINED: "BOOKING_ALREADY_DECLINED",
+  BOOKING_ALREADY_CANCELLED: "BOOKING_ALREADY_CANCELLED",
+  INVALID_DURATION: "INVALID_DURATION",
+  INVALID_DATE: "INVALID_DATE",
+  INVALID_INPUT: "INVALID_INPUT",
+  WORKER_SERVICE_NOT_FOUND: "WORKER_SERVICE_NOT_FOUND",
+  WORKER_NOT_FOUND: "WORKER_NOT_FOUND",
+  UNAUTHORIZED: "UNAUTHORIZED",
+  BOOKING_CREATION_FAILED: "BOOKING_CREATION_FAILED",
 } as const;
-

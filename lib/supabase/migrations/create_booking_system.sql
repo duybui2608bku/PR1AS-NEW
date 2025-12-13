@@ -245,6 +245,18 @@ BEGIN
     notification_title := 'Booking Declined';
     notification_message := 'The worker has declined your booking request';
     target_user_id := NEW.client_id;
+  ELSIF NEW.status = 'in_progress' AND OLD.status = 'worker_confirmed' THEN
+    -- Worker started booking - notify client
+    notification_type := 'booking_confirmed';
+    notification_title := 'Work Started';
+    notification_message := 'The worker has started working on your booking';
+    target_user_id := NEW.client_id;
+  ELSIF NEW.status = 'worker_completed' AND (OLD.status = 'worker_confirmed' OR OLD.status = 'in_progress') THEN
+    -- Worker completed - notify client
+    notification_type := 'booking_completed';
+    notification_title := 'Work Completed';
+    notification_message := 'The worker has completed the work. Please confirm completion to release payment.';
+    target_user_id := NEW.client_id;
   ELSIF NEW.status = 'client_completed' AND OLD.status = 'worker_completed' THEN
     -- Client confirmed completion - notify worker
     notification_type := 'booking_completed';

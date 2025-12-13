@@ -2,7 +2,11 @@
 
 import { useState } from "react";
 import { Button, Form, Input, Typography, ConfigProvider } from "antd";
-import { MailOutlined, HomeOutlined, ArrowLeftOutlined } from "@ant-design/icons";
+import {
+  MailOutlined,
+  HomeOutlined,
+  ArrowLeftOutlined,
+} from "@ant-design/icons";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
@@ -10,7 +14,6 @@ import { showMessage } from "@/lib/utils/toast";
 import { authAPI } from "@/lib/auth/api-client";
 import { getErrorMessage } from "@/lib/utils/common";
 import LanguageSwitcher from "@/components/common/LanguageSwitcher";
-import Loading from "@/components/common/Loading";
 import styles from "./page.module.css";
 
 const { Title, Text } = Typography;
@@ -27,7 +30,9 @@ function ForgotPasswordForm() {
     try {
       await authAPI.forgotPassword(values.email);
       setEmailSent(true);
-      showMessage.success("Email đặt lại mật khẩu đã được gửi. Vui lòng kiểm tra hộp thư của bạn.");
+      showMessage.success(
+        "Email đặt lại mật khẩu đã được gửi. Vui lòng kiểm tra hộp thư của bạn."
+      );
     } catch (error) {
       const errorMessage = getErrorMessage(error, "Failed to send reset email");
       showMessage.error(errorMessage);
@@ -81,7 +86,8 @@ function ForgotPasswordForm() {
 
             <div className={styles.backLinkContainer}>
               <Link href="/auth/login" className={styles.backLink}>
-                <ArrowLeftOutlined /> {t("auth.forgotPassword.backToLogin") || "Quay lại đăng nhập"}
+                <ArrowLeftOutlined />{" "}
+                {t("auth.forgotPassword.backToLogin") || "Quay lại đăng nhập"}
               </Link>
             </div>
           </div>
@@ -129,13 +135,22 @@ function ForgotPasswordForm() {
             <Form.Item
               name="email"
               rules={[
-                { required: true, message: t("auth.login.emailRequired") || "Vui lòng nhập email" },
-                { type: "email", message: t("auth.login.emailInvalid") || "Email không hợp lệ" },
+                {
+                  required: true,
+                  message:
+                    t("auth.login.emailRequired") || "Vui lòng nhập email",
+                },
+                {
+                  type: "email",
+                  message: t("auth.login.emailInvalid") || "Email không hợp lệ",
+                },
               ]}
             >
               <Input
                 prefix={<MailOutlined className={styles.inputIcon} />}
-                placeholder={t("auth.login.emailPlaceholder") || "Nhập email của bạn"}
+                placeholder={
+                  t("auth.login.emailPlaceholder") || "Nhập email của bạn"
+                }
                 size="large"
                 className={styles.input}
               />
@@ -150,14 +165,16 @@ function ForgotPasswordForm() {
                 loading={loading}
                 className={styles.submitButton}
               >
-                {t("auth.forgotPassword.sendResetLink") || "Gửi link đặt lại mật khẩu"}
+                {t("auth.forgotPassword.sendResetLink") ||
+                  "Gửi link đặt lại mật khẩu"}
               </Button>
             </Form.Item>
           </Form>
 
           <div className={styles.backLinkContainer}>
             <Link href="/auth/login" className={styles.backLink}>
-              <ArrowLeftOutlined /> {t("auth.forgotPassword.backToLogin") || "Quay lại đăng nhập"}
+              <ArrowLeftOutlined />{" "}
+              {t("auth.forgotPassword.backToLogin") || "Quay lại đăng nhập"}
             </Link>
           </div>
         </div>
@@ -167,17 +184,5 @@ function ForgotPasswordForm() {
 }
 
 export default function ForgotPasswordPage() {
-  return (
-    <Loading
-      variant="fullPage"
-      size="large"
-      tip="Đang tải..."
-      style={{
-        background: "linear-gradient(135deg, #690f0f 0%, #8b1818 100%)",
-      }}
-    >
-      <ForgotPasswordForm />
-    </Loading>
-  );
+  return <ForgotPasswordForm />;
 }
-

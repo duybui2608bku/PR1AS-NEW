@@ -29,7 +29,7 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
       refresh_token: refreshToken,
     });
 
-  if (refreshError || !sessionData.session) {
+  if (refreshError || !sessionData.session || !sessionData.user) {
     // Invalid or expired refresh token
     // Clear cookies and return error
     const response = successResponse(
@@ -104,4 +104,3 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
 
   return response;
 });
-

@@ -7,7 +7,6 @@ import { NextRequest } from "next/server";
 import { successResponse } from "@/lib/http/response";
 import { withErrorHandling } from "@/lib/http/errors";
 import { requireWorker } from "@/lib/auth/middleware";
-import { getSupabaseServerClient } from "@/lib/supabase/server";
 import {
   validateStepState,
   recalculateCompletedSteps,
@@ -21,8 +20,7 @@ import { WorkerProfileService } from "@/lib/worker/service";
  * Validate current user's profile for inconsistencies
  */
 export const GET = withErrorHandling(async (request: NextRequest) => {
-  const user = await requireWorker(request);
-  const supabase = getSupabaseServerClient();
+  const { user, supabase } = await requireWorker(request);
 
   const service = new WorkerProfileService(supabase);
   const profile = await service.getWorkerProfile(user.id, false); // Don't auto-fix
@@ -50,8 +48,7 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
  * Fix inconsistencies in current user's profile
  */
 export const POST = withErrorHandling(async (request: NextRequest) => {
-  const user = await requireWorker(request);
-  const supabase = getSupabaseServerClient();
+  const { user, supabase } = await requireWorker(request);
 
   const service = new WorkerProfileService(supabase);
   const profile = await service.getWorkerProfile(user.id, false);
@@ -78,8 +75,7 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
  * Recalculate completed steps for current user's profile
  */
 export const PATCH = withErrorHandling(async (request: NextRequest) => {
-  const user = await requireWorker(request);
-  const supabase = getSupabaseServerClient();
+  const { user, supabase } = await requireWorker(request);
 
   const service = new WorkerProfileService(supabase);
   const profile = await service.getWorkerProfile(user.id, false);
@@ -100,4 +96,3 @@ export const PATCH = withErrorHandling(async (request: NextRequest) => {
     profileId: profile.id,
   });
 });
-

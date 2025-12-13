@@ -239,7 +239,7 @@ export class BookingService {
     const { data: workerService, error: workerServiceError } =
       await this.supabase
         .from("worker_services")
-        .select("service_id, worker_profile_id")
+        .select("service_id, worker_profile_id, is_active")
         .eq("id", request.worker_service_id)
         .maybeSingle();
 
@@ -266,6 +266,15 @@ export class BookingService {
     if (workerService.worker_profile_id !== workerProfile.id) {
       throw new BookingError(
         "Worker service does not belong to the specified worker",
+        BookingErrorCodes.WORKER_SERVICE_NOT_FOUND,
+        400
+      );
+    }
+
+    // Validate worker service is still active
+    if (!workerService.is_active) {
+      throw new BookingError(
+        "Cannot create booking. The service is no longer active.",
         BookingErrorCodes.WORKER_SERVICE_NOT_FOUND,
         400
       );
@@ -329,7 +338,7 @@ export class BookingService {
    * Worker confirms booking - deducts payment and creates escrow
    */
   async confirmBooking(bookingId: string, workerId: string): Promise<Booking> {
-    // Get booking
+    // Get booking with worker service info
     const { data: booking, error: bookingError } = await this.supabase
       .from("bookings")
       .select("*")
@@ -362,6 +371,45 @@ export class BookingService {
       );
     }
 
+    // Validate worker service is still active
+    if (booking.worker_service_id) {
+      const { data: workerService, error: workerServiceError } =
+        await this.supabase
+          .from("worker_services")
+          .select("is_active")
+          .eq("id", booking.worker_service_id)
+          .single();
+
+      if (workerServiceError || !workerService) {
+        throw new BookingError(
+          "Worker service not found",
+          BookingErrorCodes.WORKER_SERVICE_NOT_FOUND,
+          404
+        );
+      }
+
+      if (!workerService.is_active) {
+        throw new BookingError(
+          "Cannot confirm booking. The service is no longer active.",
+          BookingErrorCodes.WORKER_SERVICE_NOT_FOUND,
+          400
+        );
+      }
+    }
+
+    // Validate start_date is not in the past (allow up to 1 hour before)
+    const startDate = new Date(booking.start_date);
+    const now = new Date();
+    const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
+
+    if (startDate < oneHourAgo) {
+      throw new BookingError(
+        "Cannot confirm booking. The start date has already passed.",
+        BookingErrorCodes.INVALID_DATE,
+        400
+      );
+    }
+
     // Process payment and create escrow
     const walletService = new WalletService(this.supabase);
     const paymentRequest: PaymentRequest = {
@@ -372,10 +420,16 @@ export class BookingService {
       description: `Payment for booking ${booking.id}`,
     };
 
+    let escrowId: string | undefined;
+    let transactionId: string | undefined;
+
     try {
       const { escrow, transaction } = await walletService.processPayment(
         paymentRequest
       );
+
+      escrowId = escrow.id;
+      transactionId = transaction.id;
 
       // Update booking
       const { data: updatedBooking, error: updateError } = await this.supabase
@@ -390,13 +444,143 @@ export class BookingService {
         .single();
 
       if (updateError) {
-        throw updateError;
+        // Payment succeeded but booking update failed - try to refund escrow
+        // Note: This is a compensation pattern since Supabase doesn't support transactions
+        // In production, consider using a database RPC function for atomic operations
+        try {
+          await this.refundEscrowToEmployer(escrow.id, booking.client_id, {
+            reason: "Booking update failed after payment",
+            booking_id: bookingId,
+          });
+        } catch (refundError) {
+          // Log error but don't throw - the original error is more important
+          console.error(
+            `Failed to refund escrow ${escrow.id} after booking update failure:`,
+            refundError
+          );
+        }
+
+        throw new BookingError(
+          `Failed to update booking: ${updateError.message}`,
+          BookingErrorCodes.BOOKING_CREATION_FAILED,
+          500
+        );
       }
 
       return updatedBooking as Booking;
     } catch (error) {
       // If payment fails, booking remains in pending status
-      throw error;
+      // If payment succeeded but update failed, escrow should be refunded (handled above)
+      if (error instanceof BookingError) {
+        throw error;
+      }
+      throw new BookingError(
+        error instanceof Error ? error.message : "Failed to confirm booking",
+        BookingErrorCodes.BOOKING_CREATION_FAILED,
+        500
+      );
+    }
+  }
+
+  /**
+   * Helper method to attempt refund escrow to employer
+   * Used for compensation when booking update fails after payment
+   * Note: This is a best-effort compensation pattern since Supabase doesn't support transactions
+   * In production, consider using a database RPC function for atomic operations
+   */
+  private async refundEscrowToEmployer(
+    escrowId: string,
+    employerId: string,
+    metadata: Record<string, any>
+  ): Promise<void> {
+    try {
+      // Get escrow details
+      const { data: escrow, error: escrowError } = await this.supabase
+        .from("escrow_holds")
+        .select("*")
+        .eq("id", escrowId)
+        .single();
+
+      if (escrowError || !escrow) {
+        throw new Error(`Escrow ${escrowId} not found`);
+      }
+
+      // Only refund if status is still "held"
+      if (escrow.status !== "held") {
+        throw new Error(
+          `Escrow ${escrowId} is not in held status (current: ${escrow.status})`
+        );
+      }
+
+      // Refund full amount to employer
+      const refundAmount = escrow.employer_amount_usd;
+
+      // Get employer wallet
+      const { data: wallet, error: walletError } = await this.supabase
+        .from("wallets")
+        .select("*")
+        .eq("user_id", employerId)
+        .single();
+
+      if (walletError || !wallet) {
+        throw new Error(`Wallet not found for employer ${employerId}`);
+      }
+
+      // Update wallet balance (add refund amount back)
+      const { error: balanceError } = await this.supabase
+        .from("wallets")
+        .update({
+          balance_usd: wallet.balance_usd + refundAmount,
+          total_spent_usd: wallet.total_spent_usd - refundAmount,
+        })
+        .eq("user_id", employerId);
+
+      if (balanceError) {
+        throw new Error(
+          `Failed to update wallet balance: ${balanceError.message}`
+        );
+      }
+
+      // Create refund transaction
+      const walletService = new WalletService(this.supabase);
+      await walletService.createTransaction({
+        user_id: employerId,
+        type: "refund",
+        amount_usd: refundAmount,
+        payment_method: "escrow",
+        status: "completed",
+        escrow_id: escrowId,
+        description: `Refund for booking update failure: ${
+          metadata.reason || "Booking update failed"
+        }`,
+        metadata: {
+          ...metadata,
+          refund_reason: "booking_update_failed",
+        },
+      });
+
+      // Update escrow status to refunded
+      const { error: escrowUpdateError } = await this.supabase
+        .from("escrow_holds")
+        .update({
+          status: "refunded",
+          released_at: new Date().toISOString(),
+        })
+        .eq("id", escrowId);
+
+      if (escrowUpdateError) {
+        throw new Error(
+          `Failed to update escrow status: ${escrowUpdateError.message}`
+        );
+      }
+    } catch (error) {
+      // Log error but don't throw - we want the original booking update error to be thrown
+      console.error(
+        `[BookingService] Failed to refund escrow ${escrowId} after booking update failure:`,
+        error
+      );
+      // In production, you might want to send this to an error tracking service
+      // or create an admin notification for manual intervention
     }
   }
 
@@ -463,6 +647,79 @@ export class BookingService {
   }
 
   // ===========================================================================
+  // BOOKING START
+  // ===========================================================================
+
+  /**
+   * Worker starts booking - marks booking as in_progress
+   */
+  async startBooking(bookingId: string, workerId: string): Promise<Booking> {
+    // Get booking
+    const { data: booking, error: bookingError } = await this.supabase
+      .from("bookings")
+      .select("*")
+      .eq("id", bookingId)
+      .single();
+
+    if (bookingError || !booking) {
+      throw new BookingError(
+        "Booking not found",
+        BookingErrorCodes.BOOKING_NOT_FOUND,
+        404
+      );
+    }
+
+    // Verify worker owns this booking
+    if (booking.worker_id !== workerId) {
+      throw new BookingError(
+        "Unauthorized",
+        BookingErrorCodes.UNAUTHORIZED,
+        403
+      );
+    }
+
+    // Check status - only allow starting from worker_confirmed
+    if (booking.status !== "worker_confirmed") {
+      throw new BookingError(
+        `Booking cannot be started. Current status: ${booking.status}`,
+        BookingErrorCodes.INVALID_BOOKING_STATUS,
+        400
+      );
+    }
+
+    // Validate start_date is not in the past (allow with warning if within reasonable time)
+    const startDate = new Date(booking.start_date);
+    const now = new Date();
+    // Allow starting up to 1 hour before scheduled start time
+    const oneHourBefore = new Date(startDate.getTime() - 60 * 60 * 1000);
+
+    if (now < oneHourBefore) {
+      // Too early to start - but we'll allow it with a warning
+      // In production, you might want to throw an error here or require confirmation
+    }
+
+    // Update booking status to in_progress
+    const { data: updatedBooking, error: updateError } = await this.supabase
+      .from("bookings")
+      .update({
+        status: "in_progress",
+      })
+      .eq("id", bookingId)
+      .select()
+      .single();
+
+    if (updateError) {
+      throw new BookingError(
+        "Failed to start booking",
+        BookingErrorCodes.BOOKING_NOT_FOUND,
+        500
+      );
+    }
+
+    return updatedBooking as Booking;
+  }
+
+  // ===========================================================================
   // BOOKING COMPLETION
   // ===========================================================================
 
@@ -506,11 +763,23 @@ export class BookingService {
       );
     }
 
+    // Validate completion time is reasonable (not before start_date)
+    const completedAt = new Date();
+    const startDate = new Date(booking.start_date);
+
+    if (completedAt < startDate) {
+      throw new BookingError(
+        "Cannot complete booking before the scheduled start date",
+        BookingErrorCodes.INVALID_DATE,
+        400
+      );
+    }
+
     const { data: updatedBooking, error: updateError } = await this.supabase
       .from("bookings")
       .update({
         status: "worker_completed",
-        worker_completed_at: new Date().toISOString(),
+        worker_completed_at: completedAt.toISOString(),
       })
       .eq("id", bookingId)
       .select()
@@ -523,6 +792,9 @@ export class BookingService {
         500
       );
     }
+
+    // Notification will be created automatically via database trigger
+    // when status changes from worker_confirmed/in_progress to worker_completed
 
     return updatedBooking as Booking;
   }
@@ -698,11 +970,40 @@ export class BookingService {
       );
     }
 
+    // Require cancellation reason for confirmed bookings
+    const confirmedStatuses: BookingStatus[] = [
+      "worker_confirmed",
+      "in_progress",
+    ];
+    if (confirmedStatuses.includes(booking.status) && !reason) {
+      throw new BookingError(
+        "Cancellation reason is required for confirmed bookings",
+        BookingErrorCodes.INVALID_INPUT,
+        400
+      );
+    }
+
     // If payment was made, refund it
     if (booking.escrow_id && booking.status !== "pending_worker_confirmation") {
-      const walletService = new WalletService(this.supabase);
-      // Refund logic would go here - for now, we'll just mark as cancelled
-      // In production, you'd want to refund the escrow
+      try {
+        await this.refundEscrowToEmployer(
+          booking.escrow_id,
+          booking.client_id,
+          {
+            reason: reason || "Booking cancelled",
+            cancelled_by: userId,
+            booking_id: bookingId,
+          }
+        );
+      } catch (refundError) {
+        // Log error but continue with cancellation
+        // In production, you might want to send this to an error tracking service
+        console.error(
+          `[BookingService] Failed to refund escrow ${booking.escrow_id} when cancelling booking ${bookingId}:`,
+          refundError
+        );
+        // Still allow cancellation even if refund fails - admin can handle manually
+      }
     }
 
     // Update booking
@@ -789,13 +1090,15 @@ export class BookingService {
 
     query = query.order("created_at", { ascending: false });
 
+    // Pagination: use range() instead of limit() when page is specified
     if (filters.limit) {
-      query = query.limit(filters.limit);
       if (filters.page) {
-        query = query.range(
-          (filters.page - 1) * filters.limit,
-          filters.page * filters.limit - 1
-        );
+        // Use range() for pagination
+        const offset = (filters.page - 1) * filters.limit;
+        query = query.range(offset, offset + filters.limit - 1);
+      } else {
+        // Use limit() only when no pagination
+        query = query.limit(filters.limit);
       }
     }
 

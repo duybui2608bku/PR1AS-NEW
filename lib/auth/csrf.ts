@@ -3,7 +3,7 @@
  * Implements CSRF token generation and validation
  */
 
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { randomBytes } from "crypto";
 
 /**
@@ -106,4 +106,3 @@ export function setCSRFTokenCookie(
     path: "/",
   });
 }
-

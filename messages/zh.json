@@ -867,6 +867,7 @@
     "pagination": "显示 {start} - {end}，共 {total} 名工作者"
   },
   "escrow": {
+    "name": "托管",
     "table": {
       "id": "ID",
       "jobId": "预订 / 工作",

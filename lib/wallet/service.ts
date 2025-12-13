@@ -829,6 +829,7 @@ export class WalletService {
         const balanceBefore = workerWallet.balance_usd;
 
         // 2. Create release transaction for worker (before updating balance)
+        // This will set balance_before_usd and balance_after_usd to current balance
         const releaseTransaction = await this.createTransaction({
           user_id: escrowHold.worker_id,
           type: "escrow_release",
@@ -855,17 +856,36 @@ export class WalletService {
           escrowHold.worker_amount_usd
         );
 
-        // 4. Update transaction with correct balance_after
-        await this.supabase
+        // 4. Update transaction with correct balance_before, balance_after, and completed_at
+        const { error: updateError } = await this.supabase
           .from("transactions")
           .update({
             balance_before_usd: balanceBefore,
             balance_after_usd: updatedWorkerWallet.balance_usd,
+            completed_at: new Date().toISOString(),
           })
           .eq("id", releaseTransaction.id);
 
-        // 3. Update escrow status
-        await this.supabase
+        if (updateError) {
+          // Rollback wallet balance update if transaction update fails
+          try {
+            await this.updateWalletBalance(
+              escrowHold.worker_id,
+              -escrowHold.worker_amount_usd
+            );
+          } catch (rollbackError) {
+            // Log rollback error but don't throw - original error is more important
+            console.error("Failed to rollback wallet balance:", rollbackError);
+          }
+          throw new WalletError(
+            `Failed to update transaction balances: ${updateError.message}`,
+            "TRANSACTION_UPDATE_ERROR",
+            500
+          );
+        }
+
+        // 5. Update escrow status
+        const { error: escrowUpdateError } = await this.supabase
           .from("escrow_holds")
           .update({
             status: "released",
@@ -875,6 +895,14 @@ export class WalletService {
             released_at: new Date().toISOString(),
           })
           .eq("id", escrow_id);
+
+        if (escrowUpdateError) {
+          throw new WalletError(
+            `Failed to update escrow status: ${escrowUpdateError.message}`,
+            "ESCROW_UPDATE_ERROR",
+            500
+          );
+        }
       } else if (action === "refund_to_employer") {
         // Refund full amount to employer
         // 1. Get employer wallet to get balance_before
@@ -908,16 +936,35 @@ export class WalletService {
           escrowHold.total_amount_usd
         );
 
-        // 4. Update transaction with correct balance_after
-        await this.supabase
+        // 4. Update transaction with correct balance_after and completed_at
+        const { error: updateError } = await this.supabase
           .from("transactions")
           .update({
             balance_before_usd: balanceBefore,
             balance_after_usd: updatedEmployerWallet.balance_usd,
+            completed_at: new Date().toISOString(),
           })
           .eq("id", refundTransaction.id);
 
-        await this.supabase
+        if (updateError) {
+          // Rollback wallet balance update if transaction update fails
+          try {
+            await this.updateWalletBalance(
+              escrowHold.employer_id,
+              -escrowHold.total_amount_usd
+            );
+          } catch (rollbackError) {
+            console.error("Failed to rollback wallet balance:", rollbackError);
+          }
+          throw new WalletError(
+            `Failed to update transaction balances: ${updateError.message}`,
+            "TRANSACTION_UPDATE_ERROR",
+            500
+          );
+        }
+
+        // 5. Update escrow status
+        const { error: escrowUpdateError } = await this.supabase
           .from("escrow_holds")
           .update({
             status: "refunded",
@@ -927,6 +974,14 @@ export class WalletService {
             released_at: new Date().toISOString(),
           })
           .eq("id", escrow_id);
+
+        if (escrowUpdateError) {
+          throw new WalletError(
+            `Failed to update escrow status: ${escrowUpdateError.message}`,
+            "ESCROW_UPDATE_ERROR",
+            500
+          );
+        }
       } else if (action === "partial_refund") {
         // Partial refund: split between worker and employer
         if (!worker_amount || !employer_refund) {
@@ -970,14 +1025,35 @@ export class WalletService {
           worker_amount
         );
 
-        // 4. Update worker transaction with correct balance_after
-        await this.supabase
+        // 4. Update worker transaction with correct balance_after and completed_at
+        const { error: workerUpdateError } = await this.supabase
           .from("transactions")
           .update({
             balance_before_usd: workerBalanceBefore,
             balance_after_usd: updatedWorkerWallet.balance_usd,
+            completed_at: new Date().toISOString(),
           })
           .eq("id", workerTransaction.id);
+
+        if (workerUpdateError) {
+          // Rollback worker wallet balance update if transaction update fails
+          try {
+            await this.updateWalletBalance(
+              escrowHold.worker_id,
+              -worker_amount
+            );
+          } catch (rollbackError) {
+            console.error(
+              "Failed to rollback worker wallet balance:",
+              rollbackError
+            );
+          }
+          throw new WalletError(
+            `Failed to update worker transaction balances: ${workerUpdateError.message}`,
+            "TRANSACTION_UPDATE_ERROR",
+            500
+          );
+        }
 
         // Refund employer
         // 1. Get employer wallet to get balance_before
@@ -1012,16 +1088,38 @@ export class WalletService {
           employer_refund
         );
 
-        // 4. Update employer transaction with correct balance_after
-        await this.supabase
+        // 4. Update employer transaction with correct balance_after and completed_at
+        const { error: employerUpdateError } = await this.supabase
           .from("transactions")
           .update({
             balance_before_usd: employerBalanceBefore,
             balance_after_usd: updatedEmployerWallet.balance_usd,
+            completed_at: new Date().toISOString(),
           })
           .eq("id", employerRefundTransaction.id);
 
-        await this.supabase
+        if (employerUpdateError) {
+          // Rollback employer wallet balance update if transaction update fails
+          try {
+            await this.updateWalletBalance(
+              escrowHold.employer_id,
+              -employer_refund
+            );
+          } catch (rollbackError) {
+            console.error(
+              "Failed to rollback employer wallet balance:",
+              rollbackError
+            );
+          }
+          throw new WalletError(
+            `Failed to update employer transaction balances: ${employerUpdateError.message}`,
+            "TRANSACTION_UPDATE_ERROR",
+            500
+          );
+        }
+
+        // 5. Update escrow status
+        const { error: escrowUpdateError } = await this.supabase
           .from("escrow_holds")
           .update({
             status: "released",
@@ -1031,6 +1129,14 @@ export class WalletService {
             released_at: new Date().toISOString(),
           })
           .eq("id", escrow_id);
+
+        if (escrowUpdateError) {
+          throw new WalletError(
+            `Failed to update escrow status: ${escrowUpdateError.message}`,
+            "ESCROW_UPDATE_ERROR",
+            500
+          );
+        }
       }
 
       // Get updated escrow

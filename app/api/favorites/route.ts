@@ -6,7 +6,8 @@
 import { NextRequest } from "next/server";
 import { requireAuth } from "@/lib/auth/middleware";
 import { successResponse } from "@/lib/http/response";
-import { withErrorHandling } from "@/lib/http/errors";
+import { withErrorHandling, ApiError, ErrorCode } from "@/lib/http/errors";
+import { HttpStatus } from "@/lib/utils/enums";
 
 /**
  * GET /api/favorites
@@ -15,10 +16,10 @@ import { withErrorHandling } from "@/lib/http/errors";
 export const GET = withErrorHandling(async (request: NextRequest) => {
   const { user, supabase } = await requireAuth(request);
   const { searchParams } = new URL(request.url);
-  
+
   // Optional: Get worker IDs to check if they're favorited
   const workerIds = searchParams.get("worker_ids");
-  
+
   let query = supabase
     .from("worker_favorites")
     .select(
@@ -86,9 +87,10 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
   const { worker_profile_id } = body;
 
   if (!worker_profile_id) {
-    return new Response(
-      JSON.stringify({ error: "worker_profile_id is required" }),
-      { status: 400 }
+    throw new ApiError(
+      "worker_profile_id is required",
+      HttpStatus.BAD_REQUEST,
+      ErrorCode.MISSING_REQUIRED_FIELDS
     );
   }
 
@@ -100,16 +102,18 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
     .single();
 
   if (workerError || !workerProfile) {
-    return new Response(
-      JSON.stringify({ error: "Worker profile not found" }),
-      { status: 404 }
+    throw new ApiError(
+      "Worker profile not found",
+      HttpStatus.NOT_FOUND,
+      ErrorCode.NOT_FOUND
     );
   }
 
   if (workerProfile.profile_status !== "published") {
-    return new Response(
-      JSON.stringify({ error: "Worker profile is not published" }),
-      { status: 400 }
+    throw new ApiError(
+      "Worker profile is not published",
+      HttpStatus.BAD_REQUEST,
+      ErrorCode.VALIDATION_ERROR
     );
   }
 
@@ -150,9 +154,10 @@ export const DELETE = withErrorHandling(async (request: NextRequest) => {
   const worker_profile_id = searchParams.get("worker_profile_id");
 
   if (!worker_profile_id) {
-    return new Response(
-      JSON.stringify({ error: "worker_profile_id is required" }),
-      { status: 400 }
+    throw new ApiError(
+      "worker_profile_id is required",
+      HttpStatus.BAD_REQUEST,
+      ErrorCode.MISSING_REQUIRED_FIELDS
     );
   }
 
@@ -170,4 +175,3 @@ export const DELETE = withErrorHandling(async (request: NextRequest) => {
     message: "Worker removed from favorites",
   });
 });
-

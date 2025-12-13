@@ -36,7 +36,7 @@ export const ERROR_MESSAGES = {
   INVALID_ROLE: "errors.api.invalidRole",
   INVALID_INPUT: "errors.api.invalidInput",
   WEAK_PASSWORD: "errors.api.weakPassword",
-  
+
   // Rate Limiting
   RATE_LIMIT_EXCEEDED: "errors.api.rateLimitExceeded",
   ACCOUNT_LOCKED: "errors.api.accountLocked",
@@ -75,6 +75,7 @@ export const ERROR_MESSAGES = {
   FETCH_BOOKINGS_FAILED: "errors.api.fetchBookingsFailed",
   CONFIRM_BOOKING_FAILED: "errors.api.confirmBookingFailed",
   DECLINE_BOOKING_FAILED: "errors.api.declineBookingFailed",
+  START_BOOKING_FAILED: "errors.api.startBookingFailed",
   COMPLETE_BOOKING_FAILED: "errors.api.completeBookingFailed",
 
   // Worker Profile
@@ -124,7 +125,8 @@ export const ERROR_MESSAGES_FALLBACK: Record<string, string> = {
   [ERROR_MESSAGES.USER_NOT_FOUND]: "User not found",
   [ERROR_MESSAGES.PROFILE_NOT_FOUND]: "Profile not found",
   [ERROR_MESSAGES.NO_PROFILE]: "No profile found",
-  [ERROR_MESSAGES.NO_PROFILE_NO_ROLE]: "Profile not found. Please select a role.",
+  [ERROR_MESSAGES.NO_PROFILE_NO_ROLE]:
+    "Profile not found. Please select a role.",
   [ERROR_MESSAGES.PROFILE_ALREADY_EXISTS]: "Profile already exists",
   [ERROR_MESSAGES.ACCOUNT_BANNED]: "Account is banned",
   [ERROR_MESSAGES.EMAIL_ALREADY_REGISTERED]: "Email already registered",
@@ -137,20 +139,26 @@ export const ERROR_MESSAGES_FALLBACK: Record<string, string> = {
   [ERROR_MESSAGES.MISSING_REQUIRED_FIELDS]: "Missing required fields",
   [ERROR_MESSAGES.INVALID_ROLE]: "Invalid role",
   [ERROR_MESSAGES.INVALID_INPUT]: "Invalid input",
-  [ERROR_MESSAGES.WEAK_PASSWORD]: "Password does not meet security requirements",
-  [ERROR_MESSAGES.RATE_LIMIT_EXCEEDED]: "Too many requests. Please try again later.",
-  [ERROR_MESSAGES.ACCOUNT_LOCKED]: "Account temporarily locked due to too many failed attempts",
+  [ERROR_MESSAGES.WEAK_PASSWORD]:
+    "Password does not meet security requirements",
+  [ERROR_MESSAGES.RATE_LIMIT_EXCEEDED]:
+    "Too many requests. Please try again later.",
+  [ERROR_MESSAGES.ACCOUNT_LOCKED]:
+    "Account temporarily locked due to too many failed attempts",
 
   [ERROR_MESSAGES.INSUFFICIENT_BALANCE]: "Insufficient balance",
   [ERROR_MESSAGES.INVALID_PAYMENT_METHOD]: "Invalid payment method",
   [ERROR_MESSAGES.TRANSACTION_FAILED]: "Transaction failed",
   [ERROR_MESSAGES.ESCROW_NOT_FOUND]: "Escrow not found",
   [ERROR_MESSAGES.ESCROW_ID_REQUIRED]: "Escrow ID is required",
-  [ERROR_MESSAGES.FETCH_PLATFORM_SETTINGS_FAILED]: "Failed to fetch platform settings",
-  [ERROR_MESSAGES.UPDATE_PLATFORM_SETTINGS_FAILED]: "Failed to update platform settings",
+  [ERROR_MESSAGES.FETCH_PLATFORM_SETTINGS_FAILED]:
+    "Failed to fetch platform settings",
+  [ERROR_MESSAGES.UPDATE_PLATFORM_SETTINGS_FAILED]:
+    "Failed to update platform settings",
   [ERROR_MESSAGES.CREATE_WALLET_FAILED]: "Failed to create wallet",
   [ERROR_MESSAGES.FETCH_WALLET_FAILED]: "Failed to fetch wallet",
-  [ERROR_MESSAGES.UPDATE_WALLET_BALANCE_FAILED]: "Failed to update wallet balance",
+  [ERROR_MESSAGES.UPDATE_WALLET_BALANCE_FAILED]:
+    "Failed to update wallet balance",
   [ERROR_MESSAGES.CREATE_TRANSACTION_FAILED]: "Failed to create transaction",
   [ERROR_MESSAGES.UPDATE_TRANSACTION_FAILED]: "Failed to update transaction",
   [ERROR_MESSAGES.FETCH_TRANSACTIONS_FAILED]: "Failed to fetch transactions",
@@ -164,26 +172,34 @@ export const ERROR_MESSAGES_FALLBACK: Record<string, string> = {
   [ERROR_MESSAGES.BOOKING_ALREADY_CONFIRMED]: "Booking already confirmed",
   [ERROR_MESSAGES.BOOKING_ALREADY_DECLINED]: "Booking already declined",
   [ERROR_MESSAGES.ONLY_CLIENTS_CAN_CREATE]: "Only clients can create bookings",
-  [ERROR_MESSAGES.ONLY_WORKERS_CAN_CONFIRM]: "Only workers can confirm bookings",
-  [ERROR_MESSAGES.ONLY_WORKERS_CAN_DECLINE]: "Only workers can decline bookings",
+  [ERROR_MESSAGES.ONLY_WORKERS_CAN_CONFIRM]:
+    "Only workers can confirm bookings",
+  [ERROR_MESSAGES.ONLY_WORKERS_CAN_DECLINE]:
+    "Only workers can decline bookings",
   [ERROR_MESSAGES.ONLY_CLIENTS_CAN_COMPLETE]:
     "Only clients can confirm completion",
-  [ERROR_MESSAGES.ONLY_WORKERS_CAN_COMPLETE]: "Only workers can complete bookings",
+  [ERROR_MESSAGES.ONLY_WORKERS_CAN_COMPLETE]:
+    "Only workers can complete bookings",
   [ERROR_MESSAGES.CALCULATE_PRICE_FAILED]: "Failed to calculate price",
   [ERROR_MESSAGES.CREATE_BOOKING_FAILED]: "Failed to create booking",
   [ERROR_MESSAGES.FETCH_BOOKINGS_FAILED]: "Failed to fetch bookings",
   [ERROR_MESSAGES.CONFIRM_BOOKING_FAILED]: "Failed to confirm booking",
   [ERROR_MESSAGES.DECLINE_BOOKING_FAILED]: "Failed to decline booking",
+  [ERROR_MESSAGES.START_BOOKING_FAILED]: "Failed to start booking",
   [ERROR_MESSAGES.COMPLETE_BOOKING_FAILED]: "Failed to complete booking",
 
   [ERROR_MESSAGES.WORKER_PROFILE_NOT_FOUND]: "Worker profile not found",
   [ERROR_MESSAGES.WORKER_PROFILE_NOT_PUBLISHED]:
     "Worker profile not found or not published",
-  [ERROR_MESSAGES.FETCH_SERVICE_CATEGORIES_FAILED]: "Failed to fetch service categories",
+  [ERROR_MESSAGES.FETCH_SERVICE_CATEGORIES_FAILED]:
+    "Failed to fetch service categories",
   [ERROR_MESSAGES.FETCH_SERVICES_FAILED]: "Failed to fetch services",
-  [ERROR_MESSAGES.FETCH_SERVICE_OPTIONS_FAILED]: "Failed to fetch service options",
-  [ERROR_MESSAGES.UPDATE_WORKER_PROFILE_FAILED]: "Failed to update worker profile",
-  [ERROR_MESSAGES.CREATE_WORKER_PROFILE_FAILED]: "Failed to create worker profile",
+  [ERROR_MESSAGES.FETCH_SERVICE_OPTIONS_FAILED]:
+    "Failed to fetch service options",
+  [ERROR_MESSAGES.UPDATE_WORKER_PROFILE_FAILED]:
+    "Failed to update worker profile",
+  [ERROR_MESSAGES.CREATE_WORKER_PROFILE_FAILED]:
+    "Failed to create worker profile",
   [ERROR_MESSAGES.FETCH_WORKERS_FAILED]: "Failed to fetch workers",
 
   [ERROR_MESSAGES.NO_FILE_PROVIDED]: "No file provided",
@@ -197,7 +213,8 @@ export const ERROR_MESSAGES_FALLBACK: Record<string, string> = {
   [ERROR_MESSAGES.FETCH_CONVERSATIONS_FAILED]: "Failed to fetch conversations",
   [ERROR_MESSAGES.CREATE_MESSAGE_FAILED]: "Failed to create message",
   [ERROR_MESSAGES.FETCH_MESSAGES_FAILED]: "Failed to fetch messages",
-  [ERROR_MESSAGES.UPDATE_MESSAGE_STATUS_FAILED]: "Failed to update message status",
+  [ERROR_MESSAGES.UPDATE_MESSAGE_STATUS_FAILED]:
+    "Failed to update message status",
   [ERROR_MESSAGES.MARK_MESSAGES_READ_FAILED]: "Failed to mark messages as read",
 
   [ERROR_MESSAGES.INTERNAL_ERROR]: "Internal server error",
@@ -212,4 +229,3 @@ export const ERROR_MESSAGES_FALLBACK: Record<string, string> = {
 export function getErrorMessage(key: string): string {
   return ERROR_MESSAGES_FALLBACK[key] || key;
 }
-

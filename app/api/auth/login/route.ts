@@ -36,26 +36,41 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
 
   // Rate limiting: Check by IP and email (use sanitized email)
   const clientIP = getClientIP(request);
-  const ipRateLimit = checkRateLimit(`login:ip:${clientIP}`, RATE_LIMIT_CONFIGS.LOGIN);
-  const emailRateLimit = checkRateLimit(`login:email:${sanitizedEmail}`, RATE_LIMIT_CONFIGS.LOGIN);
+  const ipRateLimit = checkRateLimit(
+    `login:ip:${clientIP}`,
+    RATE_LIMIT_CONFIGS.LOGIN
+  );
+  const emailRateLimit = checkRateLimit(
+    `login:email:${sanitizedEmail}`,
+    RATE_LIMIT_CONFIGS.LOGIN
+  );
 
-  // Use the stricter limit (whichever is locked first)
-  const rateLimitResult = ipRateLimit.lockedUntil && emailRateLimit.lockedUntil
-    ? (ipRateLimit.lockedUntil < emailRateLimit.lockedUntil ? ipRateLimit : emailRateLimit)
-    : ipRateLimit.lockedUntil
-    ? ipRateLimit
-    : emailRateLimit.lockedUntil
-    ? emailRateLimit
-    : ipRateLimit.count > emailRateLimit.count
-    ? ipRateLimit
-    : emailRateLimit;
+  // Use the stricter limit (whichever is locked first or more restrictive)
+  const rateLimitResult =
+    ipRateLimit.lockedUntil && emailRateLimit.lockedUntil
+      ? ipRateLimit.lockedUntil < emailRateLimit.lockedUntil
+        ? ipRateLimit
+        : emailRateLimit
+      : ipRateLimit.lockedUntil
+      ? ipRateLimit
+      : emailRateLimit.lockedUntil
+      ? emailRateLimit
+      : !ipRateLimit.allowed
+      ? ipRateLimit
+      : !emailRateLimit.allowed
+      ? emailRateLimit
+      : ipRateLimit.remaining < emailRateLimit.remaining
+      ? ipRateLimit
+      : emailRateLimit;
 
   if (!rateLimitResult.allowed) {
     if (rateLimitResult.lockedUntil) {
       throw new ApiError(
         getErrorMessage(ERROR_MESSAGES.ACCOUNT_LOCKED) +
           (rateLimitResult.retryAfter
-            ? ` Please try again in ${Math.ceil(rateLimitResult.retryAfter / 60)} minutes.`
+            ? ` Please try again in ${Math.ceil(
+                rateLimitResult.retryAfter / 60
+              )} minutes.`
             : ""),
         HttpStatus.TOO_MANY_REQUESTS,
         ErrorCode.ACCOUNT_LOCKED
@@ -64,7 +79,9 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
     throw new ApiError(
       getErrorMessage(ERROR_MESSAGES.RATE_LIMIT_EXCEEDED) +
         (rateLimitResult.retryAfter
-          ? ` Please try again in ${Math.ceil(rateLimitResult.retryAfter / 60)} minutes.`
+          ? ` Please try again in ${Math.ceil(
+              rateLimitResult.retryAfter / 60
+            )} minutes.`
           : ""),
       HttpStatus.TOO_MANY_REQUESTS,
       ErrorCode.RATE_LIMIT_EXCEEDED

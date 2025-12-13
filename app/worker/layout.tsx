@@ -59,7 +59,7 @@ function WorkerLayoutContent({
   const menuItems: MenuItem[] = [
     getItem(t("nav.home") || "Home", "/", <HomeOutlined />),
     getItem(
-      t("worker.dashboard.title") || "Dashboard",
+      t("worker.sidebar.dashboard") || "Bảng điều khiển",
       "/worker/dashboard",
       <DashboardOutlined />
     ),

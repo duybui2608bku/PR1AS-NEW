@@ -146,7 +146,7 @@ export default function AdminEscrowsPage() {
       title: t("escrow.table.employer") || "Client (Người thuê)",
       dataIndex: "employer",
       key: "employer_id",
-      width: 200,
+      width: 250,
       render: (employer: EscrowHold["employer"], record: EscrowHold) => {
         if (employer) {
           return (
@@ -268,12 +268,12 @@ export default function AdminEscrowsPage() {
         }
         return (
           <Space direction="vertical" size={4} style={{ fontSize: 12 }}>
-            {record.resolved_by && (
+            {/* {record.resolved_by && (
               <Text type="secondary">
                 {t("escrow.resolvedBy") || "Resolved by"}:{" "}
                 <Text code>{record.resolved_by.slice(0, 8)}...</Text>
               </Text>
-            )}
+            )} */}
             {record.released_at && (
               <Text type="secondary">
                 {t("escrow.resolvedAt") || "Resolved at"}:{" "}
@@ -285,7 +285,7 @@ export default function AdminEscrowsPage() {
                 ellipsis={{ tooltip: record.resolution_notes }}
                 style={{ maxWidth: 200 }}
               >
-                {record.resolution_notes}
+                Lời giải thích: {record.resolution_notes}
               </Text>
             )}
           </Space>

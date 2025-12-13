@@ -357,6 +357,7 @@
   },
   "worker": {
     "sidebar": {
+      "dashboard": "Bảng điều khiển",
       "profileSetup": "Thiết lập hồ sơ",
       "myWallet": "Ví của tôi",
       "messages": "Tin nhắn",
@@ -549,6 +550,7 @@
   },
   "client": {
     "sidebar": {
+      "dashboard": "Bảng điều khiển",
       "myWallet": "Ví của tôi",
       "messages": "Tin nhắn",
       "postJob": "Đăng công việc",
@@ -608,7 +610,7 @@
       "pending": "Đang chờ",
       "totalEarned": "Tổng thu nhập",
       "totalSpent": "Tổng chi tiêu",
-      "activeEscrows": "Escrow đang hoạt động",
+      "activeEscrows": "Tiền tạm giữ đang hoạt động",
       "refresh": "Làm mới",
       "deposit": "Nạp tiền",
       "withdraw": "Rút tiền",
@@ -641,10 +643,10 @@
         "platform_fee": "Phí nền tảng",
         "insurance_fee": "Phí bảo hiểm",
         "refund": "Hoàn tiền",
-        "escrowCreate": "Tạo Escrow",
-        "escrowRelease": "Giải phóng Escrow",
-        "escrow_hold": "Giữ Escrow",
-        "escrow_release": "Giải phóng Escrow",
+        "escrowCreate": "Tạo tiền tạm giữ",
+        "escrowRelease": "Giải phóng tiền tạm giữ",
+        "escrow_hold": "Giữ tiền tạm giữ",
+        "escrow_release": "Giải phóng tiền tạm giữ",
         "withdrawalFee": "Phí rút tiền"
       },
       "statuses": {
@@ -657,7 +659,7 @@
       "paymentMethods": {
         "paypal": "PayPal",
         "bank_transfer": "Chuyển khoản ngân hàng",
-        "escrow": "Escrow",
+        "escrow": "Tiền tạm giữ",
         "internal": "Nội bộ"
       }
     },
@@ -1029,11 +1031,11 @@
     },
     "payment_released": {
       "title": "Thanh toán đã được giải phóng",
-      "message": "Thanh toán đã được giải phóng từ escrow"
+      "message": "Thanh toán đã được giải phóng từ tiền tạm giữ"
     },
     "escrow_released": {
-      "title": "Escrow đã được giải phóng",
-      "message": "Escrow đã được giải phóng"
+      "title": "Tiền tạm giữ đã được giải phóng",
+      "message": "Tiền tạm giữ đã được giải phóng"
     },
     "system_announcement": {
       "title": "Thông báo hệ thống",
@@ -1174,9 +1176,28 @@
       "totalAmount": "Tổng số tiền",
       "totalDeposits": "Tổng nạp tiền",
       "totalWithdrawals": "Tổng rút tiền"
-    }
+    },
+    "detail": "Chi tiết giao dịch",
+    "balanceBefore": "Số dư trước",
+    "balanceAfter": "Số dư sau",
+    "gatewayId": "ID Gateway",
+    "escrowId": "ID Escrow",
+    "jobId": "ID Công việc",
+    "relatedUserId": "ID Người dùng liên quan",
+    "completedAt": "Hoàn thành lúc",
+    "failedAt": "Thất bại lúc",
+    "metadata": "Metadata",
+    "wallet": "ID Ví",
+    "requiresManualProcessing": "Yêu cầu xử lý thủ công",
+    "otherMetadata": "Thông tin khác",
+    "completeWithdrawal": "Hoàn tất rút tiền",
+    "withdrawalCompleted": "Hoàn tất rút tiền",
+    "withdrawalCompletedSuccess": "Giao dịch rút tiền đã được hoàn tất thành công",
+    "completeError": "Hoàn tất thất bại",
+    "completeErrorMsg": "Không thể hoàn tất giao dịch rút tiền"
   },
   "escrow": {
+    "name": "Tiền tạm giữ",
     "table": {
       "id": "ID",
       "jobId": "Booking / Công việc",
@@ -1199,34 +1220,34 @@
       "cancelled": "Đã hủy"
     },
     "filters": {
-      "status": "Trạng thái escrow",
+      "status": "Trạng thái tiền tạm giữ",
       "complaint": "Khiếu nại"
     },
     "stats": {
       "totalHeld": "Tổng tiền đang giữ",
       "totalReleased": "Tổng tiền đã giải ngân",
       "totalDisputed": "Tổng tiền đang tranh chấp",
-      "totalCount": "Tổng số escrow"
+      "totalCount": "Tổng số tiền tạm giữ"
     },
     "complaint": "Có khiếu nại",
     "complaintYes": "Có khiếu nại",
     "complaintNo": "Không khiếu nại",
     "release": "Giải ngân",
     "resolve": "Giải quyết",
-    "releaseEscrow": "Giải ngân Escrow",
+    "releaseEscrow": "Giải ngân tiền tạm giữ",
     "resolveComplaint": "Giải quyết khiếu nại",
-    "releaseConfirm": "Bạn có chắc chắn muốn giải ngân escrow này không?",
-    "id": "ID Escrow",
+    "releaseConfirm": "Bạn có chắc chắn muốn giải ngân tiền tạm giữ này không?",
+    "id": "ID Tiền tạm giữ",
     "workerAmount": "Số tiền Worker nhận",
     "totalAmount": "Tổng số tiền",
     "released": "Đã giải ngân",
     "releasedSuccess": "Escrow đã được giải ngân thành công",
     "releaseError": "Giải ngân thất bại",
-    "releaseErrorMsg": "Không thể giải ngân escrow",
+    "releaseErrorMsg": "Không thể giải ngân tiền tạm giữ",
     "resolved": "Đã giải quyết",
     "resolvedSuccess": "Khiếu nại đã được giải quyết thành công",
     "resolveError": "Giải quyết thất bại",
-    "resolveErrorMsg": "Không thể giải quyết escrow",
+    "resolveErrorMsg": "Không thể giải quyết tiền tạm giữ",
     "resolutionAction": "Hành động giải quyết",
     "selectAction": "Vui lòng chọn hành động giải quyết",
     "releaseToWorker": "Giải ngân cho Worker",

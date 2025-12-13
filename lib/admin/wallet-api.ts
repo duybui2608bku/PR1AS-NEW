@@ -74,14 +74,11 @@ const adminWalletAPI = {
         total_withdrawals: number;
         total_payments: number;
       };
-    }>(
-      `/api/admin/transactions?${params.toString()}`,
-      {
-        method: "GET",
-        headers,
-        credentials: "include",
-      }
-    );
+    }>(`/api/admin/transactions?${params.toString()}`, {
+      method: "GET",
+      headers,
+      credentials: "include",
+    });
 
     return {
       transactions: result.transactions || [],
@@ -138,14 +135,11 @@ const adminWalletAPI = {
         total_disputed: number;
         total_count: number;
       };
-    }>(
-      `/api/admin/escrows?${params.toString()}`,
-      {
-        method: "GET",
-        headers,
-        credentials: "include",
-      }
-    );
+    }>(`/api/admin/escrows?${params.toString()}`, {
+      method: "GET",
+      headers,
+      credentials: "include",
+    });
 
     return {
       escrows: result.escrows || [],
@@ -196,6 +190,23 @@ const adminWalletAPI = {
         },
       }
     );
+  },
+
+  /**
+   * Complete a withdrawal transaction (admin only)
+   */
+  async completeWithdrawal(transactionId: string): Promise<Transaction> {
+    const headers = await getAuthHeaders();
+    const result = await httpRequestJson<{ transaction: Transaction }>(
+      "/api/admin/wallet/transaction/complete",
+      {
+        method: "POST",
+        headers,
+        credentials: "include",
+        body: { transaction_id: transactionId },
+      }
+    );
+    return result.transaction;
   },
 };
 
