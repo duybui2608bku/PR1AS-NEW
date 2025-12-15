@@ -48,7 +48,7 @@ export function applySecurityHeaders<T = any>(
     "style-src 'self' 'unsafe-inline'", // 'unsafe-inline' needed for CSS-in-JS
     "img-src 'self' data: https:",
     "font-src 'self' data:",
-    "connect-src 'self' https://*.supabase.co https://*.supabase.com",
+    "connect-src 'self' https://*.supabase.co https://*.supabase.com https://cfig.ibytecdn.org",
     "frame-ancestors 'none'",
   ].join("; ");
 

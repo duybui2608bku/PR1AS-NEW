@@ -28,7 +28,9 @@ export default function WorkerProfileSetupPage() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [profile, setProfile] = useState<WorkerProfileComplete | null>(null);
-  const [stepValidationErrors, setStepValidationErrors] = useState<string[]>([]);
+  const [stepValidationErrors, setStepValidationErrors] = useState<string[]>(
+    []
+  );
 
   // Retry logic for loading profile
   const { execute: loadProfileWithRetry } = useRetry(
@@ -51,6 +53,14 @@ export default function WorkerProfileSetupPage() {
       setLoading(true);
       setStepValidationErrors([]);
       const profileData = await loadProfileWithRetry();
+
+      // Profile doesn't exist yet (first time setup)
+      if (!profileData) {
+        setProfile(null);
+        setCurrentStep(0);
+        return;
+      }
+
       setProfile(profileData);
 
       // Determine current step based on profile_completed_steps
@@ -74,15 +84,23 @@ export default function WorkerProfileSetupPage() {
         }
       }
     } catch (error) {
-      // Profile doesn't exist yet, start from step 0
+      // Handle network errors or other errors
       const errorMessage = getErrorMessage(error);
-      if (errorMessage.includes("network") || errorMessage.includes("timeout")) {
+      if (
+        errorMessage.includes("network") ||
+        errorMessage.includes("timeout")
+      ) {
         showMessage.error(t("common.networkError"));
         setStepValidationErrors([t("common.networkError")]);
-      } else if (!errorMessage.includes("404") && !errorMessage.includes("not found")) {
+      } else if (
+        !errorMessage.includes("404") &&
+        !errorMessage.includes("not found")
+      ) {
         showMessage.error(errorMessage);
         setStepValidationErrors([errorMessage]);
       }
+      // Profile doesn't exist yet or error occurred, start from step 0
+      setProfile(null);
       setCurrentStep(0);
     } finally {
       setLoading(false);
@@ -90,35 +108,38 @@ export default function WorkerProfileSetupPage() {
   };
 
   // Validate step before navigation
-  const validateStep = useCallback((step: number): boolean => {
-    if (!profile) return true; // Allow navigation if no profile
+  const validateStep = useCallback(
+    (step: number): boolean => {
+      if (!profile) return true; // Allow navigation if no profile
 
-    const errors: string[] = [];
+      const errors: string[] = [];
 
-    if (step === 1) {
-      // Validate step 1 completion
-      if (!profile.full_name || !profile.age) {
-        errors.push(t("worker.profile.step1Incomplete"));
+      if (step === 1) {
+        // Validate step 1 completion
+        if (!profile.full_name || !profile.age) {
+          errors.push(t("worker.profile.step1Incomplete"));
+        }
+      } else if (step === 2) {
+        // Validate step 2 completion
+        if (!profile.avatar) {
+          errors.push(t("worker.profile.avatarRequired"));
+        }
+        if (!profile.services || profile.services.length === 0) {
+          errors.push(t("worker.profile.atLeastOneService"));
+        }
       }
-    } else if (step === 2) {
-      // Validate step 2 completion
-      if (!profile.avatar) {
-        errors.push(t("worker.profile.avatarRequired"));
-      }
-      if (!profile.services || profile.services.length === 0) {
-        errors.push(t("worker.profile.atLeastOneService"));
-      }
-    }
 
-    if (errors.length > 0) {
-      setStepValidationErrors(errors);
-      showMessage.error(errors[0]);
-      return false;
-    }
+      if (errors.length > 0) {
+        setStepValidationErrors(errors);
+        showMessage.error(errors[0]);
+        return false;
+      }
 
-    setStepValidationErrors([]);
-    return true;
-  }, [profile, t]);
+      setStepValidationErrors([]);
+      return true;
+    },
+    [profile, t]
+  );
 
   const handleStep1Complete = useCallback(async () => {
     try {
@@ -169,7 +190,10 @@ export default function WorkerProfileSetupPage() {
       router.push("/worker/dashboard");
     } catch (error) {
       const errorMessage = getErrorMessage(error);
-      if (errorMessage.includes("network") || errorMessage.includes("timeout")) {
+      if (
+        errorMessage.includes("network") ||
+        errorMessage.includes("timeout")
+      ) {
         showMessage.error(t("common.networkError"));
       } else if (errorMessage.includes("429")) {
         showMessage.error(t("common.tooManyRequests"));
@@ -197,13 +221,15 @@ export default function WorkerProfileSetupPage() {
   }
 
   // Determine if profile needs re-review after editing
-  const needsReReview = profile && [
-    WorkerProfileStatus.APPROVED,
-    WorkerProfileStatus.PUBLISHED,
-  ].includes(profile.profile_status);
+  const needsReReview =
+    profile &&
+    [WorkerProfileStatus.APPROVED, WorkerProfileStatus.PUBLISHED].includes(
+      profile.profile_status
+    );
 
   // Show status info if profile is not in draft
-  const showStatusInfo = profile && profile.profile_status !== WorkerProfileStatus.DRAFT;
+  const showStatusInfo =
+    profile && profile.profile_status !== WorkerProfileStatus.DRAFT;
 
   return (
     <div style={{ margin: "40px auto", padding: "0 20px" }}>

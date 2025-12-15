@@ -211,7 +211,12 @@ export class WorkerProfileService {
     });
 
     // Declare outside try block so it's accessible in catch block
-    let existingProfile: { id: string; profile_status: string; profile_completed_steps: number; version?: number } | null = null;
+    let existingProfile: {
+      id: string;
+      profile_status: string;
+      profile_completed_steps: number;
+      version?: number;
+    } | null = null;
 
     try {
       // Check if profile exists and get current status, completed steps, and version
@@ -231,7 +236,9 @@ export class WorkerProfileService {
           // Any other error is unexpected - log and throw
           logger.logWorkerProfileError("saveWorkerProfile", fetchError, userId);
           throw new WorkerServiceError(
-            `Failed to check existing profile: ${fetchError.message || fetchError.code || "Unknown error"}`,
+            `Failed to check existing profile: ${
+              fetchError.message || fetchError.code || "Unknown error"
+            }`,
             "FETCH_ERROR",
             500
           );
@@ -269,7 +276,7 @@ export class WorkerProfileService {
           completedSteps = 3; // Both steps completed
         }
       }
-      
+
       // After update, recalculate to ensure consistency
       // This will be done after the profile is saved
 
@@ -285,6 +292,9 @@ export class WorkerProfileService {
         personal_quote: data.personal_quote,
         bio: data.bio,
         profile_completed_steps: completedSteps,
+        // Ensure profile_status is set (default is 'draft' but explicit is better)
+        profile_status:
+          existingProfile?.profile_status || WorkerProfileStatus.DRAFT,
       };
 
       // Increment version for optimistic locking
@@ -378,6 +388,15 @@ export class WorkerProfileService {
         });
       } else {
         // Create new profile
+        // Ensure required fields are present
+        if (!data.full_name || !data.age) {
+          throw new WorkerServiceError(
+            "Full name and age are required",
+            "VALIDATION_ERROR",
+            400
+          );
+        }
+
         const { data: created, error } = await this.supabase
           .from("worker_profiles")
           .insert(profileData)
@@ -386,8 +405,24 @@ export class WorkerProfileService {
 
         if (error) {
           logger.logWorkerProfileError("saveWorkerProfile", error, userId);
+          // Include detailed error message for debugging
+          const errorMessage = error.message || error.code || "Unknown error";
+          const errorDetails = error.details || "";
+          logger.error("Failed to create worker profile", {
+            userId,
+            error: errorMessage,
+            details: errorDetails,
+            code: error.code,
+            profileData: {
+              ...profileData,
+              // Don't log sensitive data, just structure
+              full_name: profileData.full_name ? "[REDACTED]" : undefined,
+            },
+          });
           throw new WorkerServiceError(
-            "Failed to create profile",
+            `Failed to create profile: ${errorMessage}${
+              errorDetails ? ` (${errorDetails})` : ""
+            }`,
             "CREATE_ERROR",
             500
           );
@@ -437,11 +472,7 @@ export class WorkerProfileService {
         userId,
         existingProfile?.id
       );
-      throw new WorkerServiceError(
-        "Failed to save profile",
-        "SAVE_ERROR",
-        500
-      );
+      throw new WorkerServiceError("Failed to save profile", "SAVE_ERROR", 500);
     }
   }
 
@@ -510,9 +541,10 @@ export class WorkerProfileService {
             .select("profile_completed_steps")
             .eq("id", profile.id)
             .single();
-          
+
           if (updatedData) {
-            profile.profile_completed_steps = updatedData.profile_completed_steps;
+            profile.profile_completed_steps =
+              updatedData.profile_completed_steps;
           }
         } catch (fixError) {
           logger.error("Failed to auto-fix step inconsistencies", {
@@ -826,12 +858,9 @@ export class WorkerProfileService {
       height_px?: number;
     }
   ): Promise<WorkerImage> {
-    logger.logWorkerProfileOperation(
-      "addWorkerImage",
-      "",
-      profileId,
-      { imageType: imageData.image_type }
-    );
+    logger.logWorkerProfileOperation("addWorkerImage", "", profileId, {
+      imageType: imageData.image_type,
+    });
 
     try {
       // Validate image URL format
@@ -847,73 +876,73 @@ export class WorkerProfileService {
         );
       }
 
-    try {
-      new URL(imageData.image_url);
-    } catch {
-      throw new WorkerServiceError(
-        "Invalid image URL format",
-        "VALIDATION_ERROR",
-        400
-      );
-    }
+      try {
+        new URL(imageData.image_url);
+      } catch {
+        throw new WorkerServiceError(
+          "Invalid image URL format",
+          "VALIDATION_ERROR",
+          400
+        );
+      }
 
-    // Validate file size if provided
-    if (imageData.file_size_bytes !== undefined) {
-      const MAX_SIZE = 5 * 1024 * 1024; // 5MB
-      if (imageData.file_size_bytes > MAX_SIZE) {
-        throw new WorkerServiceError(
-          "Image file size exceeds maximum allowed (5MB)",
-          "VALIDATION_ERROR",
-          400
-        );
+      // Validate file size if provided
+      if (imageData.file_size_bytes !== undefined) {
+        const MAX_SIZE = 5 * 1024 * 1024; // 5MB
+        if (imageData.file_size_bytes > MAX_SIZE) {
+          throw new WorkerServiceError(
+            "Image file size exceeds maximum allowed (5MB)",
+            "VALIDATION_ERROR",
+            400
+          );
+        }
+        if (imageData.file_size_bytes < 0) {
+          throw new WorkerServiceError(
+            "Invalid file size",
+            "VALIDATION_ERROR",
+            400
+          );
+        }
       }
-      if (imageData.file_size_bytes < 0) {
-        throw new WorkerServiceError(
-          "Invalid file size",
-          "VALIDATION_ERROR",
-          400
-        );
-      }
-    }
 
-    // Validate MIME type if provided
-    if (imageData.mime_type !== undefined) {
-      const VALID_TYPES = [
-        "image/jpeg",
-        "image/jpg",
-        "image/png",
-        "image/webp",
-        "image/gif",
-      ];
-      if (!VALID_TYPES.includes(imageData.mime_type)) {
-        throw new WorkerServiceError(
-          `Invalid image type. Allowed types: ${VALID_TYPES.join(", ")}`,
-          "VALIDATION_ERROR",
-          400
-        );
+      // Validate MIME type if provided
+      if (imageData.mime_type !== undefined) {
+        const VALID_TYPES = [
+          "image/jpeg",
+          "image/jpg",
+          "image/png",
+          "image/webp",
+          "image/gif",
+        ];
+        if (!VALID_TYPES.includes(imageData.mime_type)) {
+          throw new WorkerServiceError(
+            `Invalid image type. Allowed types: ${VALID_TYPES.join(", ")}`,
+            "VALIDATION_ERROR",
+            400
+          );
+        }
       }
-    }
 
-    // Validate dimensions if provided
-    if (imageData.width_px !== undefined) {
-      if (!Number.isInteger(imageData.width_px) || imageData.width_px < 1) {
-        throw new WorkerServiceError(
-          "Invalid image width",
-          "VALIDATION_ERROR",
-          400
-        );
+      // Validate dimensions if provided
+      if (imageData.width_px !== undefined) {
+        if (!Number.isInteger(imageData.width_px) || imageData.width_px < 1) {
+          throw new WorkerServiceError(
+            "Invalid image width",
+            "VALIDATION_ERROR",
+            400
+          );
+        }
       }
-    }
 
-    if (imageData.height_px !== undefined) {
-      if (!Number.isInteger(imageData.height_px) || imageData.height_px < 1) {
-        throw new WorkerServiceError(
-          "Invalid image height",
-          "VALIDATION_ERROR",
-          400
-        );
+      if (imageData.height_px !== undefined) {
+        if (!Number.isInteger(imageData.height_px) || imageData.height_px < 1) {
+          throw new WorkerServiceError(
+            "Invalid image height",
+            "VALIDATION_ERROR",
+            400
+          );
+        }
       }
-    }
 
       // If adding avatar, remove existing avatar
       if (imageData.image_type === "avatar") {
@@ -942,7 +971,11 @@ export class WorkerProfileService {
           undefined,
           profileId
         );
-        throw new WorkerServiceError("Failed to add image", "CREATE_ERROR", 500);
+        throw new WorkerServiceError(
+          "Failed to add image",
+          "CREATE_ERROR",
+          500
+        );
       }
 
       // Reset profile status to pending if approved/published
@@ -959,7 +992,12 @@ export class WorkerProfileService {
       if (error instanceof WorkerServiceError) {
         throw error;
       }
-      logger.logWorkerProfileError("addWorkerImage", error, undefined, profileId);
+      logger.logWorkerProfileError(
+        "addWorkerImage",
+        error,
+        undefined,
+        profileId
+      );
       throw new WorkerServiceError("Failed to add image", "CREATE_ERROR", 500);
     }
   }

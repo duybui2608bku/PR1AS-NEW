@@ -17,12 +17,18 @@ import { HttpStatus } from "@/lib/utils/enums";
 import { checkRateLimit, RATE_LIMIT_CONFIGS } from "@/lib/auth/rate-limit";
 import { validateWorkerProfileStep1OrThrow } from "@/lib/worker/validation";
 import { sanitizeWorkerProfileStep1 } from "@/lib/worker/security";
-import { withCSRFProtection } from "@/lib/http/csrf-middleware";
+import {
+  withCSRFProtection,
+  generateCSRFResponse,
+} from "@/lib/http/csrf-middleware";
 import { applySecurityHeaders } from "@/lib/http/security-headers";
+import { generateCSRFToken, setCSRFTokenCookie } from "@/lib/auth/csrf";
 
 /**
  * GET /api/worker/profile
  * Get worker's own profile
+ * Returns null if profile doesn't exist yet (first time setup)
+ * Also sets CSRF token cookie for subsequent POST requests
  */
 export const GET = withErrorHandling(async (request: NextRequest) => {
   const { user, supabase } = await requireWorker(request);
@@ -30,16 +36,20 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
   const service = new WorkerProfileService(supabase);
   const profile = await service.getWorkerProfile(user.id);
 
-  if (!profile) {
-    throw new ApiError(
-      getErrorMessage(ERROR_MESSAGES.WORKER_PROFILE_NOT_FOUND),
-      HttpStatus.NOT_FOUND,
-      ErrorCode.WORKER_PROFILE_NOT_FOUND
-    );
+  // Return null if profile doesn't exist yet (first time setup)
+  // Frontend will handle this gracefully
+  const response = successResponse(profile);
+  const responseWithHeaders = applySecurityHeaders(response);
+
+  // Set CSRF token cookie if not exists (for first-time requests)
+  // This ensures CSRF protection works when user submits the form
+  const existingToken = request.cookies.get("csrftoken")?.value;
+  if (!existingToken) {
+    const token = generateCSRFToken();
+    setCSRFTokenCookie(responseWithHeaders, token);
   }
 
-  const response = successResponse(profile);
-  return applySecurityHeaders(response);
+  return responseWithHeaders;
 });
 
 /**
