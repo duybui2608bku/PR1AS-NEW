@@ -234,3 +234,6 @@ $$;
 -- Comment
 COMMENT ON FUNCTION duplicate_worker_profile IS 'Nhân bản worker profile từ một profile ID mẫu sang một user_id mới. User phải đã được tạo trước với role worker.';
 
+
+
+

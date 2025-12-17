@@ -20,6 +20,11 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "images.unsplash.com" },
       { protocol: "https", hostname: "i.pinimg.com" },
       { protocol: "https", hostname: "i.ibytecdn.org" },
+      {
+        protocol: "https",
+        hostname: "sf-static.upanhlaylink.com",
+        pathname: "/img/**",
+      },
       ...(supabaseHostname
         ? [
             {
